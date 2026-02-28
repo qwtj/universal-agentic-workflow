@@ -3,7 +3,7 @@
 This folder is intentionally self-contained under `./tmp` so it can be opened as a workspace without mixing with any existing repo files.
 
 ## How to use (recommended)
-1. add this repo in your VS Code workspace root.
+1. add contents of this repo in your VS Code workspace root.
 2. Open Copilot Chat and run: `/uwf-run`
 3. Follow the handoff buttons between stage agents.
 
