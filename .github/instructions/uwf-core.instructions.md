@@ -32,7 +32,7 @@ Must also: update `tmp/workflow-artifacts/intake.md` with any facts discovered t
 Must produce:
 - `tmp/workflow-artifacts/plan.md` — the timeline of goals (milestones/epics → sprints → issues/user stories → tasks). This is NOT an implementation plan; it is a sequenced roadmap.
 - `state/<milestone>/<sprint>/{open,active,closed}/` — one directory triplet per sprint; each issue/task created as a file under `open/` with id, title, parent, depends-on, and acceptance-criteria stub in YAML frontmatter.
-Must then: hand off to the orchestrator. Do **not** begin implementation.
+Must then: hand off to the orchestrator. Do **not** begin implementation.  When change state move the file do not copy or leave it in its original location.
 
 ---
 
