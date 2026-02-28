@@ -6,12 +6,12 @@ applyTo: "**"
 # UWF Stage Gates
 
 UWF has two operating modes that share the same stage gate names but differ in scope:
-- **Project Mode** — runs once per large objective; produces the backlog and timeline, then hands off to the orchestrator.
-- **Issue Mode** — runs for each individual work item (issue/task) from the backlog; the orchestrator drives this cycle.
+- **Project Mode** — runs once per large objective; produces the timeline and issue file-system state structure, then hands off to the orchestrator.
+- **Issue Mode** — runs for each individual work item (issue file) the orchestrator picks from an `open/` directory.
 
-Determine mode by checking `tmp/state/backlog.md`:
-- File **absent** → Project Mode (first run).
-- File **present** → Issue Mode (select next `open` item from backlog).
+Determine mode by checking whether any `tmp/state/*/*` directory path exists:
+- **No such path** → Project Mode (first run).
+- **Path exists** → Issue Mode (scan `tmp/state/*/*/open/` for next eligible issue).
 
 ---
 
@@ -29,7 +29,7 @@ Must also: update `docs/workflow/intake.md` with any facts discovered that chang
 ### Gate: Timeline Planning
 Must produce:
 - `docs/workflow/plan.md` — the timeline of goals (milestones/epics → sprints → issues/user stories → tasks). This is NOT an implementation plan; it is a sequenced roadmap.
-- `tmp/state/backlog.md` — the master ordered list of every work item with id, type, title, parent, status (`open` / `active` / `complete` / `skipped`), and acceptance criteria stub.
+- `tmp/state/<milestone>/<sprint>/{open,active,closed}/` — one directory triplet per sprint; each issue/task created as a file under `open/` with id, title, parent, depends-on, and acceptance-criteria stub in YAML frontmatter.
 Must then: hand off to the orchestrator. Do **not** begin implementation.
 
 ---
@@ -37,7 +37,7 @@ Must then: hand off to the orchestrator. Do **not** begin implementation.
 ## Issue Mode Gates (run per work item, orchestrator-driven)
 
 ### Gate: Issue Intake
-Input: the active issue file from `tmp/state/active/<issue-id>.md`.
+Input: the active issue file from `tmp/state/<milestone>/<sprint>/active/<issue-id>.md`.
 Must produce: reset `docs/workflow/intake.md` scoped to this issue.
 Must include: issue goal, acceptance criteria, constraints, out-of-scope items.
 
@@ -63,21 +63,21 @@ All code/infra changes must trace back to a requirement or ADR.
 
 ### Gate: Acceptance
 Must produce: `docs/workflow/acceptance.md`
-Must include: final checks, known issues, follow-up backlog items.
-After acceptance: orchestrator moves issue file from `tmp/state/active/` to `tmp/state/complete/` and updates `tmp/state/backlog.md` status to `complete`.
+Must include: final checks, known issues, follow-up items.
+After acceptance: orchestrator moves issue file from `tmp/state/<M>/<S>/active/` to `tmp/state/<M>/<S>/closed/`.
 
 ---
 
 ## Orchestrator State-Management Rules
 
 - After Timeline Planning completes, the orchestrator:
-  1. Picks the next `open` item from `tmp/state/backlog.md`.
-  2. Creates `tmp/state/active/<issue-id>.md` with the issue context.
+  1. Scans all `tmp/state/*/*/open/*.md` files; picks the first eligible issue (all `depends-on` ids present in a `closed/` directory).
+  2. Moves `tmp/state/<M>/<S>/open/<id>.md` → `tmp/state/<M>/<S>/active/<id>.md`.
   3. Resets `docs/workflow/` documents (intake, discovery, plan, acceptance) to blank templates scoped to the new issue.
   4. Starts Issue Intake for that issue.
-- On issue completion: move `tmp/state/active/<issue-id>.md` → `tmp/state/complete/<issue-id>.md`, update backlog status.
-- On issue skip: move to `tmp/state/skipped/<issue-id>.md`, update backlog status.
-- Parallel issues are allowed when the backlog marks items as independent (no blocking dependency).
+- On issue completion (close): move `tmp/state/<M>/<S>/active/<id>.md` → `tmp/state/<M>/<S>/closed/<id>.md`.
+- On issue skip: move `tmp/state/<M>/<S>/open/<id>.md` → `tmp/state/<M>/<S>/closed/<id>.md`; prepend a `## Skip reason` section.
+- Parallel issues are allowed when eligible issues share no `depends-on` relationship with each other.
 
 ---
 
@@ -91,8 +91,7 @@ After acceptance: orchestrator moves issue file from `tmp/state/active/` to `tmp
 | Test plan | `docs/workflow/test-plan.md` |
 | Issue plan | `docs/workflow/plan.md` |
 | Acceptance results | `docs/workflow/acceptance.md` |
-| Master backlog | `tmp/state/backlog.md` |
-| Active issue context | `tmp/state/active/<issue-id>.md` |
-| Completed issues | `tmp/state/complete/<issue-id>.md` |
-| Skipped issues | `tmp/state/skipped/<issue-id>.md` |
+| Open (not started) issues | `tmp/state/<milestone>/<sprint>/open/<issue-id>.md` |
+| Active (in-progress) issues | `tmp/state/<milestone>/<sprint>/active/<issue-id>.md` |
+| Closed issues | `tmp/state/<milestone>/<sprint>/closed/<issue-id>.md` |
 | ADRs | `docs/adr/ADR-####-<slug>.md` |

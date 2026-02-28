@@ -9,15 +9,15 @@ handoffs:
     send: false
   - label: "Issue Mode — Stage 2: Issue Discovery"
     agent: uwf-discovery
-    prompt: "Issue intake is complete. Perform Issue Discovery scoped to the active issue in tmp/state/active/. Update docs/workflow/intake.md if scope changes. Produce docs/workflow/discovery.md."
+    prompt: "Issue intake is complete. Perform Issue Discovery scoped to the active issue found in tmp/state/*/*/active/. Update docs/workflow/intake.md if scope changes. Produce docs/workflow/discovery.md."
     send: false
 ---
 # Intake stage
 
 ## Scope check
 Determine the current mode before writing anything:
-- If `tmp/state/backlog.md` is **absent** → **Project Mode** intake (full project objective).
-- If `tmp/state/backlog.md` is **present** and `tmp/state/active/<issue-id>.md` exists → **Issue Mode** intake (scoped to that issue).
+- If **no** `tmp/state/*/*` directory path exists → **Project Mode** intake (full project objective).
+- If at least one `tmp/state/<milestone>/<sprint>/active/<issue-id>.md` file exists → **Issue Mode** intake (scoped to that issue).
 
 ---
 
@@ -57,8 +57,8 @@ Do NOT fill sections with generic placeholders. Every section must reflect what 
 Goal: scope a single work item from the backlog so implementation can begin.
 
 ### Inputs
-- `tmp/state/active/<issue-id>.md` — the active issue context set by the orchestrator
-- `tmp/state/backlog.md` — for parent/dependency context
+- `tmp/state/<milestone>/<sprint>/active/<issue-id>.md` — the active issue file moved here by the orchestrator
+- `docs/workflow/plan.md` — for parent milestone/sprint context and dependency graph
 
 ### Required output: `docs/workflow/intake.md` (reset and scoped to this issue)
 Must include:
@@ -66,7 +66,7 @@ Must include:
 - **Acceptance criteria** — explicit, testable conditions (copy + expand from backlog stub)
 - **Constraints** — what must NOT change, tech limits, time box
 - **Out-of-scope items** — what this issue deliberately defers
-- **Dependencies** — other issues that must be complete first (from backlog `depends-on`)
+- **Dependencies** — other issues that must be closed first (read `depends-on` from the issue file frontmatter)
 - **Risk tolerance** — low / medium / high for this item
 
 After writing `docs/workflow/intake.md`, trigger the appropriate Discovery handoff.

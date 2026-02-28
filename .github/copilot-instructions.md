@@ -11,15 +11,15 @@
 - If user doesn't provide a clear goal, ask for one. If the goal is too broad, ask for it to be narrowed down.
 
 ## Operating mode detection
-- Check `tmp/state/backlog.md` to determine mode:
-  - **Absent** → Project Mode: run Project Intake → Discovery → Timeline Planning → hand off to orchestrator.
-  - **Present** → Issue Mode: orchestrator picks next `open` item from backlog and drives the per-issue workflow.
+- Check whether any `tmp/state/*/*` directory path exists:
+  - **No such path** → Project Mode: run Project Intake → Discovery → Timeline Planning → create `tmp/state/` issue structure → hand off to orchestrator.
+  - **Path exists** → Issue Mode: orchestrator scans `tmp/state/*/*/open/` for the next eligible issue and drives the per-issue workflow.
 
 ## UWF artifact locations (relative to workspace root)
 - Workflow docs: `docs/workflow/*.md`
 - ADRs: `docs/adr/ADR-####-<slug>.md`
 - Security artifacts: `docs/workflow/security-plan.md` (and supporting files if needed)
-- State tracking: `tmp/state/backlog.md`, `tmp/state/active/`, `tmp/state/complete/`, `tmp/state/skipped/`
+- State tracking: `tmp/state/<milestone>/<sprint>/{open,active,closed}/<issue-id>.md`
 
 ## Output format expectations
 - For each stage: write/modify the corresponding markdown artifact first, then summarize:

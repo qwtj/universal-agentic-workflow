@@ -1,7 +1,7 @@
 ---
 name: "uwf-run"
 description: "Run the Universal Workflow Framework (UWF) — auto-detects Project Mode vs Issue Mode."
-argument-hint: "New project: describe what you want to build + constraints. Returning: leave blank to continue from backlog."
+argument-hint: "New project: describe what you want to build + constraints. Returning: leave blank to continue working through open issues."
 agent: "uwf-orchestrator"
 tools: ["todos", "codebase", "listDirectory", "readFile", "createFile", "editFiles", "createDirectory"]
 ---
@@ -10,21 +10,22 @@ Hand off to the UWF orchestrator, which auto-detects the operating mode and driv
 
 ## Instructions
 1. **Mode detection** (orchestrator does this first):
-   - Check `tmp/state/backlog.md`.
-   - **Absent** → Project Mode: run Intake → Discovery → Timeline Planning → produce backlog → hand off to orchestrator for Issue Mode.
-   - **Present** → Issue Mode: pick the next `open` item from backlog, set up active state, reset workflow docs, run per-issue workflow.
+   - Check whether any `tmp/state/*/*` directory path exists.
+   - **No such path** → Project Mode: run Intake → Discovery → Timeline Planning → create `tmp/state/` issue structure → hand off to orchestrator for Issue Mode.
+   - **Path exists** → Issue Mode: scan `tmp/state/*/*/open/` for the next eligible issue, move it to `active/`, reset workflow docs, run per-issue workflow.
 
-2. **Project Mode** — only if backlog is absent:
+2. **Project Mode** — only if no `tmp/state/*/*` path exists:
    - Clarification gate: if the objective is missing or vague, ask focused questions before writing any artifact.
    - Run `uwf-intake` → `uwf-discovery` → `uwf-timeline-planner`.
-   - Planner creates `tmp/state/backlog.md` and then triggers orchestrator to switch to Issue Mode.
+   - Planner creates the `tmp/state/<milestone>/<sprint>/{open,active,closed}/` tree and then triggers orchestrator to switch to Issue Mode.
 
-3. **Issue Mode** — if backlog present:
-   - Orchestrator picks next `open` item, creates `tmp/state/active/<id>.md`, resets workflow docs, triggers `uwf-intake` for that issue.
+3. **Issue Mode** — if `tmp/state/*/*` paths exist:
+   - Orchestrator scans `tmp/state/*/*/open/` for next eligible issue (respecting `depends-on`).
+   - Move issue file to `active/`, reset workflow docs, trigger `uwf-intake`.
    - Full per-issue cycle: Intake → Discovery → (Requirements) → (ADRs) → (Security) → Implementation → Review → Acceptance.
-   - On completion: move to `tmp/state/complete/`, update backlog, loop to next open item.
+   - On completion: move issue file from `active/` → `closed/`, loop to next open issue.
 
 ## Done when
-- Project Mode: `tmp/state/backlog.md` exists and orchestrator has transitioned to Issue Mode.
-- Issue Mode: all items in backlog reach `complete` or `skipped` and a retro is prompted.
+- Project Mode: `tmp/state/` directory structure exists and orchestrator has transitioned to Issue Mode.
+- Issue Mode: all `open/` directories are empty across all milestones and sprints, and a retro is prompted.
 

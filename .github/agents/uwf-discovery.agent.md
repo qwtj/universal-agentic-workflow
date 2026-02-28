@@ -5,7 +5,7 @@ tools: [read/readFile, agent/runSubagent, edit/createDirectory, edit/createFile,
 handoffs:
   - label: "Project Mode — Stage 3: Timeline Planning"
     agent: uwf-timeline-planner
-    prompt: "Produce the timeline roadmap (docs/workflow/plan.md) and the master backlog (tmp/state/backlog.md). Do NOT begin implementation. Hand off to orchestrator when done."
+    prompt: "Produce the timeline roadmap (docs/workflow/plan.md) and create the issue file-system state under tmp/state/ (one open/active/closed/ triplet per sprint, with issue files in open/). Do NOT begin implementation. Hand off to orchestrator when done."
     send: false
   - label: "Issue Mode — Stage 3: Requirements"
     agent: uwf-requirements
