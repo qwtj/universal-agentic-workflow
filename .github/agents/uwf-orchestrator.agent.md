@@ -76,7 +76,7 @@ Driven by files in `state/`. Repeat for every issue found in an `open/` director
    - Security Plan and Test Planning are strongly recommended; skip only if the issue is trivially non-security-sensitive and has no testable behaviour — document the reason in the plan.
    - Tests are always planned and stubbed **before** implementation steps in the work plan.
    - Documentation Review runs after implementation and before the reviewer/acceptance steps to keep `tmp/workflows` in sync with any new or changed artifacts in `docs/`.
-5. **On acceptance** (close): move `state/<M>/<S>/active/<id>.md` → `state/<M>/<S>/closed/<id>.md`.
+5. **On acceptance** — the **acceptance agent** is now responsible for relocating the active issue file to the `closed/` directory.  The orchestrator will wait for the acceptance stage to signal completion instead of performing the move itself.
 6. **On skip**: move `state/<M>/<S>/open/<id>.md` → `state/<M>/<S>/closed/<id>.md`. Prepend a `## Skip reason` section to the file before moving.
 7. Loop — scan for the next open issue.
 

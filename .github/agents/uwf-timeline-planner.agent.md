@@ -66,7 +66,7 @@ acceptance-criteria: <one-line stub — expanded during Issue Intake>
 ```
 
 - Use sequential ids: `I-001`, `I-002`, … for issues; `T-001a`, `T-001b`, … for sub-tasks.
-- All files start in `open/`. The orchestrator moves them to `active/` then `closed/`.
+- All files start in `open/`. The orchestrator moves them to `active/`; the acceptance agent will later move them to `closed/` after acceptance.
 - `depends-on` lists ids (not paths); the orchestrator resolves them at runtime.
 
 ## After producing both artifacts

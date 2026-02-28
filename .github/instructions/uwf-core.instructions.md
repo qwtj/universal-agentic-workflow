@@ -66,7 +66,7 @@ All code/infra changes must trace back to a requirement or ADR.
 ### Gate: Acceptance
 Must produce: `tmp/workflows/acceptance.md`
 Must include: final checks, known issues, follow-up items.
-After acceptance: orchestrator moves issue file from `state/<M>/<S>/active/` to `state/<M>/<S>/closed/`.
+After acceptance: the acceptance agent (not the orchestrator) moves the issue file from `state/<M>/<S>/active/` to `state/<M>/<S>/closed/` and documents completion.
 
 ---
 
@@ -77,7 +77,7 @@ After acceptance: orchestrator moves issue file from `state/<M>/<S>/active/` to 
   2. Moves `state/<M>/<S>/open/<id>.md` → `state/<M>/<S>/active/<id>.md`.
   3. Resets `tmp/workflows/` documents (intake, discovery, plan, acceptance) to blank templates scoped to the new issue.
   4. Starts Issue Intake for that issue.
-- On issue completion (close): move `state/<M>/<S>/active/<id>.md` → `state/<M>/<S>/closed/<id>.md`.
+- On issue completion (close): the acceptance agent handles moving `state/<M>/<S>/active/<id>.md` → `state/<M>/<S>/closed/<id>.md` once all acceptance criteria are met.
 - On issue skip: move `state/<M>/<S>/open/<id>.md` → `state/<M>/<S>/closed/<id>.md`; prepend a `## Skip reason` section.
 - Parallel issues are allowed when eligible issues share no `depends-on` relationship with each other.
 

@@ -21,7 +21,7 @@ Hand off to the UWF orchestrator, which auto-detects the operating mode and driv
    - Orchestrator scans `state/*/*/open/` for next eligible issue (respecting `depends-on`).
    - Move issue file to `active/`, reset workflow docs, trigger `uwf-intake`.
    - Full per-issue cycle: Intake → Discovery → (Requirements) → (ADRs) → (Security) → Implementation → Review → Acceptance.
-   - On completion: move issue file from `active/` → `closed/`, loop to next open issue.
+   - On completion: the acceptance agent moves the issue file from `active/` → `closed/` and notifies the orchestrator; the orchestrator then loops to the next open issue.
 
 ## Done when
 - Project Mode: `state/` directory structure exists and orchestrator has transitioned to Issue Mode.
