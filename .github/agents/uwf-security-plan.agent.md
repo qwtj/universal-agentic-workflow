@@ -5,11 +5,11 @@ tools: ["todos", "codebase", "readFile", "createFile", "editFiles", "search", "f
 handoffs:
   - label: "Stage — Test Planning"
     agent: uwf-test-planner
-    prompt: "Security plan is ready. Produce tmp/workflows/test-plan.md: define all unit, integration, and security-specific tests (stubs only) before implementation begins. Use tmp/workflows/security-plan.md as an input."
+    prompt: "Security plan is ready. Produce tmp/workflow-artifacts/test-plan.md: define all unit, integration, and security-specific tests (stubs only) before implementation begins. Use tmp/workflow-artifacts/security-plan.md as an input."
     send: false
 ---
 # Security planning stage
-Produce tmp/workflows/security-plan.md with:
+Produce tmp/workflow-artifacts/security-plan.md with:
 - Threat model (assets, trust boundaries, threats, mitigations)
 - AuthN/AuthZ model
 - Secrets handling

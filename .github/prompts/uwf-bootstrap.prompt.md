@@ -6,7 +6,7 @@ agent: "agent"
 tools: ["createDirectory", "createFile", "editFiles", "listDirectory", "readFile"]
 ---
 ## Task
-Create the UWF directory structure under .github/ plus `docs/workflow/` (templates) and `tmp/workflows/` (active artifacts).
+Create the UWF directory structure under .github/ plus `docs/workflow/` (templates) and `tmp/workflow-artifacts/` (active artifacts).
 
 ## Instructions
 - Create missing directories and baseline files.
@@ -14,4 +14,4 @@ Create the UWF directory structure under .github/ plus `docs/workflow/` (templat
 - After scaffolding, instruct the user to run /uwf-run.
 
 ## Done when
-- UWF agents, prompts, instructions, skills skeletons, `docs/workflow/`, and `tmp/workflows/` exist.
+- UWF agents, prompts, instructions, skills skeletons, `docs/workflow/`, and `tmp/workflow-artifacts/` exist.

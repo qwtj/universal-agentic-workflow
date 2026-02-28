@@ -13,7 +13,7 @@ handoffs:
     send: true
 ---
 # Acceptance stage
-Write tmp/workflows/acceptance.md:
+Write tmp/workflow-artifacts/acceptance.md:
 - Acceptance checklist results
 - Verification commands + outcomes
 - Known issues / follow-ups

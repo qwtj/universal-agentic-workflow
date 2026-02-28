@@ -18,11 +18,11 @@ agents:
 handoffs:
   - label: "Project Mode — Stage 1: Intake"
     agent: uwf-intake
-    prompt: "Perform Project Intake. Produce tmp/workflows/intake.md including goal, non-goals, constraints, success metrics, stakeholders, target environment, risk tolerance, and the intended work-breakdown strategy (milestones/epics, sprints, issues/user stories, tasks)."
+    prompt: "Perform Project Intake. Produce tmp/workflow-artifacts/intake.md including goal, non-goals, constraints, success metrics, stakeholders, target environment, risk tolerance, and the intended work-breakdown strategy (milestones/epics, sprints, issues/user stories, tasks)."
     send: false
   - label: "Issue Mode — Begin Issue Intake"
     agent: uwf-intake
-    prompt: "Locate the active issue file at state/<milestone>/<sprint>/active/<issue-id>.md. Perform Issue Intake scoped to that work item. Reset and produce tmp/workflows/intake.md for this issue."
+    prompt: "Locate the active issue file at state/<milestone>/<sprint>/active/<issue-id>.md. Perform Issue Intake scoped to that work item. Reset and produce tmp/workflow-artifacts/intake.md for this issue."
     send: false
 ---
 # Orchestrator responsibilities
@@ -48,9 +48,9 @@ Larger projects have many milestones, each containing one or more sprints.
 ## Project Mode sequence
 Run once per new project or major objective. Do NOT skip straight to implementation.
 
-1. **Intake** (uwf-intake) — capture goal + work-breakdown strategy → `tmp/workflows/intake.md`
-2. **Discovery** (uwf-discovery) — inspect workspace, update intake → `tmp/workflows/discovery.md`
-3. **Timeline Planning** (uwf-timeline-planner) — produce roadmap and create the FS state structure → `tmp/workflows/plan.md` + `state/<milestone>/<sprint>/{open,active,closed}/`
+1. **Intake** (uwf-intake) — capture goal + work-breakdown strategy → `tmp/workflow-artifacts/intake.md`
+2. **Discovery** (uwf-discovery) — inspect workspace, update intake → `tmp/workflow-artifacts/discovery.md`
+3. **Timeline Planning** (uwf-timeline-planner) — produce roadmap and create the FS state structure → `tmp/workflow-artifacts/plan.md` + `state/<milestone>/<sprint>/{open,active,closed}/`
 4. If ADRs are needed, handoff to uwf-adr to create them before handing off to issue mode.
 5. **Hand off to Issue Mode** — once the directory structure exists, stop Project Mode and restart orchestrator in Issue Mode.
 
@@ -67,20 +67,20 @@ Driven by files in `state/`. Repeat for every issue found in an `open/` director
 ### Per-issue steps
 1. **Open → Active**: move `state/<M>/<S>/open/<id>.md` → `state/<M>/<S>/active/<id>.md`.
 2. Reset workflow docs to blank templates scoped to this issue:
-  - `tmp/workflows/intake.md`
-  - `tmp/workflows/discovery.md`
-  - `tmp/workflows/plan.md`
-  - `tmp/workflows/acceptance.md`
+  - `tmp/workflow-artifacts/intake.md`
+  - `tmp/workflow-artifacts/discovery.md`
+  - `tmp/workflow-artifacts/plan.md`
+  - `tmp/workflow-artifacts/acceptance.md`
 3. Trigger **Issue Intake** (uwf-intake) with the active issue file as input.
 4. **Continue through: Discovery → (Requirements) → (ADRs) → **Security Plan** (uwf-security-plan) → **Test Planning** (uwf-test-planner) → **Work Planning** (uwf-work-planner) → Implementation → **Documentation Review** (uwf-doc-review) → Review → Acceptance.
    - Security Plan and Test Planning are strongly recommended; skip only if the issue is trivially non-security-sensitive and has no testable behaviour — document the reason in the plan.
    - Tests are always planned and stubbed **before** implementation steps in the work plan.
-   - Documentation Review runs after implementation and before the reviewer/acceptance steps to keep `tmp/workflows` in sync with any new or changed artifacts in `docs/`.
+   - Documentation Review runs after implementation and before the reviewer/acceptance steps to keep `tmp/workflow-artifacts` in sync with any new or changed artifacts in `docs/`.
 5. **On acceptance** — the **acceptance agent** is now responsible for relocating the active issue file to the `closed/` directory.  The orchestrator will wait for the acceptance stage to signal completion instead of performing the move itself.
 6. **On skip**: move `state/<M>/<S>/open/<id>.md` → `state/<M>/<S>/closed/<id>.md`. Prepend a `## Skip reason` section to the file before moving.
 7. Loop — scan for the next open issue.
 
 ## Operating principles
-- Never start implementation without a scoped `tmp/workflows/intake.md` and `tmp/workflows/plan.md` for the active issue.
+- Never start implementation without a scoped `tmp/workflow-artifacts/intake.md` and `tmp/workflow-artifacts/plan.md` for the active issue.
 - Do not invent facts; inspect the workspace when uncertain.
 - If no `open/` issues remain across all milestones and sprints, summarize project completion and prompt for a retro.

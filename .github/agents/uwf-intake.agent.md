@@ -1,15 +1,15 @@
 ---
 name: uwf-intake
-description: "Capture the user objective and work-breakdown strategy (Project Mode) or scope a single work item (Issue Mode). Produces tmp/workflows/intake.md."
+description: "Capture the user objective and work-breakdown strategy (Project Mode) or scope a single work item (Issue Mode). Produces tmp/workflow-artifacts/intake.md."
 tools: ["todos", "codebase", "readFile", "createFile", "editFiles", "listDirectory", "search"]
 handoffs:
   - label: "Project Mode — Stage 2: Discovery"
     agent: uwf-discovery
-    prompt: "Intake is complete. Perform Project Discovery: inspect the workspace, identify what already exists, and update tmp/workflows/intake.md with any facts that change scope. Produce tmp/workflows/discovery.md."
+    prompt: "Intake is complete. Perform Project Discovery: inspect the workspace, identify what already exists, and update tmp/workflow-artifacts/intake.md with any facts that change scope. Produce tmp/workflow-artifacts/discovery.md."
     send: false
   - label: "Issue Mode — Stage 2: Issue Discovery"
     agent: uwf-discovery
-    prompt: "Issue intake is complete. Perform Issue Discovery scoped to the active issue found in state/*/*/active/. Update tmp/workflows/intake.md if scope changes. Produce tmp/workflows/discovery.md."
+    prompt: "Issue intake is complete. Perform Issue Discovery scoped to the active issue found in state/*/*/active/. Update tmp/workflow-artifacts/intake.md if scope changes. Produce tmp/workflow-artifacts/discovery.md."
     send: false
 ---
 # Intake stage
@@ -37,7 +37,7 @@ Goal: capture a concrete, bounded objective before any work begins.
    - **Tasks** — sub-steps within an issue (hours)
    Choose the levels that fit the project size. Document the rationale.
 
-### Required output: `tmp/workflows/intake.md`
+### Required output: `tmp/workflow-artifacts/intake.md`
 Must include all sections:
 - **Goal** — one-paragraph statement of the objective
 - **Non-goals** — explicit exclusions
@@ -73,9 +73,9 @@ Goal: scope a single work item from the backlog so implementation can begin.
 
 ### Inputs
 - `state/<milestone>/<sprint>/active/<issue-id>.md` — the active issue file moved here by the orchestrator
-- `tmp/workflows/plan.md` — for parent milestone/sprint context and dependency graph
+- `tmp/workflow-artifacts/plan.md` — for parent milestone/sprint context and dependency graph
 
-### Required output: `tmp/workflows/intake.md` (reset and scoped to this issue)
+### Required output: `tmp/workflow-artifacts/intake.md` (reset and scoped to this issue)
 Must include:
 - **Issue goal** — what this specific item delivers
 - **Acceptance criteria** — explicit, testable conditions (copy + expand from backlog stub)
@@ -86,7 +86,7 @@ Must include:
 
 The intake comments/report should also summarise any automated recommendations made during the process (e.g. prompts to create or update backlog stubs, sprint placement advice, reordering suggestions).
 
-After writing `tmp/workflows/intake.md`, recommend the appropriate next step:
+After writing `tmp/workflow-artifacts/intake.md`, recommend the appropriate next step:
 - If in project mode move to project discovery (handoff to uwf-discovery).
 - If in issue mode, check if parent milestone/sprint has a plan. If not, recommend creating one before issue discovery. If yes, move to issue discovery (handoff to uwf-discovery).
 

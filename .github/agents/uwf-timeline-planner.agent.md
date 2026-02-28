@@ -1,6 +1,6 @@
 ---
 name: uwf-timeline-planner
-description: "Project Mode only: produce the timeline roadmap (tmp/workflows/plan.md) and create the issue file-system state structure under state/. No implementation. Hand off to orchestrator to begin Issue Mode."
+description: "Project Mode only: produce the timeline roadmap (tmp/workflow-artifacts/plan.md) and create the issue file-system state structure under state/. No implementation. Hand off to orchestrator to begin Issue Mode."
 tools: ["todos", "codebase", "readFile", "createDirectory", "createFile", "editFiles", "search", "fetch"]
 handoffs:
   - label: "Hand off to Orchestrator (Issue Mode)"
@@ -14,12 +14,12 @@ handoffs:
 > Do not write code, create source files, or produce implementation steps.
 
 ## Inputs
-- `tmp/workflows/intake.md` — goal, non-goals, work-breakdown strategy
-- `tmp/workflows/discovery.md` — current state, constraints, unknowns
+- `tmp/workflow-artifacts/intake.md` — goal, non-goals, work-breakdown strategy
+- `tmp/workflow-artifacts/discovery.md` — current state, constraints, unknowns
 
 ## Required outputs
 
-### 1. `tmp/workflows/plan.md` — Timeline Roadmap
+### 1. `tmp/workflow-artifacts/plan.md` — Timeline Roadmap
 Structure by the levels chosen during intake:
 ```
 ## Milestones / Epics
@@ -38,7 +38,7 @@ state/<milestone-id>/<sprint-id>/open/
 state/<milestone-id>/<sprint-id>/active/
 state/<milestone-id>/<sprint-id>/closed/
 ```
-- `<milestone-id>` matches the `M1-<slug>` ids used in `tmp/workflows/plan.md`.
+- `<milestone-id>` matches the `M1-<slug>` ids used in `tmp/workflow-artifacts/plan.md`.
 - `<sprint-id>` matches the `S1-<slug>` ids.
 - For projects with no formal sprints, use a single sprint id of `S1`.
 

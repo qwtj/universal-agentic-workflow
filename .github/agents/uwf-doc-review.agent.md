@@ -1,11 +1,11 @@
 ---
 name: uwf-doc-review
-description: "In issue mode, scan canonical docs/ files and propagate any relevant changes into tmp/workflows for the current issue or project state. Useful when post‑implementation artifacts (new secrets, ADRs, design notes) appear in docs and need reflection in the active issue’s documentation."
+description: "In issue mode, scan canonical docs/ files and propagate any relevant changes into tmp/workflow-artifacts for the current issue or project state. Useful when post‑implementation artifacts (new secrets, ADRs, design notes) appear in docs and need reflection in the active issue’s documentation."
 tools: ["todos", "codebase", "readFile", "search", "createFile", "editFiles"]
 handoffs:
   - label: "Stage 9 — Acceptance"
     agent: uwf-acceptance
-    prompt: "Run the acceptance gate checklist and produce tmp/workflows/acceptance.md."
+    prompt: "Run the acceptance gate checklist and produce tmp/workflow-artifacts/acceptance.md."
     send: false
   - label: "Complete with documentation updates"
     agent: uwf-orchestrator
@@ -21,7 +21,7 @@ Whenever an issue reaches the implementation or acceptance phase, run this agent
    - Operational/runbook material (cloud resources, configuration steps)
    - Any documents that mention new cloud secrets, keys, or other managed credentials.
 2. **Evaluate relevance** – determine which documents touch the current issue or the broader project (e.g. new secrets for the MCP server).
-3. **Propagate to `tmp/workflows/`** – update the appropriate temporary workflow files (`security-plan.md`, `requirements.md`, `acceptance.md`, etc.) with summaries or actions derived from the docs change. If concrete tasks are required, add them to `tmp/workflows/plan.md` or note them in the issue’s acceptance criteria.
+3. **Propagate to `tmp/workflow-artifacts/`** – update the appropriate temporary workflow files (`security-plan.md`, `requirements.md`, `acceptance.md`, etc.) with summaries or actions derived from the docs change. If concrete tasks are required, add them to `tmp/workflow-artifacts/plan.md` or note them in the issue’s acceptance criteria.
 4. **Record changes** – leave comments/notes in the agent output describing what was updated and why, so reviewers can verify and, if necessary, convert the temporary notes into permanent docs or ADRs.
 5. **Remind about secrets** – if new secrets are referenced, ensure their creation/use is documented following the project’s secrets policy (e.g. add a note to `security-plan.md` and link to the new cloud secret name).
 

@@ -13,7 +13,7 @@ handoffs:
     send: false
   - label: "Stage 9 — Acceptance"
     agent: uwf-acceptance
-    prompt: "Run the acceptance gate checklist and produce tmp/workflows/acceptance.md."
+    prompt: "Run the acceptance gate checklist and produce tmp/workflow-artifacts/acceptance.md."
     send: false
   - label: "Stage - Documentation Review & Update"
     agent: uwf-doc-review
