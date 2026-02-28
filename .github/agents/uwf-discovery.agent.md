@@ -1,26 +1,50 @@
 ---
 name: uwf-discovery
-description: "Inspect the workspace and clarify unknowns. No implementation."
+description: "Inspect the workspace, clarify unknowns, and update intake. No implementation."
 tools: [read/readFile, agent/runSubagent, edit/createDirectory, edit/createFile, edit/createJupyterNotebook, edit/editFiles, edit/editNotebook, search/changes, search/codebase, search/fileSearch, search/listDirectory, search/searchResults, search/textSearch, search/usages, web/fetch, web/githubRepo, azure-mcp/search, todo]
 handoffs:
-  - label: "Stage 2 — Requirements"
+  - label: "Project Mode — Stage 3: Timeline Planning"
+    agent: uwf-timeline-planner
+    prompt: "Produce the timeline roadmap (docs/workflow/plan.md) and the master backlog (tmp/state/backlog.md). Do NOT begin implementation. Hand off to orchestrator when done."
+    send: false
+  - label: "Issue Mode — Stage 3: Requirements"
     agent: uwf-requirements
-    prompt: "Using discovery results, produce docs/workflow/requirements.md."
+    prompt: "Using issue discovery results, produce docs/workflow/requirements.md."
     send: false
-  - label: "Stage 3 — ADRs (incl. 300-point)"
+  - label: "Issue Mode — Stage 4: Security Plan"
+    agent: uwf-security-plan
+    prompt: "Produce docs/workflow/security-plan.md for this issue: threat model, controls, secrets handling, and verification checklist."
+    send: false
+  - label: "Issue Mode — Stage 5: Test Planning"
+    agent: uwf-test-planner
+    prompt: "Produce docs/workflow/test-plan.md: define all unit, integration, and security tests (stubs only) before implementation begins."
+    send: false
+  - label: "Issue Mode — Stage 6: Work Planning"
+    agent: uwf-work-planner
+    prompt: "Security and test plans are ready. Produce docs/workflow/plan.md with test steps ordered before implementation steps."
+    send: false
+  - label: "Issue Mode — ADRs (incl. 300-point)"
     agent: uwf-adr
-    prompt: "Create ADRs needed for this work. Use the 300-point ADR pattern when decisions are high-impact."
-    send: false
-  - label: "Stage 4 — Planning"
-    agent: uwf-planner
-    prompt: "Produce docs/workflow/plan.md with steps, milestones, tests, rollout/rollback."
+    prompt: "Create ADRs needed for this issue. Use the 300-point ADR pattern when decisions are high-impact."
     send: false
 ---
 # Discovery stage
-- Gather facts from the repo (structure, existing patterns, tooling, CI, lint, tests).
-- Identify missing info and ask targeted questions.
-- Output docs/workflow/discovery.md with:
-  - Current state summary
-  - Constraints and assumptions
-  - Unknowns + questions
-  - Recommended artifacts (requirements, ADRs, security plan)
+
+## Scope check
+Read `docs/workflow/intake.md` to determine whether this is:
+- **Project Discovery** (intake contains a work-breakdown strategy) → explore whole codebase/repo
+- **Issue Discovery** (intake is scoped to a single work item) → focus only on areas relevant to that issue
+
+## Tasks
+- Gather facts: directory structure, existing patterns, tooling, CI, tests, dependencies.
+- Identify gaps between what is needed (per intake) and what already exists.
+- Ask targeted questions for any remaining unknowns before declaring discovery complete.
+
+## Required outputs
+1. `docs/workflow/discovery.md` containing:
+   - Current state summary
+   - Constraints and assumptions
+   - Unknowns + open questions
+   - Recommended artifacts (requirements, ADRs, security plan, etc.)
+   - Recommended use of planning timelines (which of milestones / sprints / issues / tasks apply, and why)
+2. Updated `docs/workflow/intake.md` — amend any section where discovery changed scope or revealed new constraints. Mark amendments with `<!-- updated by discovery -->`.

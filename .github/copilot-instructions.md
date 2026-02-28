@@ -10,10 +10,16 @@
 - Do not make assumptions about the project or its dependencies. If information is missing, ask for clarification or use tools to discover it.
 - If user doesn't provide a clear goal, ask for one. If the goal is too broad, ask for it to be narrowed down.
 
+## Operating mode detection
+- Check `tmp/state/backlog.md` to determine mode:
+  - **Absent** → Project Mode: run Project Intake → Discovery → Timeline Planning → hand off to orchestrator.
+  - **Present** → Issue Mode: orchestrator picks next `open` item from backlog and drives the per-issue workflow.
+
 ## UWF artifact locations (relative to workspace root)
-- Workflow docs: docs/workflow/*.md
-- ADRs: docs/adr/ADR-####-<slug>.md
-- Security artifacts: docs/workflow/security-plan.md (and supporting files if needed)
+- Workflow docs: `docs/workflow/*.md`
+- ADRs: `docs/adr/ADR-####-<slug>.md`
+- Security artifacts: `docs/workflow/security-plan.md` (and supporting files if needed)
+- State tracking: `tmp/state/backlog.md`, `tmp/state/active/`, `tmp/state/complete/`, `tmp/state/skipped/`
 
 ## Output format expectations
 - For each stage: write/modify the corresponding markdown artifact first, then summarize:

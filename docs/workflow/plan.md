@@ -1,17 +1,19 @@
 # Plan
 
+> Timeline roadmap — NOT an implementation plan.
+> Produced by the Timeline Planning stage. Consumed by the orchestrator to seed the backlog.
+
 ## Overview
 
-## Implementation steps
+## Milestones / Epics
 
-## Timelines (milestones, sprints, issues, tasks)
+## Sprints (if applicable)
 
-## Issues and tasks
+## Issues / User stories
 
-## Test strategy
+## Tasks (if applicable)
 
-## Rollout strategy
+## Sequencing notes
+<!-- Dependencies, parallel work, critical path -->
 
-## Rollback strategy
-
-## Verification checklist
+## Success signals per milestone

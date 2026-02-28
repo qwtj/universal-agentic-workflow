@@ -7,9 +7,13 @@ handoffs:
     agent: uwf-adr
     prompt: "Derive architecture decisions from requirements; write ADRs."
     send: false
-  - label: "Stage 4 — Planning"
-    agent: uwf-planner
-    prompt: "Turn requirements into an implementation plan."
+  - label: "Stage — Security Plan"
+    agent: uwf-security-plan
+    prompt: "Produce docs/workflow/security-plan.md for this issue. It will feed into test planning and the work plan."
+    send: false
+  - label: "Stage — Work Planning (skip security+test)"
+    agent: uwf-work-planner
+    prompt: "Produce docs/workflow/plan.md with test steps ordered before implementation steps. Note: security and test planning were skipped — document the reason in the plan."
     send: false
 ---
 # Requirements stage

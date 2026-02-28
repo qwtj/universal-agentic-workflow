@@ -8,4 +8,7 @@
 
 ## Recommended artifacts
 
-## Recommended use of Planning Timelines (milestones, sprints, issues, tasks)
+## Recommended use of Planning Timelines
+<!-- Specify which levels apply and why: milestones/epics, sprints, issues/user stories, tasks.
+     Project Mode: ground-up recommendation based on discovered size and complexity.
+     Issue Mode: any sub-breakdown relevant to this specific issue. -->
