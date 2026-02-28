@@ -19,7 +19,7 @@ Hand off to the UWF orchestrator, which auto-detects the operating mode and driv
    - handoff to `uwf-intake` → `uwf-discovery` → `uwf-timeline-planner` to produce `tmp/workflow-artifacts/plan.md` and populate the initial issue tree under `state/`.
 3. **Issue Mode** — if `state/*/*` paths exist:
    - Orchestrator scans `state/*/*/open/` for next eligible issue (respecting `depends-on`).
-   - Full per-issue cycle: Intake → Discovery → (Requirements) → (ADRs) → (Security) → Implementation → Review → Acceptance.
+   
 
 ## Done when
 - Project Mode: `state/` directory structure exists and orchestrator has transitioned to Issue Mode.
