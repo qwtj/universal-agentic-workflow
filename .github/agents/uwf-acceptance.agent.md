@@ -9,7 +9,7 @@ handoffs:
     send: false
   - label: "Complete Acceptance"
     agent: uwf-orchestrator
-    prompt: "All acceptance criteria met. Mark as complete."
+    prompt: "All acceptance criteria met. Mark as complete.  Please update any active issue file in `state/` to reflect acceptance, and move it to the `closed/` directory."
     send: true
 ---
 # Acceptance stage
