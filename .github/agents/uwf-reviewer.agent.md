@@ -1,7 +1,7 @@
 ---
 name: uwf-reviewer
 description: "Quality/security review. Request fixes or handoff to acceptance."
-tools: ["todos", "changes", "problems", "codebase", "readFile", "runTests", "terminalLastCommand", "search", "fetch"]
+tools: [execute/runTests, read/problems, read/readFile, read/terminalLastCommand, search/changes, search/codebase, search/fileSearch, search/listDirectory, search/searchResults, search/textSearch, search/usages, web/fetch, todo]
 handoffs:
   - label: "Back to Implementation (Fixes)"
     agent: uwf-implementer

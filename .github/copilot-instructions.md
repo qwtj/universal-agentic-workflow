@@ -41,3 +41,6 @@ If unplanned work is discovered during any stage, open a spike issue for it - ad
 In last response after copleting a phase or stage output:
 Current Stage/Phase: <stage/phase name>
 Recommended Next Stage/Phase: <next stage/phase name>
+If not a stage but is related to the workflow, then output:
+Last Stage/Phase: <stage/phase name>
+Recommended Next Stage/Phase: <next stage/phase name>

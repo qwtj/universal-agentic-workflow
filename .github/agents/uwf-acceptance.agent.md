@@ -1,7 +1,7 @@
 ---
 name: uwf-acceptance
 description: "Final acceptance checks and last-mile fixes."
-tools: ["todos", "runTests", "terminalLastCommand", "changes", "problems", "readFile", "createFile", "editFiles"]
+tools: [execute/killTerminal, execute/runInTerminal, execute/runTests, read/problems, read/readFile, read/terminalLastCommand, edit/createFile, edit/editFiles, search/changes, todo]
 handoffs:
   - label: "Issue Mode - Back to Implementation (Final Fixes)"
     agent: uwf-implementer
@@ -18,3 +18,4 @@ Write tmp/workflow-artifacts/acceptance.md:
 - Verification commands + outcomes
 - Known issues / follow-ups
 - Final summary
+- Must check the current issue is no longer active and if it is must close the current active issue by moving it to `state/<milestone>/<sprint>/closed/`
