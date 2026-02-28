@@ -1,7 +1,7 @@
 ---
 name: uwf-discovery
 description: "Inspect the workspace, clarify unknowns, and update intake. No implementation."
-tools: [read/readFile, agent/runSubagent, edit/createDirectory, edit/createFile, edit/createJupyterNotebook, edit/editFiles, edit/editNotebook, search/changes, search/codebase, search/fileSearch, search/listDirectory, search/searchResults, search/textSearch, search/usages, web/fetch, web/githubRepo, azure-mcp/search, todo]
+tools: [read/readFile, agent/runSubagent, edit/createDirectory, edit/createFile, edit/createJupyterNotebook, edit/editFiles, edit/editNotebook, search/changes, search/codebase, search/fileSearch, search/listDirectory, search/searchResults, search/textSearch, search/usages, web/fetch, todo]
 handoffs:
   - label: "Project Mode — Stage 3: Timeline Planning"
     agent: uwf-timeline-planner
