@@ -40,7 +40,7 @@ Orchestrator picks each `open` item and drives the per-issue cycle:
 2. **Issue Discovery** (`uwf-discovery`) — focus on relevant areas
 3. **Work Planning** (`uwf-work-planner`) — implementation steps, tests, rollout/rollback
 4. **Implementation** → **Review** → **Acceptance**
-5. Move `state/<M>/<S>/active/<id>.md` → `state/<M>/<S>/closed/<id>.md`, loop
+5. Acceptance stage should move `state/<M>/<S>/active/<id>.md` → `state/<M>/<S>/closed/<id>.md`; the orchestrator simply loops afterwards.
 
 ## Notes
 - Hooks are **Preview** in VS Code (see VS Code docs). Your org may disable them.
