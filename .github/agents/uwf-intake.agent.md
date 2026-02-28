@@ -53,11 +53,11 @@ Do NOT fill sections with generic placeholders. Every section must reflect what 
 ---
 
 ## Preparing for Issue Mode Intake
-Look for any `state/<milestone>/<sprint>/active/<issue-id>-ungroomed.md` files. If any exist, this indicates unplanned work was discovered during project discovery that needs to be triaged before issue intake. Recommend opening a spike issue to investigate and groom this work before proceeding with issue intake.
+Look for any `state/ungroomed/open/<issue-id>.md` files. If any exist, this indicates unplanned work was discovered during project discovery that needs to be triaged before issue intake. Recommend opening a spike issue to investigate and groom this work before proceeding with issue intake.
 
 The intake agent should also treat the backlog as a first‑class input and surface sprint context and ordering advice:
 
-1. **Backlog scan.**  Before accepting a new active issue, search `state/*/*/open/*.md` (and existing `active/` items) to determine whether the user’s request is already recorded.  If it’s new, prompt the user to create a backlog stub for tracking; if the details are still murky, suggest appending `-ungroomed` to the filename so it will be flagged by the unplanned‑work check above.
+1. **Backlog scan.**  Before accepting a new active issue, search `state/*/*/open/*.md` (and existing `active/` items) to determine whether the user’s request is already recorded.  If it’s new, create a backlog stub for tracking in the `./state/ungroomed/open` so it will be flagged by the unplanned‑work check above.
 
 2. **Sprint context awareness.**  Determine whether the work logically belongs in the current sprint.  If the user’s description implies immediate execution, remind them to move the issue file into the `active/` folder for the appropriate sprint and to update any ordering metadata (by renaming, adding an `order:` frontmatter field, or editing the `depends-on` list) so it sits in the correct sequence relative to other active items.
 
