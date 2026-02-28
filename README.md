@@ -20,7 +20,7 @@ This folder is intentionally self-contained under `./tmp` so it can be opened as
 - Skills: `.github/skills/*/SKILL.md`
 - Hooks (Preview): `.github/hooks/*.json` + `scripts/hooks/preToolUse.mjs`
 - Workflow artifact templates (do not edit in-place): `docs/workflow/*.md`, `docs/adr/*.md`
-- Active workflow artifacts (editable after intake): `tmp/workflows/*.md`
+- Active workflow artifacts (editable after intake): `tmp/workflow-artifacts/*.md`
 - State tracking: `state/<milestone>/<sprint>/{open,active,closed}/<issue-id>.md`
 
 ## Two operating modes
@@ -31,7 +31,7 @@ UWF auto-detects its mode from the issue tree under `state/`:
 Runs once per new project objective:
 1. **Intake** (`uwf-intake`) — goal + work-breakdown strategy
 2. **Discovery** (`uwf-discovery`) — inspect workspace, update intake
-3. **Timeline Planning** (`uwf-timeline-planner`) — roadmap (`tmp/workflows/plan.md`) + issue tree (`state/<milestone>/<sprint>/{open,active,closed}/`)
+3. **Timeline Planning** (`uwf-timeline-planner`) — roadmap (`tmp/workflow-artifacts/plan.md`) + issue tree (`state/<milestone>/<sprint>/{open,active,closed}/`)
 4. Orchestrator switches automatically to Issue Mode
 
 ### Issue Mode (subsequent runs — `state/*/*` exists)
@@ -46,4 +46,4 @@ Orchestrator picks each `open` item and drives the per-issue cycle:
 - Hooks are **Preview** in VS Code (see VS Code docs). Your org may disable them.
 - The hook script blocks obvious destructive commands and requires confirmation for edits in sensitive paths.
 - `docs/workflow/` contains example templates and should remain intact.
-- After intake begins, edit and reference workflow artifacts from `tmp/workflows/`.
+- After intake begins, edit and reference workflow artifacts from `tmp/workflow-artifacts/`.
