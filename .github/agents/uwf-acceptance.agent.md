@@ -7,6 +7,10 @@ handoffs:
     agent: uwf-implementer
     prompt: "Fix acceptance issues listed above; re-run checks."
     send: false
+  - label: "Complete Acceptance"
+    agent: uwf-orchestrator
+    prompt: "All acceptance criteria met. Mark as complete."
+    send: true
 ---
 # Acceptance stage
 Write tmp/workflows/acceptance.md:

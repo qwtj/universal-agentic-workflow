@@ -48,3 +48,6 @@ Read `tmp/workflows/intake.md` to determine whether this is:
    - Recommended artifacts (requirements, ADRs, security plan, etc.)
    - Recommended use of planning timelines (which of milestones / sprints / issues / tasks apply, and why)
 2. Updated `tmp/workflows/intake.md` — amend any section where discovery changed scope or revealed new constraints. Mark amendments with `<!-- updated by discovery -->`.
+
+## Recommended next steps
+When discovery is complete, recommend which agent(s) should execute next, based on the outputs above. For example:

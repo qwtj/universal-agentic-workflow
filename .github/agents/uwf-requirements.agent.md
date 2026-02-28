@@ -3,13 +3,17 @@ name: uwf-requirements
 description: "Write the requirements pack: PRD + NFRs + acceptance criteria."
 tools: ["todos", "readFile", "codebase", "createFile", "editFiles"]
 handoffs:
-  - label: "Stage 3 — ADRs"
+  - label: "Stage — ADRs"
     agent: uwf-adr
     prompt: "Derive architecture decisions from requirements; write ADRs."
     send: false
   - label: "Stage — Security Plan"
     agent: uwf-security-plan
     prompt: "Produce tmp/workflows/security-plan.md for this issue. It will feed into test planning and the work plan."
+    send: false
+  - label: "Stage — Test Plan (skip security+test)"
+    agent: uwf-test-planner
+    prompt: "Produce tmp/workflows/test-plan.md for this issue. It will feed into the work plan."
     send: false
   - label: "Stage — Work Planning (skip security+test)"
     agent: uwf-work-planner

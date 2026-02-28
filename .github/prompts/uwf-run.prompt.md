@@ -16,9 +16,7 @@ Hand off to the UWF orchestrator, which auto-detects the operating mode and driv
 
 2. **Project Mode** — only if no `state/*/*` path exists:
    - Clarification gate: if the objective is missing or vague, ask focused questions before writing any artifact.
-   - Run `uwf-intake` → `uwf-discovery` → `uwf-timeline-planner`.
-   - Planner creates the `state/<milestone>/<sprint>/{open,active,closed}/` tree and then triggers orchestrator to switch to Issue Mode.
-
+   - handoff to `uwf-intake` → `uwf-discovery` → `uwf-timeline-planner` to produce `tmp/workflows/plan.md` and populate the initial issue tree under `state/`.
 3. **Issue Mode** — if `state/*/*` paths exist:
    - Orchestrator scans `state/*/*/open/` for next eligible issue (respecting `depends-on`).
    - Move issue file to `active/`, reset workflow docs, trigger `uwf-intake`.
