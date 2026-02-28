@@ -7,6 +7,8 @@
   - docs/workflow/intake.md
   - docs/workflow/plan.md
 - Keep changes small and reviewable; avoid broad rewrites unless explicitly requested.
+- Do not make assumptions about the project or its dependencies. If information is missing, ask for clarification or use tools to discover it.
+- If user doesn't provide a clear goal, ask for one. If the goal is too broad, ask for it to be narrowed down.
 
 ## UWF artifact locations (relative to workspace root)
 - Workflow docs: docs/workflow/*.md
