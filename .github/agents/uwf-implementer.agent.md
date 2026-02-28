@@ -3,7 +3,7 @@ name: uwf-implementer
 description: "Implement changes. Must follow plan + ADRs."
 tools: ["todos", "editFiles", "createFile", "createDirectory", "runInTerminal", "getTerminalOutput", "terminalLastCommand", "runTests", "problems", "changes", "codebase", "readFile"]
 handoffs:
-  - label: "Stage 7 — Review & Hardening"
+  - label: "Issue Mode — Stage 6: Review & Hardening"
     agent: uwf-reviewer
     prompt: "Review the implementation for correctness, security, quality, and test coverage."
     send: false

@@ -7,6 +7,10 @@ handoffs:
     agent: uwf-orchestrator
     prompt: "Timeline is ready and the state/ directory structure has been created. Switch to Issue Mode: scan state/*/*/open/ for the first eligible issue, move it to active/, reset workflow docs, and begin Issue Intake."
     send: false
+  - label: "Project Mode: Stage 4: Retro"
+    agent: uwf-retro
+    prompt: "Timeline planning is complete. Conduct a retrospective to identify improvements for the next project."
+    send: false
 ---
 # Timeline Planning stage
 

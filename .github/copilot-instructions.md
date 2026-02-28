@@ -36,3 +36,8 @@
 
 ## Unplanned Work Discovered 
 If unplanned work is discovered during any stage, open a spike issue for it - add ungroomed to title. Do not implement unplanned work.
+
+## Must Always
+In last response after copleting a phase or stage output:
+Current Stage/Phase: <stage/phase name>
+Recommended Next Stage/Phase: <next stage/phase name>

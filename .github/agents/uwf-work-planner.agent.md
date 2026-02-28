@@ -3,7 +3,7 @@ name: uwf-work-planner
 description: "Issue Mode only: produce the implementation plan (tmp/workflow-artifacts/plan.md) for the active issue. No coding."
 tools: ["todos", "codebase", "readFile", "createFile", "editFiles", "search", "fetch"]
 handoffs:
-  - label: "Stage — Implementation"
+  - label: "Issue Mode — Stage 5: Implementation"
     agent: uwf-implementer
     prompt: "Implement based on tmp/workflow-artifacts/plan.md and any ADRs for this issue. Keep edits minimal and tested."
     send: false

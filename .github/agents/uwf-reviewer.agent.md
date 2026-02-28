@@ -7,15 +7,15 @@ handoffs:
     agent: uwf-implementer
     prompt: "Apply the review fixes listed above, then re-run verification."
     send: false
-  - label: "Stage 8 — Retro"
+  - label: "Project Mode - Stage 4: Retro"
     agent: uwf-retro
     prompt: "Write a short retro: what to improve in code and workflow."
     send: false
-  - label: "Stage 9 — Acceptance"
+  - label: "Issue Mode — Stage 7: Acceptance"
     agent: uwf-acceptance
     prompt: "Run the acceptance gate checklist and produce tmp/workflow-artifacts/acceptance.md."
     send: false
-  - label: "Stage - Documentation Review & Update"
+  - label: "Issue Mode — Documentation Review & Update"
     agent: uwf-doc-review
     prompt: "Review and update documentation in `docs/` as needed based on the implementation. Ensure ADRs are updated for any decisions made during implementation."
 ---

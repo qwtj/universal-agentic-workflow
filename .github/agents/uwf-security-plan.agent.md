@@ -3,7 +3,7 @@ name: uwf-security-plan
 description: "Threat model + security controls plan."
 tools: ["todos", "codebase", "readFile", "createFile", "editFiles", "search", "fetch", "githubRepo"]
 handoffs:
-  - label: "Stage — Test Planning"
+  - label: "Issue Mode — Stage 3: Test Planning"
     agent: uwf-test-planner
     prompt: "Security plan is ready. Produce tmp/workflow-artifacts/test-plan.md: define all unit, integration, and security-specific tests (stubs only) before implementation begins. Use tmp/workflow-artifacts/security-plan.md as an input."
     send: false

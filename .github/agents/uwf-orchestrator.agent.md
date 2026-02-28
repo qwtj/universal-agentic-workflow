@@ -20,7 +20,7 @@ handoffs:
     agent: uwf-intake
     prompt: "Perform Project Intake. Produce tmp/workflow-artifacts/intake.md including goal, non-goals, constraints, success metrics, stakeholders, target environment, risk tolerance, and the intended work-breakdown strategy (milestones/epics, sprints, issues/user stories, tasks)."
     send: false
-  - label: "Issue Mode — Begin Issue Intake"
+  - label: "Issue Mode — Begin Stage 1: Issue Intake"
     agent: uwf-intake
     prompt: "Locate the active issue file at state/<milestone>/<sprint>/active/<issue-id>.md. Perform Issue Intake scoped to that work item. Reset and produce tmp/workflow-artifacts/intake.md for this issue."
     send: false

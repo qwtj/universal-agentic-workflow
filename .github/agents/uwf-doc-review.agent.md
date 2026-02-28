@@ -3,13 +3,21 @@ name: uwf-doc-review
 description: "In issue mode, scan canonical docs/ files and propagate any relevant changes into tmp/workflow-artifacts for the current issue or project state. Useful when post‑implementation artifacts (new secrets, ADRs, design notes) appear in docs and need reflection in the active issue’s documentation."
 tools: ["todos", "codebase", "readFile", "search", "createFile", "editFiles"]
 handoffs:
-  - label: "Stage 9 — Acceptance"
+  - label: "Issue Mode — Stage 7: Acceptance"
     agent: uwf-acceptance
     prompt: "Run the acceptance gate checklist and produce tmp/workflow-artifacts/acceptance.md."
     send: false
-  - label: "Complete with documentation updates"
-    agent: uwf-orchestrator
-    prompt: "Documentation review and updates are complete."
+  - label: "Issue Mode - Stage 4: Work Planning (skip security+test)"
+    agent: uwf-work-planner
+    prompt: "Produce tmp/workflow-artifacts/plan.md with test steps ordered before implementation steps. Note: security and test planning were skipped — document the reason in the plan."
+    send: false
+  - label: "Issue Mode - Stage 3: Create Test Plan"
+    agent: uwf-test-planner
+    prompt: "Produce tmp/workflow-artifacts/test-plan.md for this issue. ADRs and security plan are complete and available as input."
+    send: false
+  - label: "Issue Mode - Create Security Plan"
+    agent: uwf-security-plan
+    prompt: "Produce tmp/workflow-artifacts/security-plan.md for this issue. ADRs are complete and available as input."
     send: false
 ---
 # Documentation review stage

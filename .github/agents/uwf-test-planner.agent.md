@@ -3,7 +3,7 @@ name: uwf-test-planner
 description: "Issue Mode: define what tests must be written before implementation begins. Produces tmp/workflow-artifacts/test-plan.md. No coding — stubs/signatures only."
 tools: ["todos", "codebase", "readFile", "createFile", "editFiles", "search", "fetch"]
 handoffs:
-  - label: "Stage — Work Planning"
+  - label: "Issue Mode — Stage 4: Work Planning"
     agent: uwf-work-planner
     prompt: "Security plan and test plan are ready. Produce tmp/workflow-artifacts/plan.md with tests ordered before implementation steps. Use tmp/workflow-artifacts/security-plan.md and tmp/workflow-artifacts/test-plan.md as inputs."
     send: false
