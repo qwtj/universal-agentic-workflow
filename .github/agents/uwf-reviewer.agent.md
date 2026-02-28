@@ -15,6 +15,9 @@ handoffs:
     agent: uwf-acceptance
     prompt: "Run the acceptance gate checklist and produce tmp/workflows/acceptance.md."
     send: false
+  - label: "Stage - Documentation Review & Update"
+    agent: uwf-doc-review
+    prompt: "Review and update documentation in `docs/` as needed based on the implementation. Ensure ADRs are updated for any decisions made during implementation."
 ---
 # Review stage
 - Identify correctness issues, security gaps, missing tests, poor ergonomics.
