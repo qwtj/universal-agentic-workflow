@@ -3,9 +3,13 @@ name: uwf-doc-review
 description: "In issue mode, scan canonical docs/ files and propagate any relevant changes into tmp/workflows for the current issue or project state. Useful when post‑implementation artifacts (new secrets, ADRs, design notes) appear in docs and need reflection in the active issue’s documentation."
 tools: ["todos", "codebase", "readFile", "search", "createFile", "editFiles"]
 handoffs:
-  - label: "Stage — After Implementation (pre‑acceptance)"
-    agent: uwf-doc-review
-    prompt: "The issue has been implemented. Scan the `docs/` directory for new or modified artefacts (ADRs, security notes, operational runbooks, secrets listings, etc.) that affect the current project or the just‑completed issue. Update any of the `tmp/workflows/*.md` files accordingly, and record a brief summary of what changed. This ensures that the temporary workflow docs stay in sync with the canonical documentation."
+  - label: "Stage 9 — Acceptance"
+    agent: uwf-acceptance
+    prompt: "Run the acceptance gate checklist and produce tmp/workflows/acceptance.md."
+    send: false
+  - label: "Complete with documentation updates"
+    agent: uwf-orchestrator
+    prompt: "Documentation review and updates are complete."
     send: false
 ---
 # Documentation review stage
