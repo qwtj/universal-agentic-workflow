@@ -39,3 +39,9 @@ Whenever an issue reaches the implementation or acceptance phase, run this agent
 5. **Remind about secrets** – if new secrets are referenced, ensure their creation/use is documented following the project’s secrets policy (e.g. add a note to `security-plan.md` and link to the new cloud secret name).
 
 This agent helps maintain parity between long‑term documentation and the ephemeral workflow records during issue execution. It runs automatically after implementation and before acceptance, but humans may invoke it any time additional doc updates arrive.
+
+## Areas of Improvement and new Found Requirements
+Use the review-to-issues skill to create new issues for any gaps found in the documentation or new requirements that arise from the review. For example:
+- If the ADR mentions a new secret but there’s no documentation on how to create or manage it, create an issue to add that information to the security plan and operational docs.
+- If the security plan references a control that isn’t documented in the controls list, create an issue to add it with a description and any relevant implementation notes.
+- If the acceptance criteria mention performance requirements that aren’t currently documented, create an issue to add a performance testing section to the test plan or security plan.
