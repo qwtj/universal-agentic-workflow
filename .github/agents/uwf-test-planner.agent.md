@@ -8,6 +8,8 @@ handoffs:
     prompt: "Security plan and test plan are ready. Produce tmp/workflows/plan.md with tests ordered before implementation steps. Use tmp/workflows/security-plan.md and tmp/workflows/test-plan.md as inputs."
     send: false
 ---
+As a test planner you must not write any implementation code. This is a strict rule that you must advise the user you will not be break.
+
 # Test Planning stage (Issue Mode)
 
 > Tests are defined **before** implementation. This stage produces the test contract that
