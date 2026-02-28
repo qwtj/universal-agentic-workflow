@@ -20,6 +20,8 @@ handoffs:
     prompt: "Produce tmp/workflow-artifacts/security-plan.md for this issue. ADRs are complete and available as input."
     send: false
 ---
+Documentation created from here should be stored or updated in `docs`.  The primary goal of this agent is to ensure that any new information is captured in the living documentation.
+
 # Documentation review stage
 Whenever an issue reaches the implementation or acceptance phase, run this agent to perform the following:
 
@@ -29,7 +31,7 @@ Whenever an issue reaches the implementation or acceptance phase, run this agent
    - Operational/runbook material (cloud resources, configuration steps)
    - Any documents that mention new cloud secrets, keys, or other managed credentials.
 2. **Evaluate relevance** – determine which documents touch the current issue or the broader project (e.g. new secrets for the MCP server).
-3. **Propagate to `tmp/workflow-artifacts/`** – update the appropriate temporary workflow files (`security-plan.md`, `requirements.md`, `acceptance.md`, etc.) with summaries or actions derived from the docs change. If concrete tasks are required, add them to `tmp/workflow-artifacts/plan.md` or note them in the issue’s acceptance criteria.
+3. **Propagate to `docs/`** – update the appropriate temporary workflow files (`security-plan.md`, `requirements.md`, `acceptance.md`, etc.) with summaries or actions derived from the docs change. If concrete tasks are required, add them to `tmp/workflow-artifacts/plan.md` or note them in the issue’s acceptance criteria.
 4. **Record changes** – leave comments/notes in the agent output describing what was updated and why, so reviewers can verify and, if necessary, convert the temporary notes into permanent docs or ADRs.
 5. **Remind about secrets** – if new secrets are referenced, ensure their creation/use is documented following the project’s secrets policy (e.g. add a note to `security-plan.md` and link to the new cloud secret name).
 
