@@ -2,7 +2,6 @@
 
 ## Non-negotiables
 - Prefer correctness and verifiability over speed.
-- Never invent repo-specific facts. If unsure, inspect the workspace with tools (#tool:codebase, #tool:readFile, #tool:listDirectory).
 - Do not implement before producing or updating:
   - tmp/workflows/intake.md
   - tmp/workflows/plan.md

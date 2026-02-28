@@ -69,4 +69,6 @@ Must include:
 - **Dependencies** — other issues that must be closed first (read `depends-on` from the issue file frontmatter)
 - **Risk tolerance** — low / medium / high for this item
 
-After writing `tmp/workflows/intake.md`, trigger the appropriate Discovery handoff.
+After writing `tmp/workflows/intake.md`, recommend the appropriate next step:
+- If in project mode move to project discovery (handoff to uwf-discovery).
+- If in issue mode, check if parent milestone/sprint has a plan. If not, recommend creating one before issue discovery. If yes, move to issue discovery (handoff to uwf-discovery).
