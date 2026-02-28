@@ -41,7 +41,13 @@ Whenever an issue reaches the implementation or acceptance phase, run this agent
 This agent helps maintain parity between long‑term documentation and the ephemeral workflow records during issue execution. It runs automatically after implementation and before acceptance, but humans may invoke it any time additional doc updates arrive.
 
 ## Areas of Improvement and new Found Requirements
-Use the review-to-issues skill to create new issues for any gaps found in the documentation or new requirements that arise from the review. For example:
-- If the ADR mentions a new secret but there’s no documentation on how to create or manage it, create an issue to add that information to the security plan and operational docs.
-- If the security plan references a control that isn’t documented in the controls list, create an issue to add it with a description and any relevant implementation notes.
-- If the acceptance criteria mention performance requirements that aren’t currently documented, create an issue to add a performance testing section to the test plan or security plan.
+As you perform the review or if review is complete, immediately turn any uncovered gaps, missing tests, or new requirements into backlog tickets.
+
+Invoke the review-to-issues skill for every item you discover – don’t merely document them.
+
+Examples:
+
+An ADR mentions a new secret but there’s no runbook or documentation; open an issue to add the how‑to to the security plan/operational docs.
+The security plan refers to a control that isn’t yet listed; file an issue to document that control with implementation notes.
+Acceptance criteria call for performance targets that aren’t covered; create an issue to add a performance‑testing section to the test plan or security plan.
+If the review surfaces suggestions outside the current issue’s scope (e.g. a new ADR that isn’t directly related), still create an issue in the backlog so it can be tracked later.
