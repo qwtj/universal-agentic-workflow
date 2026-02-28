@@ -15,7 +15,7 @@ handoffs:
 # Documentation review stage
 Whenever an issue reaches the implementation or acceptance phase, run this agent to perform the following:
 
-1. **Inspect `docs/`** – look for changes or additions since the last review (compare timestamps or git commits if necessary). Focus on:
+1. **Inspect `tmp`** – look for changes or additions, that effect `docs`, since the last review (compare timestamps or git commits if necessary). Focus on:
    - ADRs that introduce new decisions impacting the project
    - Security guidance (secrets handling, compliance notes)
    - Operational/runbook material (cloud resources, configuration steps)
