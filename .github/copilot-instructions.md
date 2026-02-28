@@ -9,6 +9,7 @@
 - Do not make assumptions about the project or its dependencies. If information is missing, ask for clarification or use tools to discover it.
 - If user doesn't provide a clear goal, ask for one. If the goal is too broad, ask for it to be narrowed down.
 - Keep `docs/workflow/*.md` as example templates. Active edits go in `tmp/workflow-artifacts/*.md`.
+- Must always tell the user what your doing before doing it as to provide a log and then then proceed without waiting for feedback.
 
 ## Operating mode detection
 - Check whether any `state/*/*` directory path exists:
