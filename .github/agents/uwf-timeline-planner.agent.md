@@ -1,11 +1,11 @@
 ---
 name: uwf-timeline-planner
-description: "Project Mode only: produce the timeline roadmap (docs/workflow/plan.md) and create the issue file-system state structure under tmp/state/. No implementation. Hand off to orchestrator to begin Issue Mode."
+description: "Project Mode only: produce the timeline roadmap (tmp/workflows/plan.md) and create the issue file-system state structure under state/. No implementation. Hand off to orchestrator to begin Issue Mode."
 tools: ["todos", "codebase", "readFile", "createDirectory", "createFile", "editFiles", "search", "fetch"]
 handoffs:
   - label: "Hand off to Orchestrator (Issue Mode)"
     agent: uwf-orchestrator
-    prompt: "Timeline is ready and the tmp/state/ directory structure has been created. Switch to Issue Mode: scan tmp/state/*/*/open/ for the first eligible issue, move it to active/, reset workflow docs, and begin Issue Intake."
+    prompt: "Timeline is ready and the state/ directory structure has been created. Switch to Issue Mode: scan state/*/*/open/ for the first eligible issue, move it to active/, reset workflow docs, and begin Issue Intake."
     send: false
 ---
 # Timeline Planning stage
@@ -14,12 +14,12 @@ handoffs:
 > Do not write code, create source files, or produce implementation steps.
 
 ## Inputs
-- `docs/workflow/intake.md` — goal, non-goals, work-breakdown strategy
-- `docs/workflow/discovery.md` — current state, constraints, unknowns
+- `tmp/workflows/intake.md` — goal, non-goals, work-breakdown strategy
+- `tmp/workflows/discovery.md` — current state, constraints, unknowns
 
 ## Required outputs
 
-### 1. `docs/workflow/plan.md` — Timeline Roadmap
+### 1. `tmp/workflows/plan.md` — Timeline Roadmap
 Structure by the levels chosen during intake:
 ```
 ## Milestones / Epics
@@ -31,20 +31,20 @@ Structure by the levels chosen during intake:
 Only include levels that apply (not every project needs all four).
 For each milestone/epic include: goal, deliverable, success signal.
 
-### 2. `tmp/state/` — Issue File-System State
+### 2. `state/` — Issue File-System State
 Create one directory triplet **per sprint**:
 ```
-tmp/state/<milestone-id>/<sprint-id>/open/
-tmp/state/<milestone-id>/<sprint-id>/active/
-tmp/state/<milestone-id>/<sprint-id>/closed/
+state/<milestone-id>/<sprint-id>/open/
+state/<milestone-id>/<sprint-id>/active/
+state/<milestone-id>/<sprint-id>/closed/
 ```
-- `<milestone-id>` matches the `M1-<slug>` ids used in `docs/workflow/plan.md`.
+- `<milestone-id>` matches the `M1-<slug>` ids used in `tmp/workflows/plan.md`.
 - `<sprint-id>` matches the `S1-<slug>` ids.
 - For projects with no formal sprints, use a single sprint id of `S1`.
 
 Create one **issue file** per issue/task inside the appropriate `open/` directory:
 ```
-tmp/state/<milestone-id>/<sprint-id>/open/<issue-id>.md
+state/<milestone-id>/<sprint-id>/open/<issue-id>.md
 ```
 
 **Issue file format** (frontmatter + body):

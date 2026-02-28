@@ -1,11 +1,11 @@
 ---
 name: uwf-test-planner
-description: "Issue Mode: define what tests must be written before implementation begins. Produces docs/workflow/test-plan.md. No coding — stubs/signatures only."
+description: "Issue Mode: define what tests must be written before implementation begins. Produces tmp/workflows/test-plan.md. No coding — stubs/signatures only."
 tools: ["todos", "codebase", "readFile", "createFile", "editFiles", "search", "fetch"]
 handoffs:
   - label: "Stage — Work Planning"
     agent: uwf-work-planner
-    prompt: "Security plan and test plan are ready. Produce docs/workflow/plan.md with tests ordered before implementation steps. Use docs/workflow/security-plan.md and docs/workflow/test-plan.md as inputs."
+    prompt: "Security plan and test plan are ready. Produce tmp/workflows/plan.md with tests ordered before implementation steps. Use tmp/workflows/security-plan.md and tmp/workflows/test-plan.md as inputs."
     send: false
 ---
 # Test Planning stage (Issue Mode)
@@ -15,12 +15,12 @@ handoffs:
 > signatures, and scenarios.
 
 ## Inputs
-- `docs/workflow/intake.md` — acceptance criteria (source of truth for what must be tested)
-- `docs/workflow/discovery.md` — existing test patterns, frameworks, coverage tooling
-- `docs/workflow/requirements.md` — functional + non-functional requirements (if produced)
-- `docs/workflow/security-plan.md` — security controls that require test coverage
+- `tmp/workflows/intake.md` — acceptance criteria (source of truth for what must be tested)
+- `tmp/workflows/discovery.md` — existing test patterns, frameworks, coverage tooling
+- `tmp/workflows/requirements.md` — functional + non-functional requirements (if produced)
+- `tmp/workflows/security-plan.md` — security controls that require test coverage
 
-## Required output: `docs/workflow/test-plan.md`
+## Required output: `tmp/workflows/test-plan.md`
 
 ### Sections
 
@@ -41,7 +41,7 @@ Scenario-level tests that span multiple units or I/O boundaries:
 | test-id | scenario | inputs | expected outcome | maps-to |
 
 #### Security-specific tests
-Tests derived from `docs/workflow/security-plan.md` (authn/authz, input validation, secrets not leaked, etc.):
+Tests derived from `tmp/workflows/security-plan.md` (authn/authz, input validation, secrets not leaked, etc.):
 | test-id | control tested | approach | pass condition |
 
 #### Test stubs / signatures

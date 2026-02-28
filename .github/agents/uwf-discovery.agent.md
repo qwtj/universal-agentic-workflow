@@ -5,23 +5,23 @@ tools: [read/readFile, agent/runSubagent, edit/createDirectory, edit/createFile,
 handoffs:
   - label: "Project Mode — Stage 3: Timeline Planning"
     agent: uwf-timeline-planner
-    prompt: "Produce the timeline roadmap (docs/workflow/plan.md) and create the issue file-system state under tmp/state/ (one open/active/closed/ triplet per sprint, with issue files in open/). Do NOT begin implementation. Hand off to orchestrator when done."
+    prompt: "Produce the timeline roadmap (tmp/workflows/plan.md) and create the issue file-system state under state/ (one open/active/closed/ triplet per sprint, with issue files in open/). Do NOT begin implementation. Hand off to orchestrator when done."
     send: false
   - label: "Issue Mode — Stage 3: Requirements"
     agent: uwf-requirements
-    prompt: "Using issue discovery results, produce docs/workflow/requirements.md."
+    prompt: "Using issue discovery results, produce tmp/workflows/requirements.md."
     send: false
   - label: "Issue Mode — Stage 4: Security Plan"
     agent: uwf-security-plan
-    prompt: "Produce docs/workflow/security-plan.md for this issue: threat model, controls, secrets handling, and verification checklist."
+    prompt: "Produce tmp/workflows/security-plan.md for this issue: threat model, controls, secrets handling, and verification checklist."
     send: false
   - label: "Issue Mode — Stage 5: Test Planning"
     agent: uwf-test-planner
-    prompt: "Produce docs/workflow/test-plan.md: define all unit, integration, and security tests (stubs only) before implementation begins."
+    prompt: "Produce tmp/workflows/test-plan.md: define all unit, integration, and security tests (stubs only) before implementation begins."
     send: false
   - label: "Issue Mode — Stage 6: Work Planning"
     agent: uwf-work-planner
-    prompt: "Security and test plans are ready. Produce docs/workflow/plan.md with test steps ordered before implementation steps."
+    prompt: "Security and test plans are ready. Produce tmp/workflows/plan.md with test steps ordered before implementation steps."
     send: false
   - label: "Issue Mode — ADRs (incl. 300-point)"
     agent: uwf-adr
@@ -31,7 +31,7 @@ handoffs:
 # Discovery stage
 
 ## Scope check
-Read `docs/workflow/intake.md` to determine whether this is:
+Read `tmp/workflows/intake.md` to determine whether this is:
 - **Project Discovery** (intake contains a work-breakdown strategy) → explore whole codebase/repo
 - **Issue Discovery** (intake is scoped to a single work item) → focus only on areas relevant to that issue
 
@@ -41,10 +41,10 @@ Read `docs/workflow/intake.md` to determine whether this is:
 - Ask targeted questions for any remaining unknowns before declaring discovery complete.
 
 ## Required outputs
-1. `docs/workflow/discovery.md` containing:
+1. `tmp/workflows/discovery.md` containing:
    - Current state summary
    - Constraints and assumptions
    - Unknowns + open questions
    - Recommended artifacts (requirements, ADRs, security plan, etc.)
    - Recommended use of planning timelines (which of milestones / sprints / issues / tasks apply, and why)
-2. Updated `docs/workflow/intake.md` — amend any section where discovery changed scope or revealed new constraints. Mark amendments with `<!-- updated by discovery -->`.
+2. Updated `tmp/workflows/intake.md` — amend any section where discovery changed scope or revealed new constraints. Mark amendments with `<!-- updated by discovery -->`.

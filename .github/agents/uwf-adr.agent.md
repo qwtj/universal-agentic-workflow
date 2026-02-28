@@ -5,11 +5,11 @@ tools: ["todos", "codebase", "readFile", "createDirectory", "createFile", "editF
 handoffs:
   - label: "Stage — Security Plan"
     agent: uwf-security-plan
-    prompt: "Produce docs/workflow/security-plan.md for this issue. ADRs are complete and available as input."
+    prompt: "Produce tmp/workflows/security-plan.md for this issue. ADRs are complete and available as input."
     send: false
   - label: "Stage — Work Planning (skip security+test)"
     agent: uwf-work-planner
-    prompt: "Produce docs/workflow/plan.md with test steps ordered before implementation steps. Note: security and test planning were skipped — document the reason in the plan."
+    prompt: "Produce tmp/workflows/plan.md with test steps ordered before implementation steps. Note: security and test planning were skipped — document the reason in the plan."
     send: false
 ---
 # ADR stage

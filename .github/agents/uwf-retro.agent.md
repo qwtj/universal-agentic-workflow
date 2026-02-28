@@ -5,11 +5,11 @@ tools: ["todos", "changes", "readFile", "createFile", "editFiles"]
 handoffs:
   - label: "Stage 9 — Acceptance"
     agent: uwf-acceptance
-    prompt: "Run the acceptance checklist; finalize docs/workflow/acceptance.md."
+    prompt: "Run the acceptance checklist; finalize tmp/workflows/acceptance.md."
     send: false
 ---
 # Retro stage
-Write docs/workflow/retro.md:
+Write tmp/workflows/retro.md:
 - What worked
 - What didn’t
 - Concrete improvements (workflow assets, tests, docs)

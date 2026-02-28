@@ -9,7 +9,7 @@ handoffs:
     send: false
 ---
 # Acceptance stage
-Write docs/workflow/acceptance.md:
+Write tmp/workflows/acceptance.md:
 - Acceptance checklist results
 - Verification commands + outcomes
 - Known issues / follow-ups
