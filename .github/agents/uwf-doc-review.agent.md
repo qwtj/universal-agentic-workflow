@@ -31,7 +31,10 @@ Whenever an issue reaches the implementation or acceptance phase, run this agent
    - Operational/runbook material (cloud resources, configuration steps)
    - Any documents that mention new cloud secrets, keys, or other managed credentials.
 2. **Evaluate relevance** – determine which documents touch the current issue or the broader project (e.g. new secrets for the MCP server).
-3. **Propagate to `docs/`** – update the appropriate temporary workflow files (`security-plan.md`, `requirements.md`, `acceptance.md`, etc.) with summaries or actions derived from the docs change. If concrete tasks are required, add them to `tmp/workflow-artifacts/plan.md` or note them in the issue’s acceptance criteria.
+3. **Propagate to `docs/`** – update or create markdown files in `docs/` that reflect the new long term information. For example:
+   - If a new ADR defines a secret management approach, update `docs/security/secrets.md` with a summary and link to the ADR.
+   - If the security plan mentions new controls, ensure they are documented in `docs/security/controls.md`.
+   - If operational steps are added, update `docs/runbooks/` with the relevant procedures.
 4. **Record changes** – leave comments/notes in the agent output describing what was updated and why, so reviewers can verify and, if necessary, convert the temporary notes into permanent docs or ADRs.
 5. **Remind about secrets** – if new secrets are referenced, ensure their creation/use is documented following the project’s secrets policy (e.g. add a note to `security-plan.md` and link to the new cloud secret name).
 
