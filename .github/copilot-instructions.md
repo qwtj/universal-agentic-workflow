@@ -36,7 +36,7 @@
 - Explicitly document authn/authz decisions in tmp/workflow-artifacts/security-plan.md.
 
 ## Unplanned Work Discovered 
-If unplanned work is discovered during any stage, open a spike issue for it - add ungroomed to title. Do not implement unplanned work.
+If unplanned work is discovered during any stage, open a spike issue for it - create it in the `./state/ungroomed/open` directory. Do not implement unplanned work.
 
 ## Must Always
 In last response after copleting a phase or stage output:
