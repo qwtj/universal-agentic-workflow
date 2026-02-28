@@ -52,6 +52,21 @@ Do NOT fill sections with generic placeholders. Every section must reflect what 
 
 ---
 
+## Preparing for Issue Mode Intake
+Look for any `state/<milestone>/<sprint>/active/<issue-id>-ungroomed.md` files. If any exist, this indicates unplanned work was discovered during project discovery that needs to be triaged before issue intake. Recommend opening a spike issue to investigate and groom this work before proceeding with issue intake.
+
+The intake agent should also treat the backlog as a first‑class input and surface sprint context and ordering advice:
+
+1. **Backlog scan.**  Before accepting a new active issue, search `state/*/*/open/*.md` (and existing `active/` items) to determine whether the user’s request is already recorded.  If it’s new, prompt the user to create a backlog stub for tracking; if the details are still murky, suggest appending `-ungroomed` to the filename so it will be flagged by the unplanned‑work check above.
+
+2. **Sprint context awareness.**  Determine whether the work logically belongs in the current sprint.  If the user’s description implies immediate execution, remind them to move the issue file into the `active/` folder for the appropriate sprint and to update any ordering metadata (by renaming, adding an `order:` frontmatter field, or editing the `depends-on` list) so it sits in the correct sequence relative to other active items.
+
+3. **Re‑ordering suggestions.**  If the user’s input or new information changes the priority of other backlog items, propose specific edits—e.g. renaming filenames, adjusting `order:` fields, or modifying `plan.md`—to reflect the new ranking.  These recommendations should live in the intake conversation as actionable advice.
+
+4. **Logging recommendations.**  Every automated suggestion generated during intake (backlog stub creation, sprint move advice, re‑ordering prompts, etc.) must be captured in the final intake report so a human reviewer can verify and act on them.
+
+These steps ensure the agent helps groom the backlog, guides sprint placement, and transparently records its guidance before scoping the issue.
+
 ## Issue Mode Intake
 
 Goal: scope a single work item from the backlog so implementation can begin.
@@ -69,6 +84,10 @@ Must include:
 - **Dependencies** — other issues that must be closed first (read `depends-on` from the issue file frontmatter)
 - **Risk tolerance** — low / medium / high for this item
 
+The intake comments/report should also summarise any automated recommendations made during the process (e.g. prompts to create or update backlog stubs, sprint placement advice, reordering suggestions).
+
 After writing `tmp/workflows/intake.md`, recommend the appropriate next step:
 - If in project mode move to project discovery (handoff to uwf-discovery).
 - If in issue mode, check if parent milestone/sprint has a plan. If not, recommend creating one before issue discovery. If yes, move to issue discovery (handoff to uwf-discovery).
+
+Make sure the human is aware of any backlog or ordering changes you suggested; include them explicitly in the recommendation so they can be implemented before implementation begins.

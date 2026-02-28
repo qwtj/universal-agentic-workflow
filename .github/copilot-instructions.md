@@ -33,3 +33,6 @@
 - No secrets in repo. If credentials appear, stop and recommend secure storage.
 - Prefer least-privilege. Default deny for risky operations.
 - Explicitly document authn/authz decisions in tmp/workflows/security-plan.md.
+
+## Unplanned Work Discovered 
+If unplanned work is discovered during any stage, open a spike issue for it - add ungroomed to title. Do not implement unplanned work.
