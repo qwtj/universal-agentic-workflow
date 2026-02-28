@@ -72,9 +72,10 @@ Driven by files in `state/`. Repeat for every issue found in an `open/` director
   - `tmp/workflows/plan.md`
   - `tmp/workflows/acceptance.md`
 3. Trigger **Issue Intake** (uwf-intake) with the active issue file as input.
-4. Continue through: Discovery → (Requirements) → (ADRs) → **Security Plan** (uwf-security-plan) → **Test Planning** (uwf-test-planner) → **Work Planning** (uwf-work-planner) → Implementation → Review → Acceptance.
+4. **Continue through: Discovery → (Requirements) → (ADRs) → **Security Plan** (uwf-security-plan) → **Test Planning** (uwf-test-planner) → **Work Planning** (uwf-work-planner) → Implementation → **Documentation Review** (uwf-doc-review) → Review → Acceptance.
    - Security Plan and Test Planning are strongly recommended; skip only if the issue is trivially non-security-sensitive and has no testable behaviour — document the reason in the plan.
    - Tests are always planned and stubbed **before** implementation steps in the work plan.
+   - Documentation Review runs after implementation and before the reviewer/acceptance steps to keep `tmp/workflows` in sync with any new or changed artifacts in `docs/`.
 5. **On acceptance** (close): move `state/<M>/<S>/active/<id>.md` → `state/<M>/<S>/closed/<id>.md`.
 6. **On skip**: move `state/<M>/<S>/open/<id>.md` → `state/<M>/<S>/closed/<id>.md`. Prepend a `## Skip reason` section to the file before moving.
 7. Loop — scan for the next open issue.
