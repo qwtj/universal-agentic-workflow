@@ -147,3 +147,11 @@ If unplanned work is discovered during any stage, create a spike issue at `./tmp
 ## Logging and Tracing
 At the top of each issue file, include frontmatter with a `submitter` field that is the name of the agent or subagent that contributed to the issue creation or modification. This provides a traceable history of which agents contributed to which work items.
 Alos, include a `reason` field in the frontmatter for opening the issue, which can be updated with the rationale for any subsequent state transitions (e.g. activation, closure, skipping). This allows for traceability of decision-making over the issue lifecycle.
+
+## Intake Stage for Issues
+Any issue that has the following minimum information should be considered ready for implementation:
+- **Issue goal** — what this specific item delivers
+- **Acceptance criteria** — explicit, testable conditions (copy + expand from backlog stub)
+- **Constraints** — what must NOT change, tech limits, time box
+- **Out-of-scope items** — what this issue deliberately defers
+- **Dependencies** — other issues that must be closed first (read `depends-on` from the issue)

@@ -6,6 +6,9 @@ user-invokable: false
 ---
 # Discovery Stage
 
+## Empty or Not Found State
+Return the project looks new and instead continue discovery for a greenfield project then continue with tasks.
+
 ## Tasks
 - Gather facts: directory structure, existing patterns, tooling, CI, tests, dependencies.
 - Identify gaps between what is needed (per intake) and what already exists.
