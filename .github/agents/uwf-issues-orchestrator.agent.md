@@ -12,7 +12,7 @@ agents:
   - uwf-security-plan
   - uwf-test-planner
   - uwf-work-planner
-  - uwf-implementer
+  - uwf-issue-implementer
   - uwf-acceptance
 ---
 # Issues Orchestrator Responsibilities
