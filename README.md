@@ -120,10 +120,10 @@ Always-on rules applied automatically across the workspace.
 
 | Artifact | Path |
 | :--- | :--- |
-| Workflow templates (read-only) | `./docs/workflow/*.md` |
-| Active intake | `tmp/workflow-artifacts/intake.md` |
-| Active discovery | `tmp/workflow-artifacts/discovery.md` |
-| Active security plan | `tmp/workflow-artifacts/security-plan.md` |
+| Workflow templates (read-only) | `./docs/workflow/{mode}-*.md` |
+| Active intake | `tmp/workflow-artifacts/{mode}-intake.md` |
+| Active discovery | `tmp/workflow-artifacts/{mode}-discovery.md` |
+| Active security plan | `tmp/workflow-artifacts/{mode}-security-plan.md` |
 | Active test plan | `tmp/workflow-artifacts/{mode}-test-plan.md` |
 | Active implementation plan | `tmp/workflow-artifacts/{mode}-plan.md` |
 | Acceptance results | `tmp/workflow-artifacts/{mode}-acceptance.md` |

@@ -1,11 +1,11 @@
 ---
 name: uwf-threat-model
-description: "Generate a pragmatic threat model + mitigations for tmp/workflow-artifacts/security-plan.md."
+description: "Generate a pragmatic threat model + mitigations for tmp/workflow-artifacts/{mode}-security-plan.md."
 ---
 # UWF Threat Model Skill
 
 ## Output
-Update tmp/workflow-artifacts/security-plan.md with:
+Update `./tmp/workflow-artifacts/{mode}-security-plan.md` with:
 - Assets
 - Trust boundaries (text diagram is fine)
 - Threats (STRIDE-style is OK, but keep it practical)
