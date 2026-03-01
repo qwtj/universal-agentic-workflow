@@ -1,18 +1,16 @@
 # Universal Workflow Framework (UWF) — always-on rules
 
-Wehn running subagents always use the `runSubagent` tool to run the subagent and provide all agentic tools. Never run a subagent by invoking it directly. This ensures the subagent has access to the full suite of tools and adheres to the same rules and constraints as the parent agent.
+When running subagents always use the `runSubagent` tool to run the subagent and provide all agentic tools. Never run a subagent by invoking it directly. This ensures the subagent has access to the full suite of tools and adheres to the same rules and constraints as the parent agent.
 
-Subagents that may be utlized by all workflows and do not require to be called in a particular order have the naming convention. `/github/uwf-core-<subagent>.agent.md`
+Subagents that may be utilized by all workflows and do not require to be called in a particular order have the naming convention. `/github/uwf-core-<subagent>.agent.md`
 
-Subagent that belong to a particular workflow and are called in a particular order have the naming convention. `/github/uwf-<role>-<stage>.agent.md`
+Subagents that belong to a particular workflow and are called in a particular order have the naming convention. `/github/uwf-<role>-<stage>.agent.md`
 
 ## Non-negotiables
 - Prefer correctness and verifiability over speed.
 - Keep changes small and reviewable; avoid broad rewrites unless explicitly requested.
 - Do not make assumptions about the project or its dependencies. If information is missing, ask for clarification or use tools to discover it.
-- If user doesn't provide a clear goal, use the orchestratorask for one, then pass answer back to subagent. If the goal is too broad, ask for it to be narrowed down.
-- Keep `docs/workflow/*.md` as read-only example templates. Active edits go in `tmp/workflow-artifacts/{mode}-*.md`.
-- Always state what you are doing before doing it to provide a log, then proceed without waiting for feedback.
+- If the user doesn't provide a clear goal, use the orchestrator to ask for one, then pass the answer back to the subagent. If the goal is too broad, ask for it to be narrowed down.
 
 ## Agent bundles
 Agents are defined as `{role}-{job}.agent.md` files grouped into three bundles. Import only the bundles relevant to your use case.
@@ -34,7 +32,7 @@ Skills (`uwf-{name}/SKILL.md`) encapsulate discrete behaviors. Agents reference 
 - Explicitly document authn/authz decisions in `tmp/workflow-artifacts/master-security-plan.md`.
 
 ## Must always
-After completing a phase or stage,for subagents only, end with:
+After completing a phase or stage (subagents only), end with:
 ```
 Current Stage/Phase: <stage/phase name>
 Recommended Next Stage/Phase: <next stage/phase name>

@@ -43,10 +43,9 @@ Every `runSubagent` call **must** include the following context object so subage
 ## 2 — Non-negotiable Principles
 
 1. The orchestrator does **not** produce, edit, or delete any artifact file.
-2. All user-facing questions are relayed through this orchestrator (subagents return question requests; orchestrator uses `askQuestions` and passes answers back).
-3. Before **every** stage transition, invoke `uwf-core-project-tracking` to advance phase and record the hand-off in `uwf-state.json`.
-4. After **every** subagent completes, run the **Gate Check** for that stage (§4). If the gate fails, re-invoke the same subagent with the failure details — up to **2 retries**. If still failing after retries, halt and report the blocked gate to the user.
-5. Do **not** skip stages. Conditional stages (ADR, Security) may be marked `PASS — not required` in the gate log but must be explicitly evaluated.
+2. Before **every** stage transition, invoke `uwf-core-project-tracking` to advance phase and record the hand-off in `uwf-state.json`.
+3. After **every** subagent completes, run the **Gate Check** for that stage (§4). If the gate fails, re-invoke the same subagent with the failure details — up to **2 retries**. If still failing after retries, halt and report the blocked gate to the user.
+4. Do **not** skip stages. Conditional stages (ADR, Security) may be marked `PASS — not required` in the gate log but must be explicitly evaluated.
 
 ---
 
@@ -170,5 +169,3 @@ When `uwf-project_manager-reviewer` returns findings:
 - Never start timeline planning without a confirmed `project-intake.md`, `project-discovery.md`, and `project-requirements.md`.
 - Do not invent facts; use `uwf-core-discovery` to inspect the workspace when uncertain.
 - If `uwf-core-project-tracking` reports no eligible open issues after state-tree population, confirm project planning is complete and offer a retrospective.
-- Trace every action: announce what you are about to do **before** invoking each subagent. Do not pause for user confirmation — proceed and report.
-- All questions from subagents must be relayed through the orchestrator to the user. Never let a subagent address the user directly.
