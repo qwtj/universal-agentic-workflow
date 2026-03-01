@@ -23,5 +23,12 @@ Invoke `uwf-local-tracking` for backlog triage and grooming support before final
 Invoke the `uwf-local-tracking` skill for all issue-management procedures. This agent should not implement  issue-management logic.
 
 
+## Workfow Content and State Management
+Updates should be made using the skill `uwf-state-manager` to ensure all workflow state is properly recorded and accessible to all agents. This includes:
+- Updating the current `mode` (project, issue, artifact, etc) and context before
+  invoking any subagent or starting any new phase.
+- Managing the lifecycle of workflow artifacts in `./tmp/workflow-artifacts/` to ensure
+- tracking the model state and context of the project.
+- tracking the history of task across the orchestration to ensure all agents have access to the necessary context and information to perform their tasks effectively.
 
 
