@@ -13,7 +13,7 @@ agents:
   - uwf-core-test-planner
   - uwf-issues-intake
   - uwf-issues-reviewer
-  - uwf-work-planner
+  - uwf-issues-work-planner
   - uwf-issue-implementer
   - uwf-acceptance
 ---
@@ -36,7 +36,7 @@ At each step use `runSubagent` with:
 5. If ADRs are needed, `uwf-core-adr` to create them before proceeding.
 6. `uwf-core-security-plan` to produce a security plan if the issue is security-sensitive.
 7. `uwf-core-test-planner` to produce a test plan and stubs for all testable behaviour.
-8. `uwf-work-planner` to produce a work plan with implementation steps and associated tests.
+8. `uwf-issues-work-planner` to produce a work plan with implementation steps and associated tests.
 9. `uwf-issue-implementer` to execute the work plan.
 10. `uwf-issue-reviewer` to review the implementation, produce a fix list if needed, and recommend acceptance when clean. Return to implementation on fixes.
 11. `uwf-core-technical-writer` to review and update documentation in `./docs/` from new or changed artifacts in `./tmp/workflow-artifacts/`.
