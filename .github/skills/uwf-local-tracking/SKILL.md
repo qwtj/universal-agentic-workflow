@@ -140,3 +140,6 @@ acceptance-criteria: <one-line stub — expanded during Issue Intake>
 ## After producing both artifacts
 1. Verify that every intake goal maps to at least one issue file.
 2. Verify that no circular `depends-on` chains exist.
+
+## Unplanned work discovered
+If unplanned work is discovered during any stage, create a spike issue at `state/ungroomed/open/<id>.md`. Do not implement unplanned work.
