@@ -30,7 +30,7 @@ ALWAYS include { `mode`: `project`, `phase`: current_phase } when invoking subag
     identify or update the current workflow context and phase
 
 ## Project Mode sequence (DO NOT interrupt this flow except to relay a question from the subagent)
-At each step tell the subagent it is in project mode and invoke `runSubagent` with:
+At each step tell the subagent it is `{ "mode": "project", "phase": current_phase }` and invoke `runSubagent` with:
 1. `uwf-core-project-tracking` to obtain prepared active issue context.
 2. `uwf-project_manager-intake` to perform Project Intake and produce `./tmp/workflow-artifacts/project-intake.md` including goal, non-goals, constraints, success metrics, stakeholders, target environment, risk tolerance, and the intended work-breakdown strategy (milestones/epics, sprints, issues/user stories, tasks).
 3. `uwf-core-discovery` to inspect the codebase and update the intake as needed, producing `./tmp/workflow-artifacts/project-discovery.md`.
