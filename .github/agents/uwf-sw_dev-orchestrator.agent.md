@@ -1,7 +1,7 @@
 ---
 name: uwf-sw_dev-orchestrator
 description: "Detect operating mode (Project vs Issue), then drive the correct stage sequence."
-tools: ["agent", "todo", "search/codebase", "search/listDirectory", "read"read/readFile,"web/fetch"]
+tools: ["agent", "todo", "search/codebase", "search/listDirectory", "read"read/readFile,"web/fetch", "vscode/askQuestions"]
 agents:
   - uwf-core-project-tracking
   - uwf-core-technical-writer
@@ -29,7 +29,7 @@ agents:
   - Invoke `uwf-project_manager-tracking` to:
     Identify and prepare active issue and identify to update the current workflow context and phase.
 
-## Issue Workflow
+## Issue Workflow (DO NOT interrupt this flow except to relay a question from the subagent)
 At each step use `runSubagent` with:
 1. `uwf-core-project-tracking` to obtain prepared active issue context.
 2. `uwf-sw_dev-intake` with the active issue file as input.

@@ -3,6 +3,8 @@ name: uwf-project_manager-orchestrator
 description: "Drive the correct stage sequence."
 tools:
   - agent
+  - todo
+  - vscode/askQuestions
 agents:
   - uwf-project_manager-intake
   - uwf-core-project-tracking
@@ -24,7 +26,7 @@ This agent is responsible for orchestrating the overall project workflow. It sho
   - invoke `uwf-project_manager-tracking` to:
     identify to udpate the current workflow context and phase
 
-## Project Mode sequence
+## Project Mode sequence (DO NOT interrupt this flow except to relay a question from the subagent)
 At each step use `runSubagent` with:
 1. `uwf-core-project-tracking` to obtain prepared active issue context.
 2. `uwf-project_manager-intake` to perform Project Intake and produce `./tmp/workflow-artifacts/project-intake.md` including goal, non-goals, constraints, success metrics, stakeholders, target environment, risk tolerance, and the intended work-breakdown strategy (milestones/epics, sprints, issues/user stories, tasks).

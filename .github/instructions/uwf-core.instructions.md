@@ -13,3 +13,6 @@ Before invoking a subagent or starting a phase, `runSubagent` with `uwf-core-pro
 |---|---|
 | Workflow templates (read-only) | `docs/workflow/*.md` |
 | Workflow generated artifacts (read/write) | `./tmp/workflow-artifacts/` |
+
+# Questions & Querying the User
+All questions and queries must be done by the Orchestrator agent. Subagents should never ask questions directly to the user. If a subagent needs clarification or input, it should return a structured request to the orchestrator, which will then handle the user interaction, using the `askQuestion` tool offered by vscode and pass the response back to the subagent. This ensures a consistent user experience and prevents multiple agents from asking questions simultaneously, which could lead to confusion
