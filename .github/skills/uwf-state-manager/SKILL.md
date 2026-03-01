@@ -1,24 +1,24 @@
 ---
 name: uwf-state-manager
-description: "Read, validate, and mutate docs/uwf-state.json and the file-system state tree. Provides canonical procedures for phase transitions, agent hand-offs, artifact path resolution, and history recording."
+description: "Read, validate, and mutate sate docs/uwf-state.json and the file-system state tree. Provides canonical procedures for phase transitions, agent hand-offs, artifact path resolution, and history recording."
 ---
 # UWF State Manager Skill
 
 ## When to use
 Invoke this skill whenever an agent needs to:
-- Read the current workflow phase or status from `docs/uwf-state.json`
+- Read the current workflow phase or status from `./github/skills/uwf-state-manager/uwf-state.json`
 - Advance or roll back a phase (`idea → intake → discovery → planning → execution → acceptance → closed`)
 - Record a hand-off between agents (`current_agent` field)
 - Mark `ready_for_implementation` after both `{mode}-intake.md` and `{mode}-plan.md` are confirmed present
 - Append an entry to the `history` array
-- Validate that `docs/uwf-state.json` is well-formed before acting on it
+- Validate that `./github/skills/uwf-state-manager/uwf-state.json` is well-formed before acting on it
 - Sync JSON state with the file-system `./tmp/state/` directory tree after issue transitions
 
-This skill is the single authoritative source for all reads and writes to `docs/uwf-state.json`.
+This skill is the single authoritative source for all reads and writes to `./github/skills/uwf-state-manager/uwf-state.json`.
 
 ---
 
-## Schema reference — `docs/uwf-state.json`
+## Schema reference — `./github/skills/uwf-state-manager/uwf-state.json`
 
 ```jsonc
 {

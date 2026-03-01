@@ -143,3 +143,7 @@ acceptance-criteria: <one-line stub — expanded during Issue Intake>
 
 ## Unplanned work discovered
 If unplanned work is discovered during any stage, create a spike issue at `./tmp/state/ungroomed/open/<id>.md`. Do not implement unplanned work.
+
+## Logging and Tracing
+At the top of each issue file, include frontmatter with a `submitter` field that is the name of the agent or subagent that contributed to the issue creation or modification. This provides a traceable history of which agents contributed to which work items.
+Alos, include a `reason` field in the frontmatter for opening the issue, which can be updated with the rationale for any subsequent state transitions (e.g. activation, closure, skipping). This allows for traceability of decision-making over the issue lifecycle.
