@@ -23,10 +23,10 @@ Skills are separate from agents. A skill encapsulates a specific behavior — su
 
 ## Non-Negotiables
 
-- **Plan before implementing.** No code or infrastructure changes before `tmp/workflow-artifacts/intake.md` and `tmp/workflow-artifacts/plan.md` exist for the active scope.
+- **Plan before implementing.** No code or infrastructure changes before `tmp/workflow-artifacts/{mode}-intake.md` and `tmp/workflow-artifacts/{mode}-plan.md` exist for the active scope.
 - **Verifiability over speed.** Correctness takes priority. Missing context is discovered or clarified, never assumed.
 - **Small, reviewable changes.** Broad rewrites are prohibited unless explicitly requested.
-- **Template preservation.** `docs/workflow/*.md` are read-only examples. Active artifacts live in `tmp/workflow-artifacts/*.md`.
+- **Template preservation.** `./docs/workflow/*.md` are read-only examples. Active artifacts live in `tmp/workflow-artifacts/{mode}-*.md`.
 - **No secrets in the repo.** If credentials are encountered, execution stops and secure storage is recommended.
 - **Unplanned work is not silently implemented.** It is filed as a spike under `state/ungroomed/open/` for triage.
 
@@ -49,7 +49,7 @@ Generic agents reusable by any orchestrator, regardless of whether you are runni
 | `uwf-core-requirements.agent.md` | Writes PRDs, Non-Functional Requirements, and testable acceptance criteria. |
 | `uwf-core-retro.agent.md` | Runs end-of-cycle retrospectives and surfaces workflow or implementation improvements. |
 | `uwf-core-security-plan.agent.md` | Generates threat models and security control plans via the `uwf-threat-model` skill. |
-| `uwf-core-tehcnical-writer.agent.md` | Promotes ephemeral `tmp/` artifacts into permanent `docs/` documentation and files gaps as backlog items. |
+| `uwf-core-tehcnical-writer.agent.md` | Promotes ephemeral `tmp/` artifacts into permanent `./docs/` documentation and files gaps as backlog items. |
 | `uwf-core-test-planner.agent.md` | Defines test stubs, integration scenarios, and coverage targets before implementation begins. |
 
 ### Issues Bundle — `uwf-issues-*` / `uwf-issue-*`
@@ -83,11 +83,11 @@ Skills encapsulate discrete behaviors. Agents call skills by name; swapping a sk
 
 | Skill | Purpose | Swap example |
 | :--- | :--- | :--- |
-| `uwf-adr-300` | Creates high-rigor ADRs at `docs/adr/ADR-####-<slug>.md` using a 300-point checklist covering security, ops, compliance, and testability. | — |
+| `uwf-adr-300` | Creates high-rigor ADRs at `./docs/adr/ADR-####-<slug>.md` using a 300-point checklist covering security, ops, compliance, and testability. | — |
 | `uwf-local-tracking` | Manages work item state using the local filesystem (`state/.../open/`, `active/`, `closed/`). | Replace with `uwf-github-track` to use GitHub Issues instead. |
 | `uwf-review-to-issues` | Parses prioritized review or audit tables and creates ungroomed backlog items in `state/ungroomed/open/`. | — |
-| `uwf-state-manager` | Authoritative source for mutating `docs/uwf-state.json` and managing phase lifecycle transitions. | — |
-| `uwf-threat-model` | Generates STRIDE-style threat models with assets, trust boundaries, mitigations, and a verification checklist into `tmp/workflow-artifacts/security-plan.md`. | — |
+| `uwf-state-manager` | Authoritative source for mutating `./docs/uwf-state.json` and managing phase lifecycle transitions. | — |
+| `uwf-threat-model` | Generates STRIDE-style threat models with assets, trust boundaries, mitigations, and a verification checklist into `tmp/workflow-artifacts/{mode}-security-plan.md`. | — |
 
 > **Tracking skill example:** The default tracking skill (`uwf-local-tracking`) uses the local file system. To integrate with GitHub, drop in a `uwf-github-track` skill that maps the same interface to GitHub Issues API calls. No agent files change.
 
@@ -111,7 +111,7 @@ Always-on rules applied automatically across the workspace.
 | File | Scope | Purpose |
 | :--- | :--- | :--- |
 | `uwf-core.instructions.md` | `**` | Core stage gates, artifact expectations, orchestrator state rules, and workflow discipline. |
-| `docs-writing.instructions.md` | `docs/**/*.md` | Writing conventions: skimmability, explicit assumptions, executable examples with expected output. |
+| `./docs-writing.instructions.md` | `./docs/**/*.md` | Writing conventions: skimmability, explicit assumptions, executable examples with expected output. |
 | `slides.instructions.md` | `slides/**` | Slide structure and build conventions for programmatically compiled presentations. |
 
 ---
@@ -120,14 +120,14 @@ Always-on rules applied automatically across the workspace.
 
 | Artifact | Path |
 | :--- | :--- |
-| Workflow templates (read-only) | `docs/workflow/*.md` |
+| Workflow templates (read-only) | `./docs/workflow/*.md` |
 | Active intake | `tmp/workflow-artifacts/intake.md` |
 | Active discovery | `tmp/workflow-artifacts/discovery.md` |
 | Active security plan | `tmp/workflow-artifacts/security-plan.md` |
-| Active test plan | `tmp/workflow-artifacts/test-plan.md` |
-| Active implementation plan | `tmp/workflow-artifacts/plan.md` |
-| Acceptance results | `tmp/workflow-artifacts/acceptance.md` |
-| Architecture Decision Records | `docs/adr/ADR-####-<slug>.md` |
+| Active test plan | `tmp/workflow-artifacts/{mode}-test-plan.md` |
+| Active implementation plan | `tmp/workflow-artifacts/{mode}-plan.md` |
+| Acceptance results | `tmp/workflow-artifacts/{mode}-acceptance.md` |
+| Architecture Decision Records | `./docs/adr/ADR-####-<slug>.md` |
 | Open work items | `state/<milestone>/<sprint>/open/<id>.md` |
 | Active work items | `state/<milestone>/<sprint>/active/<id>.md` |
 | Closed work items | `state/<milestone>/<sprint>/closed/<id>.md` |
