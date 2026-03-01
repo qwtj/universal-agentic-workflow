@@ -30,10 +30,11 @@ At each step use `runSubagent` with:
 4. `uwf-core-requirements` to produce a requirements doc based on the updated intake and discovery.
 5. If ADRs are needed, handoff to `uwf-core-adr` to create them before proceeding.
 6. `uwf-core-security-plan` to produce a security plan if the project is security-sensitive.
-7. `uwf-timeline-planner` to produce the timeline roadmap (`tmp/workflow-artifacts/plan.md`) document in `docs`
-8. `uwf-project-reviewer` to review the project plan, produce a fix list if needed, and recommend readiness for implementation when clean. Return to timeline planning on fixes.
-9. If suggestions or errors are found during review, return to timeline planning.
-10. `uwf-core-project-tracking` to implement the timeline and roadmap.
+7. `uwf-core-test-planner` to produce a test plan and stubs for all testable behaviour.
+8. `uwf-timeline-planner` to produce the timeline roadmap (`tmp/workflow-artifacts/plan.md`) document in `docs`
+9. `uwf-project-reviewer` to review the project plan, produce a fix list if needed, and recommend readiness for implementation when clean. Return to timeline planning on fixes.
+10. If suggestions or errors are found during review, return to timeline planning.
+11. `uwf-core-project-tracking` to implement the timeline and roadmap.
 
 ## Operating principles
 - Never start implementation without a scoped `tmp/workflow-artifacts/intake.md` and `tmp/workflow-artifacts/plan.md` for the active issue.
