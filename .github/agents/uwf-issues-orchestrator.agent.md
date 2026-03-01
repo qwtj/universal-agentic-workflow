@@ -3,8 +3,8 @@ name: uwf-issues-orchestrator
 description: "Detect operating mode (Project vs Issue), then drive the correct stage sequence."
 tools: ["agent", "todo", "search/codebase", "search/listDirectory", "read"read/readFile, "edit/createDirectory", "edit/createFile", "web/fetch"]
 agents:
-  - uwf-core-intake
-  - uwf-project-tracking
+  - uwf-core-project-tracking
+  - uwf-issues-intake
   - uwf-issues-reviewer
   - uwf-discovery
   - uwf-requirements
@@ -14,15 +14,6 @@ agents:
   - uwf-work-planner
   - uwf-implementer
   - uwf-acceptance
-handoffs:
-  - label: "Project Mode — Stage 1: Intake"
-    agent: uwf-core-intake
-    prompt: "Perform Project Intake. Produce tmp/workflow-artifacts/intake.md including goal, non-goals, constraints, success metrics, stakeholders, target environment, risk tolerance, and the intended work-breakdown strategy (milestones/epics, sprints, issues/user stories, tasks)."
-    send: false
-  - label: "Issue Mode — Begin Stage 1: Issue Intake"
-    agent: uwf-core-intake
-    prompt: "Use uwf-issue-management output to locate the active issue file at state/<milestone>/<sprint>/active/<issue-id>.md. Perform Issue Intake scoped to that work item and produce tmp/workflow-artifacts/intake.md for this issue."
-    send: false
 ---
 # Issues Orchestrator Responsibilities
 - Drive the Issue Mode stage sequence for active issues, ensuring all necessary workflow artifacts are produced and up to date at each stage.
@@ -36,8 +27,8 @@ handoffs:
 
 ## Issue Mode sequence
 At each step use `runSubagent` with:
-1. `uwf-project-tracking` to obtain prepared active issue context.
-2. `uwf-core-intake` with the active issue file as input.
+1. `uwf-core-project-tracking` to obtain prepared active issue context.
+2. `uwf-issues-intake` with the active issue file as input.
 3. `uwf-discovery` to inspect the codebase and update the intake as needed.
 4. `uwf-requirements` to produce a requirements doc based on the updated intake and discovery.
 5. If ADRs are needed, `uwf-adr` to create them before proceeding.
