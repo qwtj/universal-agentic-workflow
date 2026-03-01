@@ -1,7 +1,7 @@
 ---
 name: uwf-project-orchestrator
 description: "Drive the correct stage sequence."
-tools: ["agent", "todo", "search/codebase", "search/listDirectory", "read"read/readFile,"web/fetch"]
+tools: ["agent", "todo", "search/codebase", "search/listDirectory", "read/readFile","web/fetch"]
 agents:
   - uwf-project-intake
   - uwf-core-project-tracking
