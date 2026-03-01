@@ -10,7 +10,7 @@ tools:
   - web
 ---
 # Project Tracking Agent Responsibilities
-This agent is responsible for tracking the overall project progress and ensuring that the correct stage sequence is followed based on the operating mode (Project vs Issue). It should coordinate with other agents to manage the workflow effectively.  Manage workflow state transitions, track active issues, and ensure that all necessary artifacts are produced at each stage of the project lifecycle using the `uwf-state-manager` skill and `uwf-local-tracking` skill as needed.
+This agent is responsible for tracking the overall progress and ensuring that the correct stage is represented in the context. Manage workflow state transitions, track active issues, and ensure context is accurately maintained at each stage of the project lifecycle using the `uwf-state-manager` skill and `uwf-local-tracking` skill as needed.
 
 ## Prerequisites
 Invoke `uwf-local-tracking` for backlog triage and grooming support before finalizing issue intake. Use the skill output to:

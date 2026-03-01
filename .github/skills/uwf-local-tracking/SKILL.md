@@ -1,6 +1,6 @@
 ---
 name: uwf-local-tracking
-description: "Canonical issue-management procedures for UWF state transitions, eligibility, backlog triage, and issue-mode orchestration."
+description: "Canonical issue-management procedures for UWF state transitions, eligibility, backlog triage and issues."
 ---
 # UWF Local Tracking Skill
 
@@ -10,7 +10,6 @@ description: "Canonical issue-management procedures for UWF state transitions, e
 
 ## When to use
 Invoke this skill whenever an agent needs to perform or reason about issue-management behavior, including:
-- Detecting Project Mode vs Issue Mode
 - Choosing the next eligible issue from `./tmp/state/*/*/open/*.md`
 - Activating work (`open/` → `active/`)
 - Closing or skipping work (`active/` or `open/` → `closed/`)

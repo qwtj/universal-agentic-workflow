@@ -3,10 +3,6 @@ name: "UWF Core Workflow Rules"
 description: "Stage gates, artifact expectations, and workflow discipline."
 applyTo: "**"
 ---
-## Mode
-The `mode` represents the parent worrkflow. It helps agents understand who is the persona running the workflow. 
-
-Before invoking a subagent or starting a phase, use `runSubagent` with `uwf-core-project-tracking` to update any workflow state and return the `mode` (or what is currently being worked on: project, issues, artifact, digital media, etc).
 
 ## Artifact Locations
 | Artifact | Path |
