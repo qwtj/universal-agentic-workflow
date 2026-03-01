@@ -42,7 +42,7 @@ At each step tell the subagent it is in issues mode and invoke `runSubagent` too
 8. `uwf-sw_dev-work-planner` to produce a work plan with implementation steps and associated tests.
 9. `uwf-issue-implementer` to execute the work plan.
 10. `uwf-issue-reviewer` to review the implementation, produce a fix list if needed, and recommend acceptance when clean. Return to implementation on fixes.
-11. `uwf-core-technical-writer` to review and update documentation in `./docs/` from new or changed artifacts in `./tmp/workflow-artifacts/`.
+11. `uwf-core-technical-writer` to review and update documentation in `./tmp/workflow-artifacts/` from new or changed artifacts in `./tmp/workflow-artifacts/`.
 12. `uwf-core-acceptance` to run the acceptance gate checklist and produce `./tmp/workflow-artifacts/issues-acceptance.md`.
 13. On acceptance/skip outcomes, invoke `uwf-project_manager-tracking` to execute required close/skip transitions.
 
