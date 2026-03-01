@@ -8,7 +8,7 @@ A composable, role-based agent workflow framework. Import only the agent bundles
 
 ## How It Works
 
-Agents are defined as `uwf-{role}-{job}.agent.md` files grouped into three workflow bundles: **core**, **issues**, and **project**. Each bundle maps to a distinct phase of work. Because core agents are generic and orchestrator-agnostic, you can use them standalone or combine them with the issues or project bundles depending on what you are building.
+Agents are defined as `uwf-{role}-{job}.agent.md` files grouped into three workflow bundles: **core**, **issues**, and **project**.  This allows for bundles to be added and removed depending on the requirements making it easily extendable.  A front end developer may decide to create more specific engineer.  Also the generic custom agents can be extended with skills. Because core agents are generic and orchestrator-agnostic, you can use them standalone or combine them with the issues or project bundles depending on what you are building.  With core agents you can also extend through adding skills.
 
 Skills are separate from agents. A skill encapsulates a specific behavior — such as where and how work items are tracked — and is swapped in without changing the agent itself. Need GitHub Issues instead of local file tracking? Replace the tracking skill. Everything else stays the same.
 
