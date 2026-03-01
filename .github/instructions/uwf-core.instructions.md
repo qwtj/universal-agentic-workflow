@@ -60,7 +60,6 @@ Must include: goal, non-goals, constraints, success metrics, stakeholders, targe
 ### Gate: Timeline Planning
 Must produce:
 - `./tmp/workflow-artifacts/{mode}-plan.md` — the sequenced roadmap (milestones/epics → sprints → issues/tasks). This is **not** an implementation plan.
-- `state/<milestone>/<sprint>/{open,active,closed}/` — one directory triplet per sprint. Each issue created as a file under `open/` with id, title, parent, depends-on, and acceptance-criteria stub in YAML frontmatter.
 
 Must then: hand off to the orchestrator. Do **not** begin implementation. When changing state, move the file — do not copy or leave it in its original location.
 
@@ -71,25 +70,10 @@ Must then: hand off to the orchestrator. Do **not** begin implementation. When c
 Run per work item, orchestrator-driven.
 
 ### Gate: Issue Intake
-Input: the active issue file from `state/<milestone>/<sprint>/active/<issue-id>.md`.
-Must produce: reset `./tmp/workflow-artifacts/{mode}-intake.md` scoped to this issue.
+Input:  Must produce: reset `./tmp/workflow-artifacts/{mode}-intake.md` scoped to this issue.
 Must include: issue goal, acceptance criteria, constraints, out-of-scope items.
 
 All subsequent gates (Discovery, Security Planning, Test Planning, Implementation, Acceptance) follow the Core Workflow Gates above, scoped to this issue.
-
----
-
-## Orchestrator State-Management Rules
-
-- After Timeline Planning completes, the orchestrator:
-  1. Scans all `state/*/*/open/*.md` files; picks the first eligible issue (all `depends-on` ids present in a `closed/` directory).
-  2. Moves `state/<M>/<S>/open/<id>.md` → `state/<M>/<S>/active/<id>.md`.
-  3. Resets `./tmp/workflow-artifacts/{mode}-intake.md`, `./tmp/workflow-artifacts/{mode}-discovery.md`, `./tmp/workflow-artifacts/{mode}-plan.md`, and `./tmp/workflow-artifacts/{mode}-acceptance.md` to blank templates scoped to the new issue.
-  4. Starts Issue Intake for that issue.
-- On issue completion: the acceptance agent moves `state/<M>/<S>/active/<id>.md` → `state/<M>/<S>/closed/<id>.md` once all acceptance criteria are met.
-- On issue skip: move `state/<M>/<S>/open/<id>.md` → `state/<M>/<S>/closed/<id>.md`; prepend a `## Skip reason` section.
-- Parallel issues are allowed when eligible issues share no `depends-on` relationship with each other.
-- Unplanned work discovered during any stage: create a spike file at `state/ungroomed/open/<id>.md`. Do not implement it in the current issue.
 
 ---
 

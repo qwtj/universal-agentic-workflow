@@ -12,5 +12,5 @@ This stage produces the **roadmap** and **issue state structure**. It is NOT an 
 - `./tmp/workflow-artifacts/project-discovery.md` — current state, constraints, unknowns
 
 ## Ouptuts
-1. `./tmp/workflow-artifacts/issues-backlog.md` — backlog of issues with title, one-line description, status, and linked dependencies. Used to by the `uwf-core-project-tracking` agent to create the issue tree under `state/` and track issue status.
+1. `./tmp/workflow-artifacts/issues-backlog.md` — backlog of issues with title, one-line description, status, and linked dependencies. Used to by the `uwf-core-project-tracking` agent.
 2. `./tmp/workflow-artifacts/project-roadmap.md` — high-level project phases and milestonesan deliverables
