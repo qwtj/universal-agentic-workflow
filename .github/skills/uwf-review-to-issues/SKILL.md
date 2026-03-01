@@ -22,12 +22,12 @@ Priority\tIssue\tRecommendation
 The skill should:
 
 1. Parse each row into a priority, issue description, and recommendation.
-2. For each row create an ungroomed issue file under `state/ungroomed/open/` with metadata (e.g. priority) and a descriptive title summarising the issue; include the recommendation in the body.
+2. For each row create an ungroomed issue file under `./tmp/state/ungroomed/open/` with metadata (e.g. priority) and a descriptive title summarising the issue; include the recommendation in the body.
 3. If the user has configured an external tracking system (via prompt or environment), send the items there instead; otherwise operate on the local state directory.
 4. Tag or prefix filenames appropriately so the backlog can be triaged later.
 
 ## Output
-- A set of `state/ungroomed/open/*.md` files (or external tickets) corresponding to the table rows.
+- A set of `./tmp/state/ungroomed/open/*.md` files (or external tickets) corresponding to the table rows.
 - Optionally prompt the user for confirmation or additional context before writing.
 
 ## Implementation Notes

@@ -28,7 +28,7 @@ Skills are separate from agents. A skill encapsulates a specific behavior — su
 - **Small, reviewable changes.** Broad rewrites are prohibited unless explicitly requested.
 - **Template preservation.** `./docs/workflow/*.md` are read-only examples. Active artifacts live in `tmp/workflow-artifacts/{mode}-*.md`.
 - **No secrets in the repo.** If credentials are encountered, execution stops and secure storage is recommended.
-- **Unplanned work is not silently implemented.** It is filed as a spike under `state/ungroomed/open/` for triage.
+- **Unplanned work is not silently implemented.** It is filed as a spike under `./tmp/state/ungroomed/open/` for triage.
 
 ---
 
@@ -72,7 +72,7 @@ Agents for macro-level work: scoping a new effort, building a roadmap, and scaff
 | :--- | :--- |
 | `uwf-project-orchestrator.agent.md` | Coordinates the full project planning sequence: intake → discovery → requirements → timeline → backlog scaffold → hand-off. |
 | `uwf-project-intake.agent.md` | Captures objectives, non-goals, stakeholders, success metrics, and the intended work-breakdown strategy. |
-| `uwf-project-timeline-planner.agent.md` | Translates the project scope into a milestone/sprint/issue roadmap and creates the `state/` directory structure. |
+| `uwf-project-timeline-planner.agent.md` | Translates the project scope into a milestone/sprint/issue roadmap and creates the `./tmp/state/` directory structure. |
 | `uwf-project-reviewer.agent.md` | Audits the macro plan for completeness and consistency before execution begins. |
 
 ---
@@ -84,8 +84,8 @@ Skills encapsulate discrete behaviors. Agents call skills by name; swapping a sk
 | Skill | Purpose | Swap example |
 | :--- | :--- | :--- |
 | `uwf-adr-300` | Creates high-rigor ADRs at `./docs/adr/ADR-####-<slug>.md` using a 300-point checklist covering security, ops, compliance, and testability. | — |
-| `uwf-local-tracking` | Manages work item state using the local filesystem (`state/.../open/`, `active/`, `closed/`). | Replace with `uwf-github-track` to use GitHub Issues instead. |
-| `uwf-review-to-issues` | Parses prioritized review or audit tables and creates ungroomed backlog items in `state/ungroomed/open/`. | — |
+| `uwf-local-tracking` | Manages work item state using the local filesystem (`./tmp/state/.../open/`, `active/`, `closed/`). | Replace with `uwf-github-track` to use GitHub Issues instead. |
+| `uwf-review-to-issues` | Parses prioritized review or audit tables and creates ungroomed backlog items in `./tmp/state/ungroomed/open/`. | — |
 | `uwf-state-manager` | Authoritative source for mutating `./docs/uwf-state.json` and managing phase lifecycle transitions. | — |
 | `uwf-threat-model` | Generates STRIDE-style threat models with assets, trust boundaries, mitigations, and a verification checklist into `tmp/workflow-artifacts/{mode}-security-plan.md`. | — |
 
@@ -128,7 +128,7 @@ Always-on rules applied automatically across the workspace.
 | Active implementation plan | `tmp/workflow-artifacts/{mode}-plan.md` |
 | Acceptance results | `tmp/workflow-artifacts/{mode}-acceptance.md` |
 | Architecture Decision Records | `./docs/adr/ADR-####-<slug>.md` |
-| Open work items | `state/<milestone>/<sprint>/open/<id>.md` |
-| Active work items | `state/<milestone>/<sprint>/active/<id>.md` |
-| Closed work items | `state/<milestone>/<sprint>/closed/<id>.md` |
-| Ungroomed/unplanned work | `state/ungroomed/open/<id>.md` |
+| Open work items | `./tmp/state/<milestone>/<sprint>/open/<id>.md` |
+| Active work items | `./tmp/state/<milestone>/<sprint>/active/<id>.md` |
+| Closed work items | `./tmp/state/<milestone>/<sprint>/closed/<id>.md` |
+| Ungroomed/unplanned work | `./tmp/state/ungroomed/open/<id>.md` |

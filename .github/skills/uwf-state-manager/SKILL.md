@@ -12,7 +12,7 @@ Invoke this skill whenever an agent needs to:
 - Mark `ready_for_implementation` after both `{mode}-intake.md` and `{mode}-plan.md` are confirmed present
 - Append an entry to the `history` array
 - Validate that `docs/uwf-state.json` is well-formed before acting on it
-- Sync JSON state with the file-system `state/` directory tree after issue transitions
+- Sync JSON state with the file-system `./tmp/state/` directory tree after issue transitions
 
 This skill is the single authoritative source for all reads and writes to `docs/uwf-state.json`.
 
@@ -48,8 +48,8 @@ idea → intake → discovery → planning → execution → acceptance → clos
 - **idea** — initial state; project goal not yet captured.
 - **intake** — `tmp/workflow-artifacts/{mode}-intake.md` being produced.
 - **discovery** — `tmp/workflow-artifacts/{mode}-discovery.md` being produced.
-- **planning** — `tmp/workflow-artifacts/{mode}-plan.md` and `state/` issue tree being produced.
-- **execution** — orchestrator is driving per-issue cycles; `state/` tree is active.
+- **planning** — `tmp/workflow-artifacts/{mode}-plan.md` and `./tmp/state/` issue tree being produced.
+- **execution** — orchestrator is driving per-issue cycles; `./tmp/state/` tree is active.
 - **acceptance** — final checks; `tmp/workflow-artifacts/{mode}-acceptance.md` being produced.
 - **closed** — all issues closed; project complete.
 
@@ -113,7 +113,7 @@ idea → intake → discovery → planning → execution → acceptance → clos
 ### 7) Sync with file-system state tree
 After any issue-level state transition (open → active, active → closed, open → closed/skipped):
 1. Read `docs/uwf-state.json`.
-2. Count files across all `state/*/*/open/*.md`, `state/*/*/active/*.md`, `state/*/*/closed/*.md`.
+2. Count files across all `./tmp/state/*/*/open/*.md`, `./tmp/state/*/*/active/*.md`, `./tmp/state/*/*/closed/*.md`.
 3. Derive and update the following derived fields if they differ from current values:
    - If any `active/` file exists → `status: active`.
    - If `open/` is empty and `active/` is empty → `status: idle`; if phase is `execution`, advance phase to `acceptance`.

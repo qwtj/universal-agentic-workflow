@@ -19,7 +19,7 @@ The **issues** and **project** bundles both rely on **core** agents for shared s
 
 ## Skills are swappable behaviors
 Skills (`uwf-{name}/SKILL.md`) encapsulate discrete behaviors. Agents reference skills by name; swapping a skill changes the behavior without modifying the agent.
-- Default tracking behavior: `uwf-local-tracking` (filesystem-based state in `state/...`).
+- Default tracking behavior: `uwf-local-tracking` (filesystem-based state in `./tmp/state/...`).
 - To use GitHub Issues for tracking: substitute `uwf-github-track`. No agent files change.
 - To use a different ADR format: substitute an alternative to `uwf-adr-300`.
 

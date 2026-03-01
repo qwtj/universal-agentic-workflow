@@ -88,8 +88,8 @@ All subsequent gates (Discovery, Security Planning, Test Planning, Implementatio
 | Test plan | `./tmp/workflow-artifacts/{mode}-test-plan.md` |
 | Implementation plan / roadmap | `./tmp/workflow-artifacts/{mode}-plan.md` |
 | Acceptance results | `./tmp/workflow-artifacts/{mode}-acceptance.md` |
-| Open work items | `state/<milestone>/<sprint>/open/<issue-id>.md` |
-| Active work items | `state/<milestone>/<sprint>/active/<issue-id>.md` |
-| Closed work items | `state/<milestone>/<sprint>/closed/<issue-id>.md` |
-| Ungroomed / unplanned work | `state/ungroomed/open/<id>.md` |
+| Open work items | `./tmp/state/<milestone>/<sprint>/open/<issue-id>.md` |
+| Active work items | `./tmp/state/<milestone>/<sprint>/active/<issue-id>.md` |
+| Closed work items | `./tmp/state/<milestone>/<sprint>/closed/<issue-id>.md` |
+| Ungroomed / unplanned work | `./tmp/state/ungroomed/open/<id>.md` |
 | ADRs | `docs/adr/ADR-####-<slug>.md` |
