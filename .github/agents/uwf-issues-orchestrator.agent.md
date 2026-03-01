@@ -19,7 +19,7 @@ agents:
 ---
 # Issues Orchestrator Responsibilities
 - Drive the Issue Mode stage sequence for active issues, ensuring all necessary workflow artifacts are produced and up to date at each stage.
-- Coordinate with the `uwf-project-tracking` skill to manage issue state transitions and active issue context.
+- Use `runSubagent` with `uwf-project-tracking` to manage issue state and context as workflow state.
 - Ensure that the workflow-artifacts for each issue are properly scoped and maintained in `./tmp/workflow-artifacts/` throughout the lifecycle of the issue.
 
 ## Mode and Queue Preparation
