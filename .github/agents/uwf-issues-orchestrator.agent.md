@@ -4,6 +4,7 @@ description: "Detect operating mode (Project vs Issue), then drive the correct s
 tools: ["agent", "todo", "search/codebase", "search/listDirectory", "read"read/readFile, "edit/createDirectory", "edit/createFile", "web/fetch"]
 agents:
   - uwf-core-project-tracking
+  - uwf-core-technical-writer
   - uwf-issues-intake
   - uwf-issues-reviewer
   - uwf-core-discovery
@@ -37,11 +38,10 @@ At each step use `runSubagent` with:
 8. `uwf-work-planner` to produce a work plan with implementation steps and associated tests.
 9. `uwf-issue-implementer` to execute the work plan.
 10. `uwf-issue-reviewer` to review the implementation, produce a fix list if needed, and recommend acceptance when clean. Return to implementation on fixes.
-11. `uwf-doc-review` to review and update documentation in `docs/` from new or changed artifacts in `tmp/workflow-artifacts/`.
-12. `uwf-acceptance` to run the acceptance gate checklist and produce `tmp/workflow-artifacts/acceptance.md`.
+11. `uwf-core-technical-writer` to review and update documentation in `./docs/` from new or changed artifacts in `./tmp/workflow-artifacts/`.
+12. `uwf-acceptance` to run the acceptance gate checklist and produce `./tmp/workflow-artifacts/acceptance.md`.
 13. On acceptance/skip outcomes, invoke `uwf-project-tracking` to execute required close/skip transitions.
 
 ## Operating principles
-- Never start implementation without a scoped `tmp/workflow-artifacts/intake.md` and `tmp/workflow-artifacts/plan.md` for the active issue.
 - Do not invent facts; inspect the workspace when uncertain.
 - If `uwf-project-tracking` reports no eligible open issues, summarize project completion and prompt for a retro.
