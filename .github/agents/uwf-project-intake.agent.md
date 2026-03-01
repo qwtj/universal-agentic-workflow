@@ -1,6 +1,6 @@
 ---
 name: uwf-project-intake
-description: "Capture the user objective and work-breakdown strategy (Project Mode) or scope a single work item (Issue Mode). Produces ./tmp/workflow-artifacts/{mode}-intake.md."
+description: "Capture the user objective and work-breakdown strategy (Project Mode) or scope a single work item (Issue Mode). Produces ./tmp/workflow-artifacts/projectintake.md."
 tools:
    - execute
    - read
@@ -11,7 +11,7 @@ tools:
    - todo
 user-invokable: false
 ---
-# Project Planning Stage
+# Project Planning Mode
 
 ## Goal
 Given a new project proposal or concept, capture the user objective and intended work-breakdown strategy. Produce `./tmp/workflow-artifacts/project-intake.md` with the following sections:
