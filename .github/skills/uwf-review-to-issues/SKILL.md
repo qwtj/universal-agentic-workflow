@@ -1,8 +1,8 @@
 ---
-name: review-to-issues
+name: uwf-review-to-issues
 description: "Parse a prioritized review table and create ungroomed backlog issues or send them to the user's tracking software."
 ---
-# Review-to-Issues Skill
+# UWF Review-to-Issues Skill
 
 ## When to use
 Invoke this skill when you have a tabular list of findings or recommendations (e.g., audit results, security review notes, code review comments) and you want to turn each row into a tracked work item.
