@@ -1,6 +1,6 @@
 # Universal Workflow Framework (UWF) — always-on rules
 
-Wehn running subagents always use the `runSubagent` tool.
+Wehn running subagents always use the `runSubagent` tool to run the subagent and provide all agentic tools. Never run a subagent by invoking it directly. This ensures the subagent has access to the full suite of tools and adheres to the same rules and constraints as the parent agent.
 
 ## Non-negotiables
 - Prefer correctness and verifiability over speed.

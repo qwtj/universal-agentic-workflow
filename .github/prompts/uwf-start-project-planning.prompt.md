@@ -3,14 +3,6 @@ name: "uwf-start-project-planning"
 description: "Start project planning for an idea, concept, or digital product."
 argument-hint: "New project: describe what you want to build + constraints. Returning: leave blank to continue working through open issues."
 agent: "uwf-project-orchestrator"
-tools: 
-  - "execute"
-  - "read"
-  - "edit"
-  - "search"
-  - "web"
-  - "agent"
-  - "todo"
 ---
 # Tasks
 1. Obtain an concept, project purposal, feature purposal, wireframe, or other idea for a digital product or feature to build, ideally with some constraints or acceptance criteria.
