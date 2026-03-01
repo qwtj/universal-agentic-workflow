@@ -1,5 +1,5 @@
 ---
-name: uwf-project-timeline-planner
+name: uwf-project_manager-timeline-planner
 description: "Produce the timeline roadmap (tmp/workflow-artifacts/project-plan.md) and create the issue file-system state structure under state/. No implementation."
 tools: ["agent", "todo", "search", "edit", "read", "execute"]
 user-invokable: false

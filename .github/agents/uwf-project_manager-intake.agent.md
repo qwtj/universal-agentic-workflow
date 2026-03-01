@@ -1,5 +1,5 @@
 ---
-name: uwf-project-intake
+name: uwf-project_manager-intake
 description: "Capture the user objective and work-breakdown strategy (Project Mode) or scope a single work item (Issue Mode). Produces ./tmp/workflow-artifacts/projectintake.md."
 tools:
    - execute

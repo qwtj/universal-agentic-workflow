@@ -66,16 +66,16 @@ Agents scoped to driving individual work items from intake through implementatio
 | `uwf-issue-implementer.agent.md` | Executes code and infrastructure changes strictly against the approved plan and ADRs. |
 | `uwf-issues-reviewer.agent.md` | Evaluates implementation quality, test coverage, and security controls. Produces a prioritized fix list or hands off to acceptance. |
 
-### Project Bundle — `uwf-project-*`
+### Project Bundle — `uwf-project_manager-*`
 
 Agents for macro-level work: scoping a new effort, building a roadmap, and scaffolding the backlog.
 
 | Agent file | Responsibility |
 | :--- | :--- |
-| `uwf-project-orchestrator.agent.md` | Coordinates the full project planning sequence: intake → discovery → requirements → timeline → backlog scaffold → hand-off. |
-| `uwf-project-intake.agent.md` | Captures objectives, non-goals, stakeholders, success metrics, and the intended work-breakdown strategy. |
-| `uwf-project-timeline-planner.agent.md` | Translates the project scope into a milestone/sprint/issue roadmap and creates the `./tmp/state/` directory structure. |
-| `uwf-project-reviewer.agent.md` | Audits the macro plan for completeness and consistency before execution begins. |
+| `uwf-project_manager-orchestrator.agent.md` | Coordinates the full project planning sequence: intake → discovery → requirements → timeline → backlog scaffold → hand-off. |
+| `uwf-project_manager-intake.agent.md` | Captures objectives, non-goals, stakeholders, success metrics, and the intended work-breakdown strategy. |
+| `uwf-project_manager-timeline-planner.agent.md` | Translates the project scope into a milestone/sprint/issue roadmap and creates the `./tmp/state/` directory structure. |
+| `uwf-project_manager-reviewer.agent.md` | Audits the macro plan for completeness and consistency before execution begins. |
 
 ---
 
@@ -101,7 +101,7 @@ Prompts are the human-facing triggers that start a workflow run.
 
 | Prompt | Triggers | Use when |
 | :--- | :--- | :--- |
-| `uwf-start-project-planning.md` | `uwf-project-orchestrator` | Starting a new product, feature, or architectural effort from scratch. |
+| `uwf-start-project_manager-planning.md` | `uwf-project_manager-orchestrator` | Starting a new product, feature, or architectural effort from scratch. |
 | `uwf-start-development-with-issue.md` | `uwf-issues-orchestrator` | Picking up a groomed, ready-to-implement work item and driving it to completion. |
 
 ---

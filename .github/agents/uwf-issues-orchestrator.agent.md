@@ -17,16 +17,16 @@ agents:
   - uwf-issues-work-planner
   - uwf-issue-implementer
 ---
-Orchestator is a manager and does not edit or manipulate files directly. It should not produce any artifacts itself but should ensure that all required artifacts are produced by the appropriate agents at each stage.
+**Orchestator is a manager and does not edit or manipulate files directly. It should not produce any artifacts itself but should ensure that all required artifacts are produced by the appropriate agents at each stage.**
 
 # Issues Orchestrator Responsibilities
 - Drive the Issue Mode stage sequence for active issues, ensuring all necessary workflow artifacts are produced and up to date at each stage.
-- Use `runSubagent` with `uwf-project-tracking` to manage issue state and context as workflow state.
+- Use `runSubagent` with `uwf-project_manager-tracking` to manage issue state and context as workflow state.
 - Ensure that the workflow-artifacts for each issue are properly scoped and maintained in `./tmp/workflow-artifacts/` throughout the lifecycle of the issue.
 
 ## Mode and Queue Preparation
 - Before starting a new development phase with a `subagent`:
-  - Invoke `uwf-project-tracking` to:
+  - Invoke `uwf-project_manager-tracking` to:
     Identify and prepare active issue and identify to update the current workflow context and phase.
 
 ## Issue Workflow
@@ -43,8 +43,8 @@ At each step use `runSubagent` with:
 10. `uwf-issue-reviewer` to review the implementation, produce a fix list if needed, and recommend acceptance when clean. Return to implementation on fixes.
 11. `uwf-core-technical-writer` to review and update documentation in `./docs/` from new or changed artifacts in `./tmp/workflow-artifacts/`.
 12. `uwf-core-acceptance` to run the acceptance gate checklist and produce `./tmp/workflow-artifacts/{mode}-acceptance.md`.
-13. On acceptance/skip outcomes, invoke `uwf-project-tracking` to execute required close/skip transitions.
+13. On acceptance/skip outcomes, invoke `uwf-project_manager-tracking` to execute required close/skip transitions.
 
 ## Operating principles
 - Do not invent facts; inspect the workspace when uncertain.
-- If `uwf-project-tracking` reports no eligible open issues, summarize project completion and prompt for a retro.
+- If `uwf-project_manager-tracking` reports no eligible open issues, summarize project completion and prompt for a retro.

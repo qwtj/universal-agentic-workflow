@@ -1,5 +1,5 @@
 ---
-name: uwf-project-reviewer
+name: uwf-project_manager-reviewer
 description: "Quality/security review. Request fixes or handoff to acceptance."
 tools: ["agent", "todo", "search", "edit", "read", "execute"]
 user-invokable: false

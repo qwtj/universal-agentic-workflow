@@ -2,6 +2,10 @@
 
 Wehn running subagents always use the `runSubagent` tool to run the subagent and provide all agentic tools. Never run a subagent by invoking it directly. This ensures the subagent has access to the full suite of tools and adheres to the same rules and constraints as the parent agent.
 
+Subagents that may be utlized by all workflows and do not require to be called in a particular order have the naming convention. `/github/uwf-core-<subagent>.agent.md`
+
+Subagent that belong to a particular workflow and are called in a particular order have the naming convention. `/github/uwf-<role>-<stage>.agent.md`
+
 ## Non-negotiables
 - Prefer correctness and verifiability over speed.
 - Keep changes small and reviewable; avoid broad rewrites unless explicitly requested.
@@ -15,7 +19,7 @@ Agents are defined as `{role}-{job}.agent.md` files grouped into three bundles. 
 
 - **core** (`uwf-core-*`) — Generic agents usable by any orchestrator regardless of workflow type. Covers acceptance, ADRs, discovery, requirements, retro, security planning, technical writing, test planning, and state tracking.
 - **issues** (`uwf-issues-*`, `uwf-issue-*`) — Agents scoped to driving individual work items from intake through implementation, review, and acceptance.
-- **project** (`uwf-project-*`) — Agents for macro-level work: scoping a new effort, building a roadmap, and scaffolding the backlog.
+- **project** (`uwf-project_manager-*`) — Agents for macro-level work: scoping a new effort, building a roadmap, and scaffolding the backlog.
 
 The **issues** and **project** bundles both rely on **core** agents for shared stages (discovery, security, test planning, acceptance, etc.).
 
