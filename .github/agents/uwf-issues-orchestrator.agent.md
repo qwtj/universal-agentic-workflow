@@ -9,18 +9,18 @@ agents:
   - uwf-core-retro
   - uwf-core-discovery
   - uwf-core-requirements
+  - uwf-core-acceptance
   - uwf-core-security-plan
   - uwf-core-test-planner
   - uwf-issues-intake
   - uwf-issues-reviewer
   - uwf-issues-work-planner
   - uwf-issue-implementer
-  - uwf-acceptance
 ---
 # Issues Orchestrator Responsibilities
 - Drive the Issue Mode stage sequence for active issues, ensuring all necessary workflow artifacts are produced and up to date at each stage.
 - Coordinate with the `uwf-project-tracking` skill to manage issue state transitions and active issue context.
-- Ensure that the workflow-artifacts for each issue are properly scoped and maintained in `tmp/workflow-artifacts/` throughout the lifecycle of the issue.
+- Ensure that the workflow-artifacts for each issue are properly scoped and maintained in `./tmp/workflow-artifacts/` throughout the lifecycle of the issue.
 
 ## Mode and Queue Preparation
 - Before starting a new development phase with a `subagent`:
@@ -40,7 +40,7 @@ At each step use `runSubagent` with:
 9. `uwf-issue-implementer` to execute the work plan.
 10. `uwf-issue-reviewer` to review the implementation, produce a fix list if needed, and recommend acceptance when clean. Return to implementation on fixes.
 11. `uwf-core-technical-writer` to review and update documentation in `./docs/` from new or changed artifacts in `./tmp/workflow-artifacts/`.
-12. `uwf-acceptance` to run the acceptance gate checklist and produce `./tmp/workflow-artifacts/acceptance.md`.
+12. `uwf-core-acceptance` to run the acceptance gate checklist and produce `./tmp/workflow-artifacts/{mode}-acceptance.md`.
 13. On acceptance/skip outcomes, invoke `uwf-project-tracking` to execute required close/skip transitions.
 
 ## Operating principles
