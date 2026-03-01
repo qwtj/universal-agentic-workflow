@@ -9,9 +9,9 @@ agents:
   - uwf-core-retro
   - uwf-core-discovery
   - uwf-core-requirements
+  - uwf-core-security-plan
   - uwf-issues-intake
   - uwf-issues-reviewer
-  - uwf-security-plan
   - uwf-test-planner
   - uwf-work-planner
   - uwf-issue-implementer
@@ -34,7 +34,7 @@ At each step use `runSubagent` with:
 3. `uwf-core-discovery` to inspect the codebase and update the intake as needed.
 4. `uwf-core-requirements` to produce a requirements doc based on the updated intake and discovery.
 5. If ADRs are needed, `uwf-core-adr` to create them before proceeding.
-6. `uwf-security-plan` to produce a security plan if the issue is security-sensitive.
+6. `uwf-core-security-plan` to produce a security plan if the issue is security-sensitive.
 7. `uwf-test-planner` to produce a test plan and stubs for all testable behaviour.
 8. `uwf-work-planner` to produce a work plan with implementation steps and associated tests.
 9. `uwf-issue-implementer` to execute the work plan.
