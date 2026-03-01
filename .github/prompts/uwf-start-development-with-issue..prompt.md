@@ -2,7 +2,7 @@
 name: "uwf-start-development-with-issue"
 description: "Start development with an active issue."
 argument-hint: "New project: describe what you want to build + constraints. Returning: leave blank to continue working through open issues."
-agent: "uwf-issues-orchestrator"
+agent: "uwf-sw_dev-orchestrator"
 ---
 # Tasks
 1. Get an active and groomed issue.

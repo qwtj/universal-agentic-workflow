@@ -18,7 +18,7 @@ Subagent that belong to a particular workflow and are called in a particular ord
 Agents are defined as `{role}-{job}.agent.md` files grouped into three bundles. Import only the bundles relevant to your use case.
 
 - **core** (`uwf-core-*`) — Generic agents usable by any orchestrator regardless of workflow type. Covers acceptance, ADRs, discovery, requirements, retro, security planning, technical writing, test planning, and state tracking.
-- **issues** (`uwf-issues-*`, `uwf-issue-*`) — Agents scoped to driving individual work items from intake through implementation, review, and acceptance.
+- **issues** (`uwf-sw_dev-*`, `uwf-issue-*`) — Agents scoped to driving individual work items from intake through implementation, review, and acceptance.
 - **project** (`uwf-project_manager-*`) — Agents for macro-level work: scoping a new effort, building a roadmap, and scaffolding the backlog.
 
 The **issues** and **project** bundles both rely on **core** agents for shared stages (discovery, security, test planning, acceptance, etc.).

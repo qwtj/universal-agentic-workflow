@@ -54,17 +54,17 @@ Generic agents reusable by any orchestrator, regardless of whether you are runni
 | `uwf-core-tehcnical-writer.agent.md` | Promotes ephemeral `tmp/` artifacts into permanent `./docs/` documentation and files gaps as backlog items. |
 | `uwf-core-test-planner.agent.md` | Defines test stubs, integration scenarios, and coverage targets before implementation begins. |
 
-### Issues Bundle — `uwf-issues-*` / `uwf-issue-*`
+### Issues Bundle — `uwf-sw_dev-*` / `uwf-issue-*`
 
 Agents scoped to driving individual work items from intake through implementation and review.
 
 | Agent file | Responsibility |
 | :--- | :--- |
-| `uwf-issues-orchestrator.agent.md` | Coordinates the full per-issue lifecycle: intake → discovery → test planning → implementation → review → acceptance. |
-| `uwf-issues-intake.agent.md` | Scopes a single work item: goal, acceptance criteria, constraints, and explicit out-of-scope boundaries. |
-| `uwf-issues-work-planner.agent.md` | Assembles upstream artifacts (tests, security controls, scope) into an ordered implementation plan. |
+| `uwf-sw_dev-orchestrator.agent.md` | Coordinates the full per-issue lifecycle: intake → discovery → test planning → implementation → review → acceptance. |
+| `uwf-sw_dev-intake.agent.md` | Scopes a single work item: goal, acceptance criteria, constraints, and explicit out-of-scope boundaries. |
+| `uwf-sw_dev-work-planner.agent.md` | Assembles upstream artifacts (tests, security controls, scope) into an ordered implementation plan. |
 | `uwf-issue-implementer.agent.md` | Executes code and infrastructure changes strictly against the approved plan and ADRs. |
-| `uwf-issues-reviewer.agent.md` | Evaluates implementation quality, test coverage, and security controls. Produces a prioritized fix list or hands off to acceptance. |
+| `uwf-sw_dev-reviewer.agent.md` | Evaluates implementation quality, test coverage, and security controls. Produces a prioritized fix list or hands off to acceptance. |
 
 ### Project Bundle — `uwf-project_manager-*`
 
@@ -102,7 +102,7 @@ Prompts are the human-facing triggers that start a workflow run.
 | Prompt | Triggers | Use when |
 | :--- | :--- | :--- |
 | `uwf-start-project_manager-planning.md` | `uwf-project_manager-orchestrator` | Starting a new product, feature, or architectural effort from scratch. |
-| `uwf-start-development-with-issue.md` | `uwf-issues-orchestrator` | Picking up a groomed, ready-to-implement work item and driving it to completion. |
+| `uwf-start-development-with-issue.md` | `uwf-sw_dev-orchestrator` | Picking up a groomed, ready-to-implement work item and driving it to completion. |
 
 ---
 
