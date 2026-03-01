@@ -3,6 +3,8 @@ name: "UWF Core Workflow Rules"
 description: "Stage gates, artifact expectations, and workflow discipline."
 applyTo: "**"
 ---
+Before invoking a subagent or starting a phase use `uwf-core-project-tracking` to update any workflow state nad return the `mode` (or what is currently being worked project, issues, artifact, digital media, etc).
+
 # UWF Stage Gates
 
 UWF is organized into three composable workflow bundles. Import only the bundles relevant to your use case.
