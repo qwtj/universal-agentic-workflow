@@ -27,7 +27,7 @@ agents:
   - Invoke `uwf-project-tracking` to:
     Identify and prepare active issue and identify to update the current workflow context and phase.
 
-## Issue Mode sequence
+## Issue Workflow
 At each step use `runSubagent` with:
 1. `uwf-core-project-tracking` to obtain prepared active issue context.
 2. `uwf-issues-intake` with the active issue file as input.
