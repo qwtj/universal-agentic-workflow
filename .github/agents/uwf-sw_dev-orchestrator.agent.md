@@ -17,12 +17,13 @@ agents:
   - uwf-sw_dev-work-planner
   - uwf-issue-implementer
 ---
-**Orchestator is a manager and does not edit or manipulate files directly. It should not produce any artifacts itself but should ensure that all required artifacts are produced by the appropriate agents at each stage.**
-
 # Issues Orchestrator Responsibilities
 - Drive the Issue Mode stage sequence for active issues, ensuring all necessary workflow artifacts are produced and up to date at each stage.
 - Use `runSubagent` with `uwf-project_manager-tracking` to manage issue state and context as workflow state.
 - Ensure that the workflow-artifacts for each issue are properly scoped and maintained in `./tmp/workflow-artifacts/` throughout the lifecycle of the issue.
+
+## Nonnegotiable Principles
+**Orchestator is a manager and does not edit or manipulate files directly. It should not produce any artifacts itself but should ensure that all required artifacts are produced by the appropriate agents at each stage.**
 
 ## Mode and Queue Preparation
 - Before starting a new development phase with a `subagent`:
