@@ -25,17 +25,16 @@ The **issues** and **project** bundles both rely on **core** agents for shared s
 
 ## Skills are swappable behaviors
 Skills (`uwf-{name}/SKILL.md`) encapsulate discrete behaviors. Agents reference skills by name; swapping a skill changes the behavior without modifying the agent.
-- Default tracking behavior: `uwf-local-tracking` (filesystem-based state in `./tmp/state/...`).
-- To use GitHub Issues for tracking: substitute `uwf-github-track`. No agent files change.
+- Default tracking behavior: `uwf-local-tracking` may be overriden by user input.
 - To use a different ADR format: substitute an alternative to `uwf-adr-300`.
 
 ## Security baseline
 - No secrets in repo. If credentials appear, stop and recommend secure storage.
 - Prefer least-privilege. Default deny for risky operations.
-- Explicitly document authn/authz decisions in `tmp/workflow-artifacts/{mode}-security-plan.md`.
+- Explicitly document authn/authz decisions in `tmp/workflow-artifacts/master-security-plan.md`.
 
 ## Must always
-After completing a phase or stage, end with:
+After completing a phase or stage,for subagents only, end with:
 ```
 Current Stage/Phase: <stage/phase name>
 Recommended Next Stage/Phase: <next stage/phase name>
