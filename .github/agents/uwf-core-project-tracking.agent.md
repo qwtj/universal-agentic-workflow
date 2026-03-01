@@ -23,7 +23,7 @@ argument-hint: "mode (required): workflow mode prefix; outputPath (default ./tmp
 This agent is responsible for tracking the overall progress and ensuring that the correct stage is represented in the context. Manage workflow state transitions, track active issues, and ensure context is accurately maintained at each stage of the project lifecycle using the `uwf-state-manager` skill and `uwf-local-tracking` skill as needed.
 
 ## Prerequisites
-Invoke `uwf-local-tracking` for backlog triage and grooming support before finalizing issue intake. Use the skill output to:
+Invoke `uwf-local-tracking` skill for backlog triage and grooming support before finalizing issue intake. Use the skill output to:
 - identify duplicate or existing backlog entries
 - create ungroomed backlog stubs when a request is not represented
 - generate sprint placement and ordering recommendations

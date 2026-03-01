@@ -27,7 +27,7 @@ agents:
 
 ## 1 — Subagent Invocation Contract
 
-Every `runSubagent` call **must** include the following context object so subagents know their operating environment. Define it once here; do **not** repeat it per-step.
+Every `runSubagent` call **must** include the following context object so subagents know their operating environment.
 
 ```jsonc
 {
@@ -67,8 +67,8 @@ Execute stages **in this exact order**. Do not advance past a stage until its ga
 | 9 | `planning` | `uwf-project_manager-timeline-planner` | Produce the issues backlog and project roadmap. |
 | 10 | `planning` | `uwf-project_manager-reviewer` | Review all planning artifacts for correctness, gaps, and security. Produces a fix list or a clean bill. |
 | 10a | `planning` | *(loop)* | **If reviewer returned fixes:** re-invoke the responsible subagent(s) for each fix, then re-invoke `uwf-project_manager-reviewer`. Repeat until clean or **3 review cycles** exhausted. |
-| 11 | `planning` → `execution` | `uwf-core-project-tracking` | Populate `./tmp/state/` issue file-system tree from `issues-backlog.md` using `uwf-local-tracking` skill; advance phase to `execution`. |
-| 12 | `execution` → `acceptance` | `uwf-core-acceptance` | Run final acceptance checks against all artifacts. |
+| 11 | `planning` → `waiting-acceptance` | `uwf-core-project-tracking` | Track issues in project tracking.
+| 12 | `waiting-acceptance` → `acceptance` | `uwf-core-acceptance` | Run final acceptance checks against all artifacts. |
 | 13 | `acceptance` → `closed` | `uwf-core-project-tracking` | Advance phase to `closed`; record completion. |
 | 14 | `closed` | `uwf-core-retro` | *(Optional)* Produce retrospective if requested or if issues were encountered. |
 
@@ -123,6 +123,7 @@ Each gate lists **required artifacts** that must exist and be non-empty before t
 |---|---|
 | Issues backlog exists and is non-empty | `./tmp/workflow-artifacts/issues-backlog.md` |
 | Project roadmap exists and is non-empty | `./tmp/workflow-artifacts/project-roadmap.md` |
+| All issues hae been tracked in project tracking | Cross-reference `issues-backlog.md` entries against `uwf-core-project-tracking` state tree for open issues |
 
 ### Gate 10 — Review Clean
 | Check | Condition |
