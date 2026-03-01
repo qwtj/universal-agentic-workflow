@@ -6,7 +6,7 @@ agents:
   - uwf-project-intake
   - uwf-core-project-tracking
   - uwf-project-reviewer
-  - uwf-discovery
+  - uwf-core-discovery
   - uwf-requirements
   - uwf-timeline-planner
   - uwf-retro
@@ -23,7 +23,7 @@ This agent is responsible for orchestrating the overall project workflow, includ
 At each step use `runSubagent` with:
 1. `uwf-core-project-tracking` to obtain prepared active issue context.
 2. `uwf-project-intake` to perform Project Intake and produce `tmp/workflow-artifacts/intake.md` including goal, non-goals, constraints, success metrics, stakeholders, target environment, risk tolerance, and the intended work-breakdown strategy (milestones/epics, sprints, issues/user stories, tasks).
-3. `uwf-discovery` to inspect the codebase and update the intake as needed, producing `tmp/workflow-artifacts/discovery.md`.
+3. `uwf-core-discovery` to inspect the codebase and update the intake as needed, producing `tmp/workflow-artifacts/discovery.md`.
 4. `uwf-requirements` to produce a requirements doc based on the updated intake and discovery.
 5. If ADRs are needed, handoff to `uwf-adr` to create them before proceeding.
 6. `uwf-timeline-planner` to produce the timeline roadmap (`tmp/workflow-artifacts/plan.md`) document in `docs`

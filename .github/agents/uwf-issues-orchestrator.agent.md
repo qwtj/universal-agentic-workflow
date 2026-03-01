@@ -6,7 +6,7 @@ agents:
   - uwf-core-project-tracking
   - uwf-issues-intake
   - uwf-issues-reviewer
-  - uwf-discovery
+  - uwf-core-discovery
   - uwf-requirements
   - uwf-adr
   - uwf-security-plan
@@ -29,13 +29,13 @@ agents:
 At each step use `runSubagent` with:
 1. `uwf-core-project-tracking` to obtain prepared active issue context.
 2. `uwf-issues-intake` with the active issue file as input.
-3. `uwf-discovery` to inspect the codebase and update the intake as needed.
+3. `uwf-core-discovery` to inspect the codebase and update the intake as needed.
 4. `uwf-requirements` to produce a requirements doc based on the updated intake and discovery.
 5. If ADRs are needed, `uwf-adr` to create them before proceeding.
 6. `uwf-security-plan` to produce a security plan if the issue is security-sensitive.
 7. `uwf-test-planner` to produce a test plan and stubs for all testable behaviour.
 8. `uwf-work-planner` to produce a work plan with implementation steps and associated tests.
-9. `uwf-implementer` to execute the work plan.
+9. `uwf-issue-implementer` to execute the work plan.
 10. `uwf-issue-reviewer` to review the implementation, produce a fix list if needed, and recommend acceptance when clean. Return to implementation on fixes.
 11. `uwf-doc-review` to review and update documentation in `docs/` from new or changed artifacts in `tmp/workflow-artifacts/`.
 12. `uwf-acceptance` to run the acceptance gate checklist and produce `tmp/workflow-artifacts/acceptance.md`.
