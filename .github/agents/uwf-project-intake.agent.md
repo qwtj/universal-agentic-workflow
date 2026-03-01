@@ -11,7 +11,7 @@ Given a new project proposal or concept, capture the user objective and intended
 ## Inputs
 -  An idea in the form of a project proposal, concept, feature request, or other digital artifact.
 
-### Questions to ask if not already answered by input ((return to calling agent for answering if needed, do not make assumptions):)
+### Questions to ask if unable to infer from input ((return to calling agent for answering and provide proposed answer):
 1. What is the primary goal of this project?
 2. What is explicitly out of scope?
 3. Who are the stakeholders and what is the target environment?
