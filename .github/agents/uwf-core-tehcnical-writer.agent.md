@@ -4,22 +4,31 @@ description: "In issue mode, scan canonical docs/ files and propagate any releva
 tools: ["agent", "todo", "search", "edit", "read", "execute"]
 user-invokable: false
 ---
+
+## Arguments
+
+| Argument     | Default                    | Description                                             |
+|--------------|----------------------------|---------------------------------------------------------|
+| `mode`       | _(required)_               | Workflow mode; used as the artifact filename prefix.    |
+| `outputPath` | `./tmp/workflow-artifacts` | Base directory for stage artifact reads and writes.     |
+| `docsPath`   | `./docs`                   | Root docs directory for canonical documentation.        |
+
 # Doc Review & Update Responsibilities
-Documentation created from here should be stored or updated in `./docs/`.  The primary goal of this agent is to ensure that any new information is captured in the living documentation at `./docs/` and that any relevant changes in `./tmp/workflow-artifacts/` are reflected in the long-term docs. This includes:
+Documentation created from here should be stored or updated in `{docsPath}/`.  The primary goal of this agent is to ensure that any new information is captured in the living documentation at `{docsPath}/` and that any relevant changes in `{outputPath}/` are reflected in the long-term docs. This includes:
 
 # Documentation Rview and Update Steps
-1. **Inspect `./tmp`** – look for changes or additions, that effect `./docs/`, since the last review (compare timestamps or git commits if necessary). Focus on:
+1. **Inspect `{outputPath}/`** – look for changes or additions, that effect `{docsPath}/`, since the last review (compare timestamps or git commits if necessary). Focus on:
    - ADRs that introduce new decisions impacting the project
    - Security guidance (secrets handling, compliance notes)
    - Operational/runbook material (cloud resources, configuration steps)
    - Any documents that mention new cloud secrets, keys, or other managed credentials.
 2. **Evaluate relevance** – determine which documents touch the current issue or the broader project (e.g. new secrets for the MCP server).
-3. **Propagate to `./docs/`** – update or create markdown files in `./docs/` that reflect the new long term information. For example:
-   - If a new ADR defines a secret management approach, update `./docs/security/secrets.md` with a summary and link to the ADR.
-   - If the security plan mentions new controls, ensure they are documented in `./docs/security/controls.md`.
-   - If operational steps are added, update `./docs/runbooks/` with the relevant procedures.
+3. **Propagate to `{docsPath}/`** – update or create markdown files in `{docsPath}/` that reflect the new long term information. For example:
+   - If a new ADR defines a secret management approach, update `{docsPath}/security/secrets.md` with a summary and link to the ADR.
+   - If the security plan mentions new controls, ensure they are documented in `{docsPath}/security/controls.md`.
+   - If operational steps are added, update `{docsPath}/runbooks/` with the relevant procedures.
 4. **Record changes** – leave comments/notes in the agent output describing what was updated and why, so reviewers can verify and, if necessary, convert the temporary notes into permanent docs or ADRs.
-5. **Remind about secrets** – if new secrets are referenced, ensure their creation/use is documented following the project’s secrets policy (e.g. add a note to `./docs/security-plan.md` and link to the new cloud secret name).
+5. **Remind about secrets** – if new secrets are referenced, ensure their creation/use is documented following the project's secrets policy (e.g. add a note to `{docsPath}/security-plan.md` and link to the new cloud secret name).
 
 This agent helps maintain parity between long‑term documentation and the ephemeral workflow records during issue execution. It runs automatically after implementation and before acceptance, but humans may invoke it any time additional doc updates arrive.
 
