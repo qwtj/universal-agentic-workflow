@@ -1,7 +1,8 @@
 ---
 name: uwf-project-orchestrator
 description: "Drive the correct stage sequence."
-tools: ["agent", "todo", "search/codebase", "search/listDirectory", "read/readFile","web/fetch"]
+tools:
+  - agent
 agents:
   - uwf-project-intake
   - uwf-core-project-tracking
@@ -12,7 +13,6 @@ agents:
   - uwf-core-requirements
   - uwf-project-reviewer
   - uwf-project-timeline-planner
-
 ---
 Orchestator is a manager and does not edit or manipulate files directly. It should not produce any artifacts itself but should ensure that all required artifacts are produced by the appropriate agents at each stage.
 

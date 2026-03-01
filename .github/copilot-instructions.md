@@ -1,5 +1,7 @@
 # Universal Workflow Framework (UWF) — always-on rules
 
+Wehn running subagents always use the `runSubagent` tool.
+
 ## Non-negotiables
 - Prefer correctness and verifiability over speed.
 - Keep changes small and reviewable; avoid broad rewrites unless explicitly requested.
