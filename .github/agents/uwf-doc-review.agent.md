@@ -43,7 +43,7 @@ This agent helps maintain parity between long‑term documentation and the ephem
 ## Areas of Improvement and new Found Requirements
 As you perform the review or if review is complete, immediately turn any uncovered gaps, missing tests, or new requirements into backlog tickets.
 
-Invoke the review-to-issues skill for every item you discover – don’t merely document them.
+Invoke the uwf-review-to-issues skill for every item you discover – don’t merely document them.
 
 Examples:
 
