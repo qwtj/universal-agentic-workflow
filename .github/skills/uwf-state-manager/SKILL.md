@@ -1,4 +1,3 @@
-````skill
 ---
 name: uwf-state-manager
 description: "Read, validate, and mutate docs/uwf-state.json and the file-system state tree. Provides canonical procedures for phase transitions, agent hand-offs, artifact path resolution, and history recording."
@@ -10,7 +9,7 @@ Invoke this skill whenever an agent needs to:
 - Read the current workflow phase or status from `docs/uwf-state.json`
 - Advance or roll back a phase (`idea → intake → discovery → planning → execution → acceptance → closed`)
 - Record a hand-off between agents (`current_agent` field)
-- Mark `ready_for_implementation` after both `intake.md` and `plan.md` are confirmed present
+- Mark `ready_for_implementation` after both `{mode}-intake.md` and `{mode}-plan.md` are confirmed present
 - Append an entry to the `history` array
 - Validate that `docs/uwf-state.json` is well-formed before acting on it
 - Sync JSON state with the file-system `state/` directory tree after issue transitions
@@ -47,11 +46,11 @@ idea → intake → discovery → planning → execution → acceptance → clos
 ```
 
 - **idea** — initial state; project goal not yet captured.
-- **intake** — `tmp/workflow-artifacts/intake.md` being produced.
-- **discovery** — `tmp/workflow-artifacts/discovery.md` being produced.
-- **planning** — `tmp/workflow-artifacts/plan.md` and `state/` issue tree being produced.
+- **intake** — `tmp/workflow-artifacts/{mode}-intake.md` being produced.
+- **discovery** — `tmp/workflow-artifacts/{mode}-discovery.md` being produced.
+- **planning** — `tmp/workflow-artifacts/{mode}-plan.md` and `state/` issue tree being produced.
 - **execution** — orchestrator is driving per-issue cycles; `state/` tree is active.
-- **acceptance** — final checks; `tmp/workflow-artifacts/acceptance.md` being produced.
+- **acceptance** — final checks; `tmp/workflow-artifacts/{mode}-acceptance.md` being produced.
 - **closed** — all issues closed; project complete.
 
 ---
@@ -99,8 +98,8 @@ idea → intake → discovery → planning → execution → acceptance → clos
 
 ### 5) Mark ready for implementation
 1. Verify both files exist:
-   - `tmp/workflow-artifacts/intake.md` (non-empty)
-   - `tmp/workflow-artifacts/plan.md` (non-empty)
+   - `tmp/workflow-artifacts/{mode}-intake.md` (non-empty)
+   - `tmp/workflow-artifacts/{mode}-plan.md` (non-empty)
 2. Verify `phase` is `planning` or later.
 3. If conditions met: set `ready_for_implementation` to `true` and write back.
 4. If conditions not met: return a list of missing prerequisites; do **not** write.
@@ -160,4 +159,3 @@ After any procedure, return a state-manager report containing:
 - **History entry appended** — full JSON of the new entry (if applicable)
 - **Errors or warnings** — any validation failures encountered
 - **Recommended next action** — which agent or stage should act next
-````

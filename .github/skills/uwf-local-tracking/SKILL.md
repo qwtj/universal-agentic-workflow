@@ -55,10 +55,10 @@ state/ungroomed/open/
 When an issue is selected:
 1. Move `state/<M>/<S>/open/<id>.md` to `state/<M>/<S>/active/<id>.md`.
 2. Reset per-issue workflow docs in `tmp/workflow-artifacts/`:
-	 - `intake.md`
-	 - `discovery.md`
-	 - `plan.md`
-	 - `acceptance.md`
+	 - `{mode}-intake.md`
+	 - `{mode}-discovery.md`
+	 - `{mode}-plan.md`
+	 - `{mode}-acceptance.md`
 3. Return the active issue path and a short activation summary.
 
 ### 4) Intake triage and backlog grooming support
@@ -67,7 +67,7 @@ Before or during issue intake:
 2. If no matching backlog item exists, create a backlog stub in `state/ungroomed/open/`.
 3. Check sprint placement fit and recommend move-to-active behavior when immediate execution is intended.
 4. Recommend ordering updates (`order:` field, filename ordering, or `depends-on` edits) when priorities shift.
-5. Return all generated recommendations so intake can record them in `tmp/workflow-artifacts/intake.md`.
+5. Return all generated recommendations so intake can record them in `tmp/workflow-artifacts/{mode}-intake.md`.
 
 ### 5) Close and skip transitions
 - **Close after acceptance:** move `state/<M>/<S>/active/<id>.md` to `state/<M>/<S>/closed/<id>.md`.

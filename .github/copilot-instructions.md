@@ -5,7 +5,7 @@
 - Keep changes small and reviewable; avoid broad rewrites unless explicitly requested.
 - Do not make assumptions about the project or its dependencies. If information is missing, ask for clarification or use tools to discover it.
 - If user doesn't provide a clear goal, use the orchestratorask for one, then pass answer back to subagent. If the goal is too broad, ask for it to be narrowed down.
-- Keep `docs/workflow/*.md` as read-only example templates. Active edits go in `tmp/workflow-artifacts/*.md`.
+- Keep `docs/workflow/*.md` as read-only example templates. Active edits go in `tmp/workflow-artifacts/{mode}-*.md`.
 - Always state what you are doing before doing it to provide a log, then proceed without waiting for feedback.
 
 ## Agent bundles
@@ -26,7 +26,7 @@ Skills (`uwf-{name}/SKILL.md`) encapsulate discrete behaviors. Agents reference 
 ## Security baseline
 - No secrets in repo. If credentials appear, stop and recommend secure storage.
 - Prefer least-privilege. Default deny for risky operations.
-- Explicitly document authn/authz decisions in `tmp/workflow-artifacts/security-plan.md`.
+- Explicitly document authn/authz decisions in `tmp/workflow-artifacts/{mode}-security-plan.md`.
 
 ## Must always
 After completing a phase or stage, end with:
