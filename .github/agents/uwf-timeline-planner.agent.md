@@ -1,21 +1,11 @@
 ---
 name: uwf-timeline-planner
 description: "Project Mode only: produce the timeline roadmap (tmp/workflow-artifacts/plan.md) and create the issue file-system state structure under state/. No implementation. Hand off to orchestrator to begin Issue Mode."
-tools: ["todos", "codebase", "readFile", "createDirectory", "createFile", "editFiles", "search", "fetch"]
-handoffs:
-  - label: "Hand off to Orchestrator (Issue Mode)"
-    agent: uwf-orchestrator
-    prompt: "Timeline is ready and the state/ directory structure has been created. Switch to Issue Mode: scan state/*/*/open/ for the first eligible issue, move it to active/, reset workflow docs, and begin Issue Intake."
-    send: false
-  - label: "Project Mode: Stage 4: Retro"
-    agent: uwf-retro
-    prompt: "Timeline planning is complete. Conduct a retrospective to identify improvements for the next project."
-    send: false
+tools: ["todo", "search/codebase", "read/readFile", "edit/createDirectory", "edit/createFile", "edit/editFiles", "search/searchResults", "web/fetch"]
+user-invokable: false
 ---
-# Timeline Planning stage
-
-> This stage produces the **roadmap** and **issue state structure**. It is NOT an implementation plan.
-> Do not write code, create source files, or produce implementation steps.
+# Timeline Planning Stage
+This stage produces the **roadmap** and **issue state structure**. It is NOT an implementation plan.  Do not write code, create source files, or produce implementation steps.
 
 ## Inputs
 - `tmp/workflow-artifacts/intake.md` — goal, non-goals, work-breakdown strategy
@@ -70,8 +60,8 @@ acceptance-criteria: <one-line stub — expanded during Issue Intake>
 ```
 
 - Use sequential ids: `I-001`, `I-002`, … for issues; `T-001a`, `T-001b`, … for sub-tasks.
-- All files start in `open/`. The orchestrator moves them to `active/`; the acceptance agent will later move them to `closed/` after acceptance.
-- `depends-on` lists ids (not paths); the orchestrator resolves them at runtime.
+- All files start in `open/`. Runtime transitions and queue handling are performed via `uwf-issue-management`.
+- `depends-on` lists ids (not paths); dependency resolution is performed via `uwf-issue-management`.
 
 ## After producing both artifacts
 1. Verify that every intake goal maps to at least one issue file.
