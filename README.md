@@ -1,49 +1,134 @@
-# UWF (Universal Workflow Framework) for GitHub Copilot in VS Code
+# Universal Agent Workflow (UWF)
 
-This folder is intentionally self-contained under `./tmp` so it can be opened as a workspace without mixing with any existing repo files.
+A composable, role-based agent workflow framework. Import only the agent bundles you need, wire in the skills that match your tooling, and get a consistent, gate-enforced development lifecycle out of the box.
 
-## How to use (recommended)
-1. add contents of this repo in your VS Code workspace root.
-2. Open Copilot Chat and run: `/uwf-run`
-3. Follow the handoff buttons between stage agents.
+---
 
-## What’s included
-- Custom instructions: `.github/copilot-instructions.md` and `.github/instructions/*.instructions.md`
-- Prompt files (slash commands): `.github/prompts/*.prompt.md`
-- Custom agents + handoffs: `.github/agents/*.agent.md`
-  - `uwf-orchestrator` — mode detection + stage sequencing
-  - `uwf-intake` — project or issue intake
-  - `uwf-discovery` — workspace inspection
-  - `uwf-timeline-planner` — **Project Mode**: roadmap + backlog
-  - `uwf-work-planner` — **Issue Mode**: implementation plan per issue
-  - `uwf-implementer`, `uwf-reviewer`, `uwf-acceptance`, and others
-- Skills: `.github/skills/*/SKILL.md`
-- Hooks (Preview): `.github/hooks/*.json` + `scripts/hooks/preToolUse.mjs`
-- Workflow artifact templates (do not edit in-place): `docs/workflow/*.md`, `docs/adr/*.md`
-- Active workflow artifacts (editable after intake): `tmp/workflow-artifacts/*.md`
-- State tracking: `state/<milestone>/<sprint>/{open,active,closed}/<issue-id>.md`
+## How It Works
 
-## Two operating modes
+Agents are defined as `{role}-{job}.agent.md` files grouped into three workflow bundles: **core**, **issues**, and **project**. Each bundle maps to a distinct phase of work. Because core agents are generic and orchestrator-agnostic, you can use them standalone or combine them with the issues or project bundles depending on what you are building.
 
-UWF auto-detects its mode from the issue tree under `state/`:
+Skills are separate from agents. A skill encapsulates a specific behavior — such as where and how work items are tracked — and is swapped in without changing the agent itself. Need GitHub Issues instead of local file tracking? Replace the tracking skill. Everything else stays the same.
 
-### Project Mode (first run — no `state/*/*` paths)
-Runs once per new project objective:
-1. **Intake** (`uwf-intake`) — goal + work-breakdown strategy
-2. **Discovery** (`uwf-discovery`) — inspect workspace, update intake
-3. **Timeline Planning** (`uwf-timeline-planner`) — roadmap (`tmp/workflow-artifacts/plan.md`) + issue tree (`state/<milestone>/<sprint>/{open,active,closed}/`)
-4. Orchestrator switches automatically to Issue Mode
+```
+.github/
+├── agents/               # {role}-{job}.agent.md files, grouped by bundle
+├── skills/               # Swappable behavior modules (uwf-{name}/SKILL.md)
+├── prompts/              # Entry-point prompts to trigger a workflow
+├── instructions/         # Always-on rules applied across the workspace
+└── copilot-instructions.md
+```
 
-### Issue Mode (subsequent runs — `state/*/*` exists)
-Orchestrator picks each `open` item and drives the per-issue cycle:
-1. **Issue Intake** (`uwf-intake`) — scope item, reset workflow docs
-2. **Issue Discovery** (`uwf-discovery`) — focus on relevant areas
-3. **Work Planning** (`uwf-work-planner`) — implementation steps, tests, rollout/rollback
-4. **Implementation** → **Review** → **Acceptance**
-5. Acceptance stage should move `state/<M>/<S>/active/<id>.md` → `state/<M>/<S>/closed/<id>.md`; the orchestrator simply loops afterwards.
+---
 
-## Notes
-- Hooks are **Preview** in VS Code (see VS Code docs). Your org may disable them.
-- The hook script blocks obvious destructive commands and requires confirmation for edits in sensitive paths.
-- `docs/workflow/` contains example templates and should remain intact.
-- After intake begins, edit and reference workflow artifacts from `tmp/workflow-artifacts/`.
+## Non-Negotiables
+
+- **Plan before implementing.** No code or infrastructure changes before `tmp/workflow-artifacts/intake.md` and `tmp/workflow-artifacts/plan.md` exist for the active scope.
+- **Verifiability over speed.** Correctness takes priority. Missing context is discovered or clarified, never assumed.
+- **Small, reviewable changes.** Broad rewrites are prohibited unless explicitly requested.
+- **Template preservation.** `docs/workflow/*.md` are read-only examples. Active artifacts live in `tmp/workflow-artifacts/*.md`.
+- **No secrets in the repo.** If credentials are encountered, execution stops and secure storage is recommended.
+- **Unplanned work is not silently implemented.** It is filed as a spike under `state/ungroomed/open/` for triage.
+
+---
+
+## Agent Bundles (`.github/agents`)
+
+Agents follow the naming convention `uwf-{role}-{job}.agent.md`. Import the bundles relevant to your use case.
+
+### Core Bundle — `uwf-core-*`
+
+Generic agents reusable by any orchestrator, regardless of whether you are running a project workflow, an issue workflow, or something else entirely.
+
+| Agent file | Responsibility |
+| :--- | :--- |
+| `uwf-core-acceptance.agent.md` | Runs final acceptance checks, verifies commands, and documents known issues before closing work. |
+| `uwf-core-adr.agent.md` | Produces Architecture Decision Records via the `uwf-adr-300` skill. |
+| `uwf-core-discovery.agent.md` | Inspects the workspace to identify unknowns and constraints without making implementation changes. |
+| `uwf-core-project-tracking.agent.md` | Manages workflow state transitions using whichever tracking skill is configured. |
+| `uwf-core-requirements.agent.md` | Writes PRDs, Non-Functional Requirements, and testable acceptance criteria. |
+| `uwf-core-retro.agent.md` | Runs end-of-cycle retrospectives and surfaces workflow or implementation improvements. |
+| `uwf-core-security-plan.agent.md` | Generates threat models and security control plans via the `uwf-threat-model` skill. |
+| `uwf-core-tehcnical-writer.agent.md` | Promotes ephemeral `tmp/` artifacts into permanent `docs/` documentation and files gaps as backlog items. |
+| `uwf-core-test-planner.agent.md` | Defines test stubs, integration scenarios, and coverage targets before implementation begins. |
+
+### Issues Bundle — `uwf-issues-*` / `uwf-issue-*`
+
+Agents scoped to driving individual work items from intake through implementation and review.
+
+| Agent file | Responsibility |
+| :--- | :--- |
+| `uwf-issues-orchestrator.agent.md` | Coordinates the full per-issue lifecycle: intake → discovery → test planning → implementation → review → acceptance. |
+| `uwf-issues-intake.agent.md` | Scopes a single work item: goal, acceptance criteria, constraints, and explicit out-of-scope boundaries. |
+| `uwf-issues-work-planner.agent.md` | Assembles upstream artifacts (tests, security controls, scope) into an ordered implementation plan. |
+| `uwf-issue-implementer.agent.md` | Executes code and infrastructure changes strictly against the approved plan and ADRs. |
+| `uwf-issues-reviewer.agent.md` | Evaluates implementation quality, test coverage, and security controls. Produces a prioritized fix list or hands off to acceptance. |
+
+### Project Bundle — `uwf-project-*`
+
+Agents for macro-level work: scoping a new effort, building a roadmap, and scaffolding the backlog.
+
+| Agent file | Responsibility |
+| :--- | :--- |
+| `uwf-project-orchestrator.agent.md` | Coordinates the full project planning sequence: intake → discovery → requirements → timeline → backlog scaffold → hand-off. |
+| `uwf-project-intake.agent.md` | Captures objectives, non-goals, stakeholders, success metrics, and the intended work-breakdown strategy. |
+| `uwf-project-timeline-planner.agent.md` | Translates the project scope into a milestone/sprint/issue roadmap and creates the `state/` directory structure. |
+| `uwf-project-reviewer.agent.md` | Audits the macro plan for completeness and consistency before execution begins. |
+
+---
+
+## Skills (`.github/skills`)
+
+Skills encapsulate discrete behaviors. Agents call skills by name; swapping a skill changes the behavior without touching the agent. This is the primary extension point for integrating UWF with external tooling.
+
+| Skill | Purpose | Swap example |
+| :--- | :--- | :--- |
+| `uwf-adr-300` | Creates high-rigor ADRs at `docs/adr/ADR-####-<slug>.md` using a 300-point checklist covering security, ops, compliance, and testability. | — |
+| `uwf-local-tracking` | Manages work item state using the local filesystem (`state/.../open/`, `active/`, `closed/`). | Replace with `uwf-github-track` to use GitHub Issues instead. |
+| `uwf-review-to-issues` | Parses prioritized review or audit tables and creates ungroomed backlog items in `state/ungroomed/open/`. | — |
+| `uwf-state-manager` | Authoritative source for mutating `docs/uwf-state.json` and managing phase lifecycle transitions. | — |
+| `uwf-threat-model` | Generates STRIDE-style threat models with assets, trust boundaries, mitigations, and a verification checklist into `tmp/workflow-artifacts/security-plan.md`. | — |
+
+> **Tracking skill example:** The default tracking skill (`uwf-local-tracking`) uses the local file system. To integrate with GitHub, drop in a `uwf-github-track` skill that maps the same interface to GitHub Issues API calls. No agent files change.
+
+---
+
+## Entry Points (`.github/prompts`)
+
+Prompts are the human-facing triggers that start a workflow run.
+
+| Prompt | Triggers | Use when |
+| :--- | :--- | :--- |
+| `uwf-start-project-planning.md` | `uwf-project-orchestrator` | Starting a new product, feature, or architectural effort from scratch. |
+| `uwf-start-development-with-issue.md` | `uwf-issues-orchestrator` | Picking up a groomed, ready-to-implement work item and driving it to completion. |
+
+---
+
+## Instructions (`.github/instructions`)
+
+Always-on rules applied automatically across the workspace.
+
+| File | Scope | Purpose |
+| :--- | :--- | :--- |
+| `uwf-core.instructions.md` | `**` | Core stage gates, artifact expectations, orchestrator state rules, and workflow discipline. |
+| `docs-writing.instructions.md` | `docs/**/*.md` | Writing conventions: skimmability, explicit assumptions, executable examples with expected output. |
+| `slides.instructions.md` | `slides/**` | Slide structure and build conventions for programmatically compiled presentations. |
+
+---
+
+## Artifact Locations
+
+| Artifact | Path |
+| :--- | :--- |
+| Workflow templates (read-only) | `docs/workflow/*.md` |
+| Active intake | `tmp/workflow-artifacts/intake.md` |
+| Active discovery | `tmp/workflow-artifacts/discovery.md` |
+| Active security plan | `tmp/workflow-artifacts/security-plan.md` |
+| Active test plan | `tmp/workflow-artifacts/test-plan.md` |
+| Active implementation plan | `tmp/workflow-artifacts/plan.md` |
+| Acceptance results | `tmp/workflow-artifacts/acceptance.md` |
+| Architecture Decision Records | `docs/adr/ADR-####-<slug>.md` |
+| Open work items | `state/<milestone>/<sprint>/open/<id>.md` |
+| Active work items | `state/<milestone>/<sprint>/active/<id>.md` |
+| Closed work items | `state/<milestone>/<sprint>/closed/<id>.md` |
+| Ungroomed/unplanned work | `state/ungroomed/open/<id>.md` |
