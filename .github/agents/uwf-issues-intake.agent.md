@@ -15,4 +15,5 @@ Any issue that has the following minimum information should be considered ready 
 ## Inputs
 -  An active and groomed issued, if no issue is given or issue is not active return an error.
 
+## Outputs
 The intake comments/report should also summarise any automated recommendations made during the process (e.g. prompts to create or update backlog stubs, sprint placement advice, reordering suggestions).  Write the scoped intake to `tmp/workflow-artifacts/intake.md` for the active issue.
