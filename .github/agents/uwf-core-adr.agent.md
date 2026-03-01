@@ -3,6 +3,7 @@ name: uwf-core-adr
 description: "Create ADRs and decision records (use 300-point ADR when warranted)."
 tools: ["agent", "todo", "search", "edit", "read", "execute","web"]
 user-invokable: false
+argument-hint: "mode (required): workflow mode prefix; outputPath (default ./tmp/workflow-artifacts): base directory for stage artifacts; adrPath (default ./docs/adr): where ADR files are written."
 ---
 
 ## Arguments

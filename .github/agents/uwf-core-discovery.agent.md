@@ -3,6 +3,7 @@ name: uwf-core-discovery
 description: "Inspect the workspace, clarify unknowns, and update intake. No implementation."
 tools: ["agent", "todo", "search", "edit", "read", "execute", "web"]
 user-invokable: false
+argument-hint: "mode (required): workflow mode prefix; outputPath (default ./tmp/workflow-artifacts): base directory for stage artifacts."
 ---
 
 ## Arguments

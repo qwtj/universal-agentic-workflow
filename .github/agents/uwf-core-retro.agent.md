@@ -3,6 +3,7 @@ name: uwf-core-retro
 description: "Retrospective: workflow + implementation improvements."
 tools: ["agent", "todo", "search", "edit", "read", "execute"]
 user-invokable: false
+argument-hint: "mode (required): workflow mode prefix; outputPath (default ./tmp/workflow-artifacts): base directory for stage artifacts."
 ---
 
 ## Arguments

@@ -8,6 +8,7 @@ tools:
   - read
   - edit
   - web
+argument-hint: "mode (required): workflow mode prefix; outputPath (default ./tmp/workflow-artifacts): base directory for stage artifacts; statePath (default ./tmp/uwf-state.json): workflow state file."
 ---
 
 ## Arguments
