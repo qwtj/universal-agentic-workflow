@@ -54,7 +54,7 @@ Generic agents reusable by any orchestrator, regardless of whether you are runni
 | `uwf-core-tehcnical-writer.agent.md` | Promotes ephemeral `tmp/` artifacts into permanent `./docs/` documentation and files gaps as backlog items. |
 | `uwf-core-test-planner.agent.md` | Defines test stubs, integration scenarios, and coverage targets before implementation begins. |
 
-### Issues Bundle — `uwf-sw_dev-*` / `uwf-issue-*`
+### Software Developer (sw_dev) Bundle — `uwf-sw_dev-*` / `uwf-issue-*`
 
 Agents scoped to driving individual work items from intake through implementation and review.
 
@@ -66,7 +66,7 @@ Agents scoped to driving individual work items from intake through implementatio
 | `uwf-issue-implementer.agent.md` | Executes code and infrastructure changes strictly against the approved plan and ADRs. |
 | `uwf-sw_dev-reviewer.agent.md` | Evaluates implementation quality, test coverage, and security controls. Produces a prioritized fix list or hands off to acceptance. |
 
-### Project Bundle — `uwf-project_manager-*`
+### Project Manager (project_manager) Bundle — `uwf-project_manager-*`
 
 Agents for macro-level work: scoping a new effort, building a roadmap, and scaffolding the backlog.
 
