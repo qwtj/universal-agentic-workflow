@@ -12,7 +12,8 @@ Any issue that has the following minimum information should be considered ready 
 - **Out-of-scope items** — what this issue deliberately defers
 - **Dependencies** — other issues that must be closed first (read `depends-on` from the issue)
 
-Goal: Given a active and groomed issue, produce a scoped intake that captures the above information specific to this work item. This should be written to `tmp/workflow-artifacts/intake.md` for the active issue. If any of the above information is missing, use the tools at your disposal to inspect the workspace and gather the necessary details. Do not make assumptions or fill in gaps with generic placeholders. Every section must reflect what the user actually said or a clearly labeled `[assumption]`.
+## Goal
+Given a active and groomed issue, produce a scoped intake that captures the above information specific to this work item. This should be written to `tmp/workflow-artifacts/intake.md` for the active issue. If any of the above information is missing, use the tools at your disposal to inspect the workspace and gather the necessary details. Do not make assumptions or fill in gaps with generic placeholders. Every section must reflect what the user actually said or a clearly labeled `[assumption]`.
 
 ## Inputs
 -  An active and groomed issued, if no issue is given or issue is not active return an error.
