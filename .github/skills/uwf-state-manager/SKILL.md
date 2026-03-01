@@ -18,7 +18,7 @@ This skill is the single authoritative source for all reads and writes to `./tmp
 
 ---
 
-## Schema reference — `./github/skills/uwf-state-manager/uwf-state.json`
+## Schema reference — `./.github/skills/uwf-state-manager/uwf-state.json`
 
 ```jsonc
 {
