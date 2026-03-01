@@ -30,7 +30,7 @@ agents:
     Identify and prepare active issue and identify to update the current workflow context and phase.
 
 ## Issue Workflow (DO NOT interrupt this flow except to relay a question from the subagent)
-At each step use `runSubagent` with:
+At each step tell the subagent it is in project mode and invoke `runSubagent` tool with:
 1. `uwf-core-project-tracking` to obtain prepared active issue context.
 2. `uwf-sw_dev-intake` with the active issue file as input.
 3. `uwf-core-discovery` to inspect the codebase and update the intake as needed.

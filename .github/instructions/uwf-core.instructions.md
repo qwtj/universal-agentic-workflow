@@ -19,3 +19,7 @@ All questions and queries must be done by the Orchestrator agent. Subagents shou
 
 ## Tracing and Debugging
 - Orchestrator must output tell the user it's current action and what is about to do at each step, especially when invoking subagents. This provides visibility into the workflow's progress and helps with debugging.  DO NOT STOP FOR USER FEEDBACK OR REQUEST PERMISSION TO PROCEED.
+
+## Gates
+
+ALways update the current context using the `uwf-core-project-tracking` agent before starting any new phase or invoking any subagent. This ensures the workflow state is accurate and up-to-date for all agents to reference.
