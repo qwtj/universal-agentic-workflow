@@ -1,5 +1,7 @@
 # Universal Agent Workflow (UWF)
 
+**Don't forget to enable custom subagents in settings it is experiemntal. Authorize like me you will be wwondering why nothing is getting edited or created**
+
 A composable, role-based agent workflow framework. Import only the agent bundles you need, wire in the skills that match your tooling, and get a consistent, gate-enforced development lifecycle out of the box.
 
 ---
