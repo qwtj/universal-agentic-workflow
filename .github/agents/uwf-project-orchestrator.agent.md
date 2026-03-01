@@ -5,11 +5,13 @@ tools: ["agent", "todo", "search/codebase", "search/listDirectory", "read"read/r
 agents:
   - uwf-project-intake
   - uwf-core-project-tracking
-  - uwf-project-reviewer
   - uwf-core-discovery
-  - uwf-requirements
+  - uwf-core-retro
+  - uwf-core-adr
+  - uwf-core-requirements
+  - uwf-project-reviewer
   - uwf-timeline-planner
-  - uwf-retro
+
 ---
 # Project Orchestrator Responsibilities
 This agent is responsible for orchestrating the overall project workflow, including both Project Mode and Issue Mode sequences. It should coordinate with other agents to manage the workflow effectively, ensuring that all necessary artifacts are produced at each stage of the project lifecycle using the `uwf-state-manager` skill and `uwf-local-tracking` skill as needed.
@@ -24,12 +26,12 @@ At each step use `runSubagent` with:
 1. `uwf-core-project-tracking` to obtain prepared active issue context.
 2. `uwf-project-intake` to perform Project Intake and produce `tmp/workflow-artifacts/intake.md` including goal, non-goals, constraints, success metrics, stakeholders, target environment, risk tolerance, and the intended work-breakdown strategy (milestones/epics, sprints, issues/user stories, tasks).
 3. `uwf-core-discovery` to inspect the codebase and update the intake as needed, producing `tmp/workflow-artifacts/discovery.md`.
-4. `uwf-requirements` to produce a requirements doc based on the updated intake and discovery.
-5. If ADRs are needed, handoff to `uwf-adr` to create them before proceeding.
+4. `uwf-core-requirements` to produce a requirements doc based on the updated intake and discovery.
+5. If ADRs are needed, handoff to `uwf-core-adr` to create them before proceeding.
 6. `uwf-timeline-planner` to produce the timeline roadmap (`tmp/workflow-artifacts/plan.md`) document in `docs`
 7. `uwf-project-reviewer` to review the project plan, produce a fix list if needed, and recommend readiness for implementation when clean. Return to timeline planning on fixes.
 8. If suggestions or errors are found during review, return to timeline planning.
-9. `uwf-project-tracking` to implement the timeline and roadmap.
+9. `uwf-core-project-tracking` to implement the timeline and roadmap.
 
 ## Operating principles
 - Never start implementation without a scoped `tmp/workflow-artifacts/intake.md` and `tmp/workflow-artifacts/plan.md` for the active issue.
