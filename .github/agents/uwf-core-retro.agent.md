@@ -6,7 +6,7 @@ tools: ["todo", "search/changes", "read/readFile", "edit/createFile", "edit/edit
 # Retro stage
 
 ## Outputs:
-Write `./tmp/workflow-artifacts/retro.md` with the following sections:
+Write `./tmp/workflow-artifacts/{mode}-retro.md` with the following sections:
 - What worked
 - What didn’t
 - Concrete improvements (workflow assets, tests, docs)

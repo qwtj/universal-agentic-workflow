@@ -4,6 +4,10 @@ description: "Canonical issue-management procedures for UWF state transitions, e
 ---
 # UWF Local Tracking Skill
 
+## Optional Inputs:
+-  Existing issues in backlog with milestone and sprint can be found in `./tmp/workflow-artifacts/issues-backlog.md` if present.
+-  Existing project roadmap for deliverables and milestones can be found in `./tmp/workflow-artifacts/project-roadmap.md` if present.
+
 ## When to use
 Invoke this skill whenever an agent needs to perform or reason about issue-management behavior, including:
 - Detecting Project Mode vs Issue Mode
@@ -82,3 +86,57 @@ Whenever invoked, return a concise issue-management report with:
 - Recommendations generated (if any)
 - Next action for caller agent
 
+## Orgnanization and lifecycle
+### 1. `./tmp/workflow-artifacts/issues-backlog.md`, — Timeline Roadmap
+Structure by the levels chosen during intake:
+```
+## Milestones / Epics
+- M1-<slug>: <name> — <goal> — <target date or sprint range>
+  - Sprint S1-<slug>: <goal>
+    - Issue I-001: <user story>
+      - Task T-001a: <specific work item>
+```
+Only include levels that apply (not every project needs all four).
+For each milestone/epic include: goal, deliverable, success signal.
+
+### 2. `state/` — Issue File-System State
+Create one directory triplet **per sprint**:
+```
+state/<milestone-id>/<sprint-id>/open/
+state/<milestone-id>/<sprint-id>/active/
+state/<milestone-id>/<sprint-id>/closed/
+```
+- `<milestone-id>` matches the `M1-<slug>` ids used in `./tmp/workflow-artifacts/{mode}-plan.md`.
+- `<sprint-id>` matches the `S1-<slug>` ids.
+- For projects with no formal sprints, use a single sprint id of `S1`.
+
+Create one **issue file** per issue/task inside the appropriate `open/` directory:
+```
+state/<milestone-id>/<sprint-id>/open/<issue-id>.md
+```
+
+**Issue file format** (frontmatter + body):
+```markdown
+---
+id: I-001
+milestone: <milestone-id>
+sprint: <sprint-id>
+title: <short title>
+depends-on: []           # list of issue ids that must be closed first; empty if none
+security-sensitive: false
+parallel: false           # true when this issue can run alongside its sibling
+acceptance-criteria: <one-line stub — expanded during Issue Intake>
+---
+
+# <id>: <title>
+
+<Optional additional context, user story, or notes for the intake agent.>
+```
+
+- Use sequential ids: `I-001`, `I-002`, … for issues; `T-001a`, `T-001b`, … for sub-tasks.
+- All files start in `open/`. Runtime transitions and queue handling are performed via `uwf-issue-management`.
+- `depends-on` lists ids (not paths); dependency resolution is performed via `uwf-issue-management`.
+
+## After producing both artifacts
+1. Verify that every intake goal maps to at least one issue file.
+2. Verify that no circular `depends-on` chains exist.

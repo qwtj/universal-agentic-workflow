@@ -5,7 +5,7 @@ tools: ["todo", "read/readFile", "search/codebase", "edit/createFile", "edit/edi
 user-invokable: false
 ---
 # Requirements stage
-Produce `tmp/workflow-artifacts/requirements.md` with:
+Produce `tmp/workflow-artifacts/{mode}-requirements.md` with:
 - Goal / Non-goals
 - Functional requirements (numbered)
 - Non-functional requirements (performance, security, reliability, cost, operability)

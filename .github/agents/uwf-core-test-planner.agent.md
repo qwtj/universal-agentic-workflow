@@ -11,12 +11,12 @@ As a test planner you must not write any implementation code. This is a strict r
 Tests are defined **before** implementation. This stage produces the test contract that the implementer must satisfy. Do not write implementation code — only test stubs, signatures, and scenarios.  During project planning, focus on defining the test strategy, test cases, and stubs/signatures for all tests that must be implemented to satisfy the acceptance criteria and security controls. The implementer will write the actual test code during implementation.
 
 ## Inputs
-- `tmp/workflow-artifacts/intake.md` — acceptance criteria (source of truth for what must be tested)
-- `tmp/workflow-artifacts/discovery.md` — existing test patterns, frameworks, coverage tooling
-- `tmp/workflow-artifacts/requirements.md` — functional + non-functional requirements (if produced)
-- `tmp/workflow-artifacts/security-plan.md` — security controls that require test coverage
+- `tmp/workflow-artifacts/{mode}-intake.md` — acceptance criteria (source of truth for what must be tested)
+- `tmp/workflow-artifacts/{mode}-discovery.md` — existing test patterns, frameworks, coverage tooling
+- `tmp/workflow-artifacts/{mode}-requirements.md` — functional + non-functional requirements (if produced)
+- `tmp/workflow-artifacts/{mode}-security-plan.md` — security controls that require test coverage
 
-## Required output: `tmp/workflow-artifacts/test-<mode>-plan.md`
+## Required output: `tmp/workflow-artifacts/test-{mode}-plan.md`
 
 ### Sections
 
@@ -37,7 +37,7 @@ Scenario-level tests that span multiple units or I/O boundaries:
 | test-id | scenario | inputs | expected outcome | maps-to |
 
 #### Security-specific tests
-Tests derived from `tmp/workflow-artifacts/security-plan.md` (authn/authz, input validation, secrets not leaked, etc.):
+Tests derived from `tmp/workflow-artifacts/{mode}-security-plan.md` (authn/authz, input validation, secrets not leaked, etc.):
 | test-id | control tested | approach | pass condition |
 
 #### Test stubs / signatures

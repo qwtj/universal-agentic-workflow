@@ -1,12 +1,12 @@
 ---
 name: uwf-project-intake
-description: "Capture the user objective and work-breakdown strategy (Project Mode) or scope a single work item (Issue Mode). Produces tmp/workflow-artifacts/intake.md."
+description: "Capture the user objective and work-breakdown strategy (Project Mode) or scope a single work item (Issue Mode). Produces ./tmp/workflow-artifacts/{mode}-intake.md."
 tools: ["todo", "search/codebase", "read/readFile", "edit/createFile", "edit/editFiles", "search/listDirectory", "search/searchResults"]
 ---
 # Project Planning Stage
 
 ## Goal
-Given a new project proposal or concept, capture the user objective and intended work-breakdown strategy. Produce `tmp/workflow-artifacts/intake.md` with the following sections:
+Given a new project proposal or concept, capture the user objective and intended work-breakdown strategy. Produce `./tmp/workflow-artifacts/{mode}-intake.md` with the following sections:
 
 ## Inputs
 -  An idea in the form of a project proposal, concept, feature request, or other digital artifact.
@@ -23,7 +23,7 @@ Given a new project proposal or concept, capture the user objective and intended
    - **Tasks** — sub-steps within an issue (hours)
    Choose the levels that fit the project size. Document the rationale.
 
-### Required output: `tmp/workflow-artifacts/intake.md`
+### Required output: `./tmp/workflow-artifacts/{mode}-intake.md`
 Must include all sections:
 - **Goal** — one-paragraph statement of the objective
 - **Non-goals** — explicit exclusions
