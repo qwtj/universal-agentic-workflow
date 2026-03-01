@@ -1,7 +1,7 @@
 ---
 name: uwf-issue-implementer
 description: "Implement changes. Must follow plan + ADRs."
-tools: ["todo", "edit/editFiles", "edit/createFile", "edit/createDirectory", "execute/runInTerminal", "execute/getTerminalOutput", "read/terminalLastCommand", "execute/runTests", "read/problems", "search/changes", "search/codebase", "read/readFile"]
+tools: ["agent", "todo", "search", "edit", "read", "execute"]
 user-invokable: false
 ---
 # Implementation stage

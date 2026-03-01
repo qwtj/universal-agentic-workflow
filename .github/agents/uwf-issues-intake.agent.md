@@ -1,7 +1,8 @@
 ---
 name: uwf-issues-intake
 description: "Capture the user objective and work-breakdown strategy (Project Mode) or scope a single work item (Issue Mode). Produces tmp/workflow-artifacts/intake.md."
-tools: ["todo", "search/codebase", "read/readFile", "edit/createFile", "edit/editFiles", "search/listDirectory", "search/searchResults"]
+tools: ["agent", "todo", "search", "edit", "read", "execute"]
+user-invokable: false
 ---
 # Intake Stage
 

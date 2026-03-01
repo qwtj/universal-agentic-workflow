@@ -1,7 +1,7 @@
 ---
 name: uwf-core-acceptance
 description: "Final acceptance checks and last-mile fixes."
-tools: [execute/killTerminal, execute/runInTerminal, execute/runTests, read/problems, read/readFile, read/terminalLastCommand, edit/createFile, edit/editFiles, search/changes, todo]
+tools: ["agent", "todo", "search", "edit", "read", "execute"]
 user-invokable: false
 ---
 # Acceptance stage

@@ -1,7 +1,7 @@
 ---
 name: uwf-issues-orchestrator
 description: "Detect operating mode (Project vs Issue), then drive the correct stage sequence."
-tools: ["agent", "todo", "search/codebase", "search/listDirectory", "read"read/readFile, "web/fetch"]
+tools: ["agent", "todo", "search/codebase", "search/listDirectory", "read"read/readFile,"web/fetch"]
 agents:
   - uwf-core-project-tracking
   - uwf-core-technical-writer

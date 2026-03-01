@@ -1,7 +1,7 @@
 ---
 name: uwf-issues-reviewer
 description: "Quality/security review. Request fixes or handoff to acceptance."
-tools: [execute/runTests, read/problems, read/readFile, read/terminalLastCommand, search/changes, search/codebase, search/fileSearch, search/listDirectory, search/searchResults, search/textSearch, search/usages, web/fetch, todo]
+tools: ["agent", "todo", "search", "edit", "read", "execute"]
 user-invokable: false
 ---
 # Issues Review stage

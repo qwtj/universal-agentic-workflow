@@ -1,7 +1,7 @@
 ---
 name: uwf-issues-work-planner
 description: "Produce the implementation plan (`./tmp/workflow-artifacts/{mode}-plan.md`) for the active issue. No coding."
-tools: ["todo", "search/codebase", "read/readFile", "edit/createFile", "edit/editFiles", "search/searchResults", "web/fetch"]
+tools: ["agent", "todo", "search", "edit", "read", "execute"]
 user-invokable: false
 ---
 # Work Planning Stage

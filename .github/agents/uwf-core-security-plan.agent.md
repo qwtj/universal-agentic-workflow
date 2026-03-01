@@ -1,7 +1,8 @@
 ---
 name: uwf-core-security-plan
 description: "Threat model + security controls plan."
-tools: ["todo", "search/codebase", "read/readFile", "edit/createFile", "edit/editFiles", "search/searchResults", "web/fetch", "web/githubRepo"]
+tools: ["agent", "todo", "search", "edit", "read", "execute"]
+user-invokable: false
 ---
 # Security Plan Stage
 Produce `./tmp/workflow-artifacts/{mode}-security-plan.md` with:

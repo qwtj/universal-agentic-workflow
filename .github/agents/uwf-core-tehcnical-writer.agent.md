@@ -1,7 +1,7 @@
 ---
 name: uwf-core-technical-writer
 description: "In issue mode, scan canonical docs/ files and propagate any relevant changes into tmp/workflow-artifacts for the current issue or project state. Useful when post‑implementation artifacts (new secrets, ADRs, design notes) appear in docs and need reflection in the active issue’s documentation."
-tools: ["todo", "search/codebase", "read/readFile", "edit/createFile", "edit/editFiles"]
+tools: ["agent", "todo", "search", "edit", "read", "execute"]
 user-invokable: false
 ---
 # Doc Review & Update Responsibilities

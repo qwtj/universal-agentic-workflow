@@ -1,7 +1,8 @@
 ---
 name: uwf-core-test-planner
 description: "Issue Mode: define what tests must be written before implementation begins. Produces tmp/workflow-artifacts/test-plan.md. No coding — stubs/signatures only."
-tools: ["todo", "search/codebase", "read/readFile", "edit/createFile", "edit/editFiles", "search/searchResults", "web/fetch"]
+tools: ["agent", "todo", "search", "edit", "read", "execute"]
+user-invokable: false
 ---
 # Test Planning Stage
 
