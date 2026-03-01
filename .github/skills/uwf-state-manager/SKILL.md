@@ -6,15 +6,15 @@ description: "Read, validate, and mutate sate docs/uwf-state.json and the file-s
 
 ## When to use
 Invoke this skill whenever an agent needs to:
-- Read the current workflow phase or status from `./github/skills/uwf-state-manager/uwf-state.json`
+- Read the current workflow phase or status from `./tmp/uwf-state.json`
 - Advance or roll back a phase (`idea → intake → discovery → planning → execution → acceptance → closed`)
 - Record a hand-off between agents (`current_agent` field)
 - Mark `ready_for_implementation` after both `{mode}-intake.md` and `{mode}-plan.md` are confirmed present
 - Append an entry to the `history` array
-- Validate that `./github/skills/uwf-state-manager/uwf-state.json` is well-formed before acting on it
+- Validate that `./tmp/uwf-state.json` is well-formed before acting on it
 - Sync JSON state with the file-system `./tmp/state/` directory tree after issue transitions
 
-This skill is the single authoritative source for all reads and writes to `./github/skills/uwf-state-manager/uwf-state.json`.
+This skill is the single authoritative source for all reads and writes to `./tmp/uwf-state.json`.
 
 ---
 
@@ -46,11 +46,11 @@ idea → intake → discovery → planning → execution → acceptance → clos
 ```
 
 - **idea** — initial state; project goal not yet captured.
-- **intake** — `tmp/workflow-artifacts/{mode}-intake.md` being produced.
-- **discovery** — `tmp/workflow-artifacts/{mode}-discovery.md` being produced.
-- **planning** — `tmp/workflow-artifacts/{mode}-plan.md` and `./tmp/state/` issue tree being produced.
+- **intake** — `./tmp/workflow-artifacts/{mode}-intake.md` being produced.
+- **discovery** — `./tmp/workflow-artifacts/{mode}-discovery.md` being produced.
+- **planning** — `./tmp/workflow-artifacts/{mode}-plan.md` and `./tmp/state/` issue tree being produced.
 - **execution** — orchestrator is driving per-issue cycles; `./tmp/state/` tree is active.
-- **acceptance** — final checks; `tmp/workflow-artifacts/{mode}-acceptance.md` being produced.
+- **acceptance** — final checks; `./tmp/workflow-artifacts/{mode}-acceptance.md` being produced.
 - **closed** — all issues closed; project complete.
 
 ---
@@ -58,7 +58,7 @@ idea → intake → discovery → planning → execution → acceptance → clos
 ## Procedures
 
 ### 1) Read state
-1. Read `docs/uwf-state.json`.
+1. Read `./tmp/uwf-state.json`.
 2. Validate all required top-level keys are present: `phase`, `status`, `current_agent`, `artifact_path`, `ready_for_implementation`, `history`.
 3. If the file is missing or malformed, initialize it with the default schema (phase `idea`, status `idle`, `current_agent` null, `artifact_path` `./tmp/workflow-artifacts`, `ready_for_implementation` false, `history` []).
 4. Return the parsed object.
@@ -78,7 +78,7 @@ idea → intake → discovery → planning → execution → acceptance → clos
    ```
 4. Update `phase` to `to_phase`.
 5. Update `status` to `active`.
-6. Write the updated object back to `docs/uwf-state.json` (pretty-printed, 2-space indent).
+6. Write the updated object back to `./tmp/uwf-state.json` (pretty-printed, 2-space indent).
 7. Return a transition summary.
 
 ### 3) Roll back phase
@@ -98,8 +98,8 @@ idea → intake → discovery → planning → execution → acceptance → clos
 
 ### 5) Mark ready for implementation
 1. Verify both files exist:
-   - `tmp/workflow-artifacts/{mode}-intake.md` (non-empty)
-   - `tmp/workflow-artifacts/{mode}-plan.md` (non-empty)
+   - `./tmp/workflow-artifacts/issues-intake.md` (non-empty)
+   - `./tmp/workflow-artifacts/issues-plan.md` (non-empty)
 2. Verify `phase` is `planning` or later.
 3. If conditions met: set `ready_for_implementation` to `true` and write back.
 4. If conditions not met: return a list of missing prerequisites; do **not** write.
@@ -112,7 +112,7 @@ idea → intake → discovery → planning → execution → acceptance → clos
 
 ### 7) Sync with file-system state tree
 After any issue-level state transition (open → active, active → closed, open → closed/skipped):
-1. Read `docs/uwf-state.json`.
+1. Read `./tmp/uwf-state.json`.
 2. Count files across all `./tmp/state/*/*/open/*.md`, `./tmp/state/*/*/active/*.md`, `./tmp/state/*/*/closed/*.md`.
 3. Derive and update the following derived fields if they differ from current values:
    - If any `active/` file exists → `status: active`.

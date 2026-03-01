@@ -19,6 +19,8 @@ agents:
 # Project Orchestrator Responsibilities
 This agent is responsible for orchestrating the overall project workflow. It should coordinate with other agents to manage the workflow effectively, ensuring that all necessary artifacts are produced at each stage of the project lifecycle using `runSubagent` with `uwf-project_manager-tracking` to manage issue state and context as well as workflow state.
 
+Alway pass { `mode`: `project`, `phase`: current_phase } when invoking subagents to ensure they can operate with the correct context.
+
 ## Nonnegotiable Principles
 **Orchestator is a manager and does not edit or manipulate files directly. It should not produce any artifacts itself but should ensure that all required artifacts are produced by the appropriate agents at each stage.**
 
