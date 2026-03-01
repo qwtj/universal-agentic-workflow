@@ -2,7 +2,7 @@
 name: uwf-core-adr
 description: "Create ADRs and decision records (use 300-point ADR when warranted)."
 tools: ["agent", "todo", "search", "edit", "read", "execute","web"]
-user-invokable: true
+user-invokable: false
 ---
 # ADR Stage
 - Create `./docs/adr/ADR-####-<slug>.md` for each major decision.
