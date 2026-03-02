@@ -7,6 +7,15 @@ Load this skill at orchestrator startup. It governs **how** any persona-driven o
 
 ## Invocation Contract
 
+> ### ⚠️ CRITICAL — Two separate mechanisms; never confuse them
+>
+> | Mechanism | What it is | How to invoke |
+> |---|---|---|
+> | **`runSubagent`** | A VS Code Copilot **tool call** that runs another agent | Use the tool-call infrastructure (same as `read_file`, `run_in_terminal`, etc.) — **never a shell command** |
+> | **`run.mjs`** | A Node.js script for gate checks and stage listing | `node .github/skills/uwf-{workflow}/run.mjs --list-stages` or `--check-gate <stage>` |
+>
+> `run.mjs` has **no** `--run-stage`, `--execute`, or `--invoke` flag. Attempting to run a subagent via terminal is a hard violation. If you find yourself typing `node ... --run-stage`, stop — use the `runSubagent` tool call.
+
 Every `runSubagent` call **must** embed the following context block inside the `prompt` string so subagents know their operating environment.
 
 > **CRITICAL — tool call structure:** The `runSubagent` tool takes three separate parameters:
@@ -71,6 +80,7 @@ The `workflow` and `role` values are provided by the persona skill. The `phase` 
 The following are **hard violations**. If you are about to do any of these, stop and correct course:
 
 - ❌ **Narrating or simulating stage execution in text** without calling `runSubagent`. Writing "I invoked uwf-X" or a bullet list of what each stage did is not the same as calling the tool. If the tool was not called, the stage did not run.
+- ❌ **Invoking subagents via terminal commands.** `runSubagent` is a tool call, not a shell command. Never use `node run.mjs --run-stage` or any terminal variant to attempt to run a subagent.
 - ❌ **Inventing subagent names.** Only use agent names present in the persona skill's Subagent Roster and listed in the orchestrator's `agents:` frontmatter. Never fabricate names like `uwf-project_manager-initiate`.
 - ❌ **Producing a completion summary** without having called `runSubagent` for every stage in the sequence.
 - ❌ **Emitting `Current Stage/Phase:` / `Recommended Next Stage/Phase:` blocks.** Those are for subagents only. The orchestrator never emits them.

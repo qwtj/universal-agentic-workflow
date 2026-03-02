@@ -38,8 +38,19 @@ agents:
 
 **You MUST use the `runSubagent` tool for every stage.** There is no other acceptable behavior.
 
+> ### ⚠️ CRITICAL — `runSubagent` IS A TOOL CALL, NOT A TERMINAL COMMAND
+>
+> `runSubagent` is a **VS Code Copilot agent tool** invoked via the tool-call infrastructure — the same way you call `read_file`, `run_in_terminal`, or `ask_questions`. It is **never a shell command**. You cannot run it via `node`, `npx`, or any terminal.
+>
+> The **only** terminal commands in this workflow are:
+> - `node .github/skills/uwf-{workflow}/run.mjs --list-stages` — get the ordered stage list
+> - `node .github/skills/uwf-{workflow}/run.mjs --check-gate <stageName>` — validate a stage's artifacts
+>
+> There is **no** `--run-stage`, `--execute`, or `--invoke` flag in any `run.mjs` script. If you catch yourself typing `node ... --run-stage`, stop immediately — you are using the wrong mechanism. Use the `runSubagent` tool call instead.
+
 ### FORBIDDEN — these actions are violations and must never occur:
 - ❌ Writing text that describes, narrates, or simulates running a stage (e.g. "I ran uwf-X…", "Stage 1 complete", bullet-list summaries of what each stage did)
+- ❌ **Trying to invoke a subagent via a terminal command.** `runSubagent` is a VS Code Copilot tool call — never `node run.mjs --run-stage` or any shell equivalent. There is no `--run-stage` flag in any `run.mjs` script.
 - ❌ Inventing or using stage names or subagent names not listed in the persona skill's Stage Sequence table
 - ❌ Claiming a subagent ran without having called `runSubagent` to invoke it
 - ❌ Emitting a fake progress trace (e.g. `[Stage 1/3] initialize → invoking uwf-project_manager-initiate`) without actually calling `runSubagent` immediately after
