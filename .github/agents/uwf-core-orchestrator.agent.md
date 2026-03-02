@@ -1,4 +1,3 @@
-```chatagent
 ---
 name: uwf-core-orchestrator
 description: "Generic persona-driven orchestrator. Bootstrap with a workflow skill to drive any UWF workflow sequence."
@@ -9,7 +8,6 @@ tools:
 user-invokable: true
 argument-hint: "workflow (required): name of the persona skill to load (e.g. project_manager, sw_dev, book_writer); outputPath (default ./tmp/workflow-artifacts): base path for artifacts; statePath (default ./tmp/uwf-state.json): workflow state file."
 agents:
-  # Core agents — shared by all personas
   - uwf-core-project-tracking
   - uwf-core-discovery
   - uwf-core-requirements
@@ -19,11 +17,9 @@ agents:
   - uwf-core-acceptance
   - uwf-core-retro
   - uwf-core-technical-writer
-  # project_manager persona agents
   - uwf-project_manager-intake
   - uwf-project_manager-timeline-planner
   - uwf-project_manager-reviewer
-  # sw_dev persona agents
   - uwf-sw_dev-intake
   - uwf-sw_dev-work-planner
   - uwf-sw_dev-reviewer
@@ -63,13 +59,3 @@ agents:
 ## If the `workflow` Argument Is Missing
 
 Invoke `vscode/askQuestions` and ask the user which workflow they want to run. List the available skills found under `.github/skills/uwf-*/SKILL.md`. Pass the answer back as the `workflow` argument and proceed.
-
----
-
-## Adding New Workflows
-
-To add a new persona (e.g. `book_writer`, `ui_designer`):
-1. Create `.github/skills/uwf-{name}/SKILL.md` following the persona skill structure defined in the engine skill.
-2. Add all new stage agents introduced by the persona to the `agents:` list in this file.
-3. Bootstrap this orchestrator with `workflow={name}`.
-```
