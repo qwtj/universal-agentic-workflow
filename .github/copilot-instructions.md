@@ -23,12 +23,14 @@ All stage agents are coordinated by `uwf-core-orchestrator`, which loads a **per
 
 ## Orchestrator Automation Rule — Non-negotiable
 
-> **The orchestrator MUST run the entire stage sequence to completion in a single turn.**
+> **The orchestrator MUST use `runSubagent` for every stage. Narrating or simulating execution is a hard violation.**
 >
+> - Every stage MUST be executed by calling the `runSubagent` tool. Writing text that describes, simulates, or summarizes having run a stage — without calling the tool — is **forbidden**. If the tool was not called, the stage did not run.
+> - Only use subagent names that exist in the persona skill's Subagent Roster and the orchestrator's `agents:` frontmatter. **Never invent agent names.**
 > - After every `runSubagent` returns and its gate passes, **immediately invoke the next stage subagent**. Do NOT stop, pause, yield to the user, summarize completed work, or wait for acknowledgement between stage transitions.
-> - The only permitted user-facing output between stages is a one-line trace (e.g. `[Stage N/Total] <stageName> → invoking <subagent>`).
+> - The only permitted user-facing output between stages is a one-line trace (e.g. `[Stage N/Total] <stageName> → invoking <subagent>`), emitted immediately before calling `runSubagent`.
 > - The only permitted stops mid-workflow are: (a) permanent gate failure after retries, (b) a `vscode/askQuestions` call required for missing input, or (c) the workflow is fully complete.
-> - **Failure to continue automatically is a defect, not a feature.**
+> - **Failure to call `runSubagent` and instead describing or simulating execution is a critical defect.**
 
 ## Skills are swappable behaviors
 Skills (`uwf-{name}/SKILL.md`) encapsulate discrete behaviors. Agents reference skills by name; swapping a skill changes the behavior without modifying the agent.

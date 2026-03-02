@@ -6,6 +6,11 @@ agent: "uwf-core-orchestrator"
 workflow: "sw_dev"
 ---
 # Tasks
-1. Get an active and groomed issue.
-2. Proceed with `Issue Workflow` for the active issue.
-3. Complete when the active and groomed issue has been fully implemented and accepted.
+Run the complete `sw_dev` workflow end-to-end:
+1. Read `.github/skills/uwf-orchestration-engine/SKILL.md` and `.github/skills/uwf-sw_dev/SKILL.md`.
+2. Call `runSubagent` for **every stage** in the persona's Stage Sequence table, in order, without stopping between stages.
+3. Emit a single-line trace before each `runSubagent` call.
+4. Run the gate check script after each subagent returns; apply Gate Failure Protocol if needed.
+5. Only stop on permanent gate failure, a required user question (`vscode/askQuestions`), or final workflow completion.
+
+**Do NOT narrate, simulate, or summarize stages. Every stage requires an actual `runSubagent` tool call. Describing or pretending to run a stage without calling the tool is a critical violation.**

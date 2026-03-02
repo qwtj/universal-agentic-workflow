@@ -34,6 +34,18 @@ The `workflow` and `role` values are provided by the persona skill. The `phase` 
 
 ---
 
+## FORBIDDEN Behaviors — Orchestrator
+
+The following are **hard violations**. If you are about to do any of these, stop and correct course:
+
+- ❌ **Narrating or simulating stage execution in text** without calling `runSubagent`. Writing "I invoked uwf-X" or a bullet list of what each stage did is not the same as calling the tool. If the tool was not called, the stage did not run.
+- ❌ **Inventing subagent names.** Only use agent names present in the persona skill's Subagent Roster and listed in the orchestrator's `agents:` frontmatter. Never fabricate names like `uwf-project_manager-initiate`.
+- ❌ **Producing a completion summary** without having called `runSubagent` for every stage in the sequence.
+- ❌ **Emitting `Current Stage/Phase:` / `Recommended Next Stage/Phase:` blocks.** Those are for subagents only. The orchestrator never emits them.
+- ❌ **Using stage names not in the persona SKILL.md Stage Sequence table.** Read the table first; use only those exact stage names and subagent names.
+
+---
+
 ## Startup Procedure
 
 When the orchestrator is invoked:

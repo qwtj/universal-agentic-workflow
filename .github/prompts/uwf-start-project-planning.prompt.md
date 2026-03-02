@@ -5,8 +5,15 @@ argument-hint: "New project: describe what you want to build + constraints. Retu
 agent: "uwf-core-orchestrator"
 ---
 ## Input
-- wokflow_persona: "project_manager"
-- A concept, project purposal, feature purposal, wireframe, or other idea for a digital product or feature to build, ideally with some constraints or acceptance criteria.
+- workflow_persona: "project_manager"
+- A concept, project proposal, feature proposal, wireframe, or other idea for a digital product or feature to build, ideally with some constraints or acceptance criteria.
 
 # Tasks
-Start workflow execution by kicking of the project planning intake.
+Run the complete `project_manager` workflow end-to-end:
+1. Read `.github/skills/uwf-orchestration-engine/SKILL.md` and `.github/skills/uwf-project_manager/SKILL.md`.
+2. Call `runSubagent` for **every stage** in the persona's Stage Sequence table, in order, without stopping between stages.
+3. Emit a single-line trace before each `runSubagent` call.
+4. Run the gate check script after each subagent returns; apply Gate Failure Protocol if needed.
+5. Only stop on permanent gate failure, a required user question (`vscode/askQuestions`), or final workflow completion.
+
+**Do NOT narrate, simulate, or summarize stages. Every stage requires an actual `runSubagent` tool call. Describing or pretending to run a stage without calling the tool is a critical violation.**
