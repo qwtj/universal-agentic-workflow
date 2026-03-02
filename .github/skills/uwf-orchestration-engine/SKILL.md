@@ -50,12 +50,16 @@ When the orchestrator is invoked:
 
 ## Gate Enforcement
 
-For every stage, after the designated subagent returns:
+For every stage, after the designated subagent returns, run the persona's gate script (see **Script-Driven Gate Enforcement** below):
 
-1. Identify the gate for that stage from the persona skill's gate definitions.
-2. Verify each required artifact exists and is non-empty.
-3. If the gate **passes** → log `GATE PASS: <gate_name>` and advance.
-4. If the gate **fails** → execute the Gate Failure Protocol below.
+```sh
+node .github/skills/uwf-<workflow>/run.mjs --check-gate <stageName>
+```
+
+- Exit `0` → log `GATE PASS: <stageName>` and advance to the next stage.
+- Exit `1` → parse the JSON failure list from stdout and execute the Gate Failure Protocol below.
+
+Do **not** evaluate gate conditions through reasoning or artifact inspection in the conversation loop — the script is the authoritative gate.
 
 ---
 
@@ -89,19 +93,72 @@ When a reviewer subagent returns findings:
 
 ---
 
+## Script-Driven Gate Enforcement
+
+Gate enforcement for each persona is implemented in a deterministic script, not in the orchestrator's reasoning loop. Every persona skill directory contains a `run.mjs` file alongside its `SKILL.md`.
+
+### Orchestrator gate-check protocol
+
+Before advancing past any stage, the orchestrator **must** run the gate check via terminal:
+
+```sh
+node .github/skills/uwf-<workflow>/run.mjs --check-gate <stageName> \
+  --output-path ./tmp/workflow-artifacts \
+  --state-path ./tmp/uwf-state.json
+```
+
+**Exit codes:**
+| Code | Meaning |
+|---|---|
+| `0` | Gate passed — advance to next stage |
+| `1` | Gate failed — stdout contains JSON `{ stage, passed, failures[] }` |
+| `2` | Usage error (bad stage name / missing args) |
+
+On exit code `1`, apply the Gate Failure Protocol (re-invoke responsible subagent with failure details, up to `maxRetries` times). Retrieve `maxRetries` and `onGateFailure` for any stage via:
+
+```sh
+node .github/skills/uwf-<workflow>/run.mjs --list-stages
+```
+
+### Shared utilities
+
+All `run.mjs` files import from `.github/skills/uwf-orchestration-engine/skill-runner.mjs`, which provides:
+- `requireNonEmptyFile(path, label)` — checks file exists and is non-empty
+- `requireFileContains(path, needle, label)` — checks file contains expected text
+- `requireFilesWithPrefix(dir, prefix, label)` — checks at least one matching file exists
+- `requireFileMatchingPattern(baseDir, regex, label)` — recursive pattern match
+- `gatePass(stageName)` / `gateFail(stageName, failures[])` — result constructors
+- `runCLI(stages)` — CLI dispatcher; call as the entry point of every `run.mjs`
+
+---
+
 ## Adding a New Workflow (for workflow authors)
 
-To create a new persona:
-1. Create `.github/skills/uwf-{name}/SKILL.md` with the structure defined below.
-2. Add all new stage agents to the `agents:` list in `uwf-core-orchestrator.agent.md`.
-3. Bootstrap the orchestrator with `workflow={name}`.
+To create a new persona, use the scaffolder:
+
+```sh
+node scripts/scaffold-skill.mjs --name <skill-name> --stages "stage1,stage2,stage3"
+```
+
+This generates skeleton `run.mjs` and `SKILL.md` files with TODO stubs. Then:
+
+1. Fill in the `gate()` function stubs in `.github/skills/uwf-{name}/run.mjs`.
+2. Create stage agent files: `.github/agents/uwf-{name}-{stage}.agent.md`.
+3. Add all new stage agents to the `agents:` list in `uwf-core-orchestrator.agent.md`.
+4. Bootstrap the orchestrator with `workflow={name}`.
+
+### Required artifacts per persona
+
+| Artifact | Content |
+|---|---|
+| `SKILL.md` | `mode`, Stage Sequence table, Subagent Roster, Artifact Prefix, Persona-Specific Rules |
+| `run.mjs` | `stages[]` array with `name`, `agent`, `maxRetries`, `onGateFailure`, `gate()` for every stage |
 
 ### Required sections in a persona SKILL.md
 
 | Section | Content |
 |---|---|
 | `mode` | The string passed as `mode` in the invocation contract (e.g. `project`, `issues`, `design`, `writing`) |
-| `Stage Sequence` | Ordered table: `# \| Phase \| Subagent \| Purpose` |
-| `Gate Definitions` | One gate per stage: required artifact paths and field-level checks |
+| `Stage Sequence` | Ordered table: `# \| Stage \| Subagent \| Purpose` — gate logic lives in `run.mjs`, not here |
 | `Subagent Roster` | List of all subagent names this persona uses |
 | `Artifact Prefix` | The filename prefix for all generated artifacts (e.g. `project-`, `issues-`) |

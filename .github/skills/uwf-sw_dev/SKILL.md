@@ -60,62 +60,19 @@ Execute stages **in this exact order** for each active issue. Do not advance pas
 
 ---
 
-## Gate Definitions
+## Gate Enforcement
 
-### Gate 0 — Issue Context Ready
-| Check | Path / Condition |
-|---|---|
-| Active issue identified | `uwf-core-project-tracking` returned an issue ID |
-| State file is readable | `./tmp/uwf-state.json` |
+Gate logic is implemented in [`run.mjs`](run.mjs) — not in this document. The orchestrator checks each stage gate by running:
 
-### Gate 1 — Intake Complete
-| Check | Path / Condition |
-|---|---|
-| Intake artifact exists and is non-empty | `./tmp/workflow-artifacts/issues-intake.md` |
-| Issue ID referenced in intake | Intake doc contains the active issue ID |
+```sh
+node .github/skills/uwf-sw_dev/run.mjs --check-gate <stageName>
+```
 
-### Gate 3 — Discovery Complete
-| Check | Path / Condition |
-|---|---|
-| Discovery artifact exists and is non-empty | `./tmp/workflow-artifacts/issues-discovery.md` |
-| Intake updated or confirmed unchanged | Agent confirmed no intake amendments needed, or `issues-intake.md` updated |
+To see the full stage list with retry limits:
 
-### Gate 5 — Requirements Complete
-| Check | Path / Condition |
-|---|---|
-| Requirements artifact exists and is non-empty | `./tmp/workflow-artifacts/issues-requirements.md` |
-
-### Gate 6 — ADR Gate *(Conditional)*
-| Check | Path / Condition |
-|---|---|
-| If ADRs recommended | At least one `./docs/adr/ADR-*.md` file exists |
-| If no ADRs needed | Log `PASS — not required` and continue |
-
-### Gate 7 — Security Plan Gate *(Conditional)*
-| Check | Path / Condition |
-|---|---|
-| If issue is security-sensitive | `./tmp/workflow-artifacts/issues-security-plan.md` exists and is non-empty |
-| If not security-sensitive | Log `PASS — not required` and continue |
-
-### Gate 8 — Test Plan Complete
-| Check | Path / Condition |
-|---|---|
-| Test plan artifact exists and is non-empty | `./tmp/workflow-artifacts/issues-test-plan.md` |
-
-### Gate 9 — Work Plan Complete
-| Check | Path / Condition |
-|---|---|
-| Work plan artifact exists and is non-empty | `./tmp/workflow-artifacts/issues-plan.md` |
-
-### Gate 11 — Review Clean
-| Check | Condition |
-|---|---|
-| Reviewer returned a clean bill | No outstanding fix items; or fix-loop completed ≤ 3 cycles |
-
-### Gate 13 — Acceptance Complete
-| Check | Path / Condition |
-|---|---|
-| Acceptance artifact exists and is non-empty | `./tmp/workflow-artifacts/issues-acceptance.md` |
+```sh
+node .github/skills/uwf-sw_dev/run.mjs --list-stages
+```
 
 ---
 

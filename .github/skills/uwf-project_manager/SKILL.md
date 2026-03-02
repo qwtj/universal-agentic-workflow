@@ -58,71 +58,19 @@ Execute stages **in this exact order**. Do not advance past a stage until its ga
 
 ---
 
-## Gate Definitions
+## Gate Enforcement
 
-### Gate 0 — State Initialized
-| Check | Path / Condition |
-|---|---|
-| State file exists | `./tmp/uwf-state.json` |
-| Phase is `intake` or later | `phase` field in JSON |
+Gate logic is implemented in [`run.mjs`](run.mjs) — not in this document. The orchestrator checks each stage gate by running:
 
-### Gate 1 — Intake Complete
-| Check | Path / Condition |
-|---|---|
-| Intake artifact exists and is non-empty | `./tmp/workflow-artifacts/project-intake.md` |
-| Contains required sections | Goal, Non-goals, Constraints, Success metrics, Stakeholders, Target environment, Risk tolerance, Work-breakdown strategy |
+```sh
+node .github/skills/uwf-project_manager/run.mjs --check-gate <stageName>
+```
 
-### Gate 3 — Discovery Complete
-| Check | Path / Condition |
-|---|---|
-| Discovery artifact exists and is non-empty | `./tmp/workflow-artifacts/project-discovery.md` |
-| Intake updated with discovery amendments | `project-intake.md` contains `<!-- updated by discovery -->` markers, or agent confirmed no changes needed |
+To see the full stage list with retry limits:
 
-### Gate 5 — Requirements Complete
-| Check | Path / Condition |
-|---|---|
-| Requirements artifact exists and is non-empty | `./tmp/workflow-artifacts/project-requirements.md` |
-
-### Gate 6 — ADR Gate *(Conditional)*
-| Check | Path / Condition |
-|---|---|
-| If discovery or requirements recommended ADRs | At least one `./docs/adr/ADR-*.md` file exists |
-| If no ADRs needed | Log `PASS — not required` and continue |
-
-### Gate 7 — Security Plan Gate *(Conditional)*
-| Check | Path / Condition |
-|---|---|
-| If project is security-sensitive | `./tmp/workflow-artifacts/project-security-plan.md` exists and is non-empty |
-| If not security-sensitive | Log `PASS — not required` and continue |
-
-### Gate 8 — Test Plan Complete
-| Check | Path / Condition |
-|---|---|
-| Test plan artifact exists and is non-empty | `./tmp/workflow-artifacts/project-test-plan.md` |
-
-### Gate 9 — Timeline & Backlog Complete
-| Check | Path / Condition |
-|---|---|
-| Issues backlog exists and is non-empty | `./tmp/workflow-artifacts/issues-backlog.md` |
-| Project roadmap exists and is non-empty | `./tmp/workflow-artifacts/project-roadmap.md` |
-| All issues tracked in project tracking | Cross-reference `issues-backlog.md` entries against `uwf-core-project-tracking` state tree |
-
-### Gate 10 — Review Clean
-| Check | Condition |
-|---|---|
-| Reviewer returned a clean bill | No outstanding fix items; or fix-loop completed ≤ 3 cycles |
-
-### Gate 11 — Issue State Tree Populated
-| Check | Path / Condition |
-|---|---|
-| At least one issue file exists | `./tmp/state/*/*/open/*.md` matches one or more files |
-| Every intake goal maps to an issue | Cross-reference `project-intake.md` goals against `issues-backlog.md` entries |
-| No circular `depends-on` chains | Validated by `uwf-local-tracking` skill |
-
-### Gate 12 — Acceptance Complete
-| Check | Path / Condition |
-|---|---|
-| Acceptance artifact exists and is non-empty | `./tmp/workflow-artifacts/project-acceptance.md` |
+```sh
+node .github/skills/uwf-project_manager/run.mjs --list-stages
+```
 
 ---
 
