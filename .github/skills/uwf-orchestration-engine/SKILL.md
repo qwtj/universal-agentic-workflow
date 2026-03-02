@@ -52,12 +52,16 @@ When the orchestrator is invoked:
 
 1. Read and internalize **this skill** (`uwf-orchestration-engine`) to load engine behavior.
 2. Read and internalize the **persona skill** at `.github/skills/uwf-{workflow}/SKILL.md` to load:
-   - The `mode` value for the invocation contract
-   - The ordered stage sequence table
-   - All gate definitions
+   - The `role` value for the invocation contract
    - The subagent roster
-3. Invoke `uwf-core-project-tracking` to initialize or read `uwf-state.json` and obtain the current phase.
-4. Begin executing stages from the persona's stage sequence in order, starting from the current phase.
+   - Persona-specific operating rules
+3. **Run the stage-list script to obtain the authoritative stage sequence:**
+   ```sh
+   node .github/skills/uwf-{workflow}/run.mjs --list-stages
+   ```
+   Parse the JSON output and record every stage name in order. **This script output is your sole authoritative stage list.** The SKILL.md Stage Sequence table is human-readable documentation only — it may be incomplete or stale. You MUST execute every stage returned by the script in order. Skipping, reordering, or substituting stages based on memory, summarization, or reading the table is a **hard violation**. Conditional stages (ADR, security, test-plan, etc.) are **never skipped** — their gate script auto-passes when not applicable, but you must still invoke the subagent for every stage the script returns.
+4. Invoke `uwf-core-project-tracking` to initialize or read `uwf-state.json` and obtain the current phase.
+5. Begin executing every stage from the script-supplied list in order, starting from the current phase.
 
 ---
 

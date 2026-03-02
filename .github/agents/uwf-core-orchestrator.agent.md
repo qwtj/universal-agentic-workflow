@@ -5,6 +5,8 @@ tools:
   - agent
   - todo
   - vscode/askQuestions
+  - execute
+  - read
 user-invokable: true
 argument-hint: "workflow (required): name of the persona skill to load (e.g. project_manager, sw_dev, book_writer); outputPath (default ./tmp/workflow-artifacts): base path for artifacts; statePath (default ./tmp/uwf-state.json): workflow state file."
 agents:
@@ -80,9 +82,15 @@ agents:
    This governs all orchestration behavior: the invocation contract, non-negotiable principles, gate enforcement, retry limits, and the review fix-loop protocol.
 
 2. Read and internalize `.github/skills/uwf-{workflow}/SKILL.md` (where `{workflow}` is the argument provided by the caller).
-   This provides your `role` value, ordered stage sequence, gate definitions, subagent roster, and persona-specific operating rules.
+   This provides your `role` value, subagent roster, and persona-specific operating rules.
 
-3. Follow the **Startup Procedure** defined in the engine skill to initialize state and begin stage execution.
+3. **Immediately run the stage-list script and record every stage in order:**
+   ```sh
+   node .github/skills/uwf-{workflow}/run.mjs --list-stages
+   ```
+   This JSON output is your **only** authoritative stage list. Do not derive the stage sequence from the SKILL.md table, from memory, or from any other source. Every stage name returned by the script must be executed — no summarizing, no skipping.
+
+4. Follow the **Startup Procedure** defined in the engine skill to initialize state and begin stage execution.
 
 ---
 

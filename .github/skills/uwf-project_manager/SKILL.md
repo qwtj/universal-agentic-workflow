@@ -35,6 +35,11 @@ Persona skill for macro-level project planning: scoping a new effort, producing 
 
 ## Stage Sequence
 
+> **This table is documentation only — do NOT use it as your stage list.**
+> Run `node .github/skills/uwf-project_manager/run.mjs --list-stages` at startup and execute every stage the script returns.
+>
+> **Conditional stages** (`adr`, `security-plan`) are **never skipped.** Their gate script auto-passes (`PASS — not required`) when the condition is not met, but you must still invoke the subagent. Only the gate script decides whether a stage's work is required.
+
 Execute stages **in this exact order**. Do not advance past a stage until its gate passes.
 
 | # | Phase (uwf-state) | Subagent | Purpose |
