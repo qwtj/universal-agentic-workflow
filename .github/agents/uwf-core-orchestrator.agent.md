@@ -94,6 +94,69 @@ agents:
 
 ---
 
+## Subagent Question Protocol
+
+When a subagent response contains `QUESTIONS_NEEDED`:
+
+1. **Parse** the question blocks using this format:
+   ```
+   [Group Name]
+   Q: <question text>
+   Proposed: <default/inferred value>
+   Required: <true|false>
+   ```
+
+2. **Call** `vscode/askQuestions` tool with:
+   - Questions extracted from `Q:` fields
+   - Proposed answers shown as context or recommended options
+   - Use free-text input for open-ended questions
+   - Use options for constrained choices (e.g., risk level: low/medium/high)
+   - Batch all questions in a single call
+
+3. **Re-invoke** the same subagent with enhanced context:
+   ```json
+   {
+     ...originalContext,
+     "answered": {
+       "Goal": "user's answer",
+       "Constraints": "user's answer",
+       ...
+     }
+   }
+   ```
+
+4. **Gate check** the subagent's second response as normal. If the gate still fails, apply standard retry logic.
+
+**Do NOT advance to the next stage until questions are answered and the gate passes.** The question protocol is part of the stage execution, not a separate workflow interruption.
+
+**Example:**
+
+If intake agent returns:
+```
+QUESTIONS_NEEDED
+
+[Goal]
+Q: What is the primary goal of this project?
+Proposed: Build a blog platform
+Required: true
+
+[Risk tolerance]
+Q: What is the acceptable risk level (low/medium/high)?
+Proposed: medium
+Required: false
+```
+
+You should:
+1. Extract questions
+2. Call `vscode/askQuestions` with the two questions
+3. Get answers: `{"Goal": "Create a health monitoring dashboard", "Risk tolerance": "low"}`
+4. Re-invoke `uwf-project_manager-intake` with context including `answered: {Goal: "...", "Risk tolerance": "low"}`
+5. Verify the intake document is complete
+6. Run gate check
+7. Proceed to next stage if gate passes
+
+---
+
 ## If the `workflow` Argument Is Missing
 
 Invoke `vscode/askQuestions` and ask the user which workflow they want to run. List the available skills found under `.github/skills/uwf-*/SKILL.md`. Pass the answer back as the `workflow` argument and proceed.

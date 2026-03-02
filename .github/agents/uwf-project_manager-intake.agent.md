@@ -19,7 +19,7 @@ Given a new project proposal or concept, capture the user objective and intended
 ## Inputs
 -  An idea in the form of a project proposal, concept, feature request, or other digital artifact.
 
-### Questions to ask if unable to infer from input ((return to calling agent for answering and provide proposed answer):
+### Questions to ask if unable to infer from input (return to calling agent for answering and provide proposed answer):
 1. What is the primary goal of this project?
 2. What is explicitly out of scope?
 3. Who are the stakeholders and what is the target environment?
@@ -30,6 +30,24 @@ Given a new project proposal or concept, capture the user objective and intended
    - **Issues / User Stories** — individual shippable features or fixes
    - **Tasks** — sub-steps within an issue (hours)
    Choose the levels that fit the project size. Document the rationale.
+
+### How to Request Missing Information
+
+If you cannot infer required fields from the input, use the `uwf-question-protocol`:
+
+1. Read `.github/skills/uwf-question-protocol/SKILL.md`
+2. Extract what you CAN infer from the input prompt and workspace context
+3. Return `QUESTIONS_NEEDED` block for missing fields using the format specified in the protocol
+4. When re-invoked with `answered` in context, use those values to complete the intake document
+
+**Example:**
+
+If user said "build a blog" without other details:
+- **Infer Goal:** "Build a blogging platform"
+- **Infer Work-breakdown:** Milestones + Issues (reasonable for web project)
+- **Ask about:** Constraints, Stakeholders, Success metrics, Risk tolerance
+
+**NEVER output placeholder values like `...`, `[TBD]`, or `[TODO]` in the intake document.** These will fail gate validation. If information is missing, either ask for it using the question protocol or document it as an explicit assumption with reasoning.
 
 ### Required output: `./tmp/workflow-artifacts/project-intake.md`
 Must include all sections:

@@ -7,6 +7,31 @@ user-invokable: false
 # Timeline Planning Stage
 This stage produces the **roadmap** and **issue state structure**. It is NOT an implementation plan.  Do not write code, create source files, or produce implementation steps.
 
+## CRITICAL Pre-flight Check
+
+Before generating issues:
+
+1. Read `./tmp/workflow-artifacts/project-intake.md`
+2. Verify the Goal section has substantive content (not `...`, `[TBD]`, `[TODO]`, or other placeholders)
+3. If intake is empty or contains only placeholder values, return this error:
+   ```
+   GATE FAILURE: project-intake.md contains placeholder values. Cannot plan without project goal.
+   
+   The intake stage must capture the actual project goal before timeline planning can begin.
+   ```
+
+**Do NOT generate meta-planning issues** like:
+- "Define project objectives"
+- "Populate intake document"
+- "Establish requirements"
+- "Set up repository structure"
+
+These indicate an upstream failure. The intake stage is responsible for capturing the project goal. If you see placeholders in the intake document, it means the intake stage did not complete successfully.
+
+**Only generate issues related to the actual project deliverables** described in the Goal section.
+
+---
+
 ## Inputs
 - `./tmp/workflow-artifacts/project-intake.md` — goal, non-goals, work-breakdown strategy
 - `./tmp/workflow-artifacts/project-discovery.md` — current state, constraints, unknowns

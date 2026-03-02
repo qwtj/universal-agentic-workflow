@@ -21,6 +21,45 @@ import {
 } from "../uwf-orchestration-engine/skill-runner.mjs";
 
 // ---------------------------------------------------------------------------
+// Helpers for substantive content validation
+// ---------------------------------------------------------------------------
+
+/**
+ * Check if a section in a file has substantive content (not placeholders).
+ * @param {string} filePath - Path to the file to check
+ * @param {string} section - Section name to look for
+ * @returns {string|null} Error message if content is missing/placeholder, null if valid
+ */
+function hasSubstantiveContent(filePath, section) {
+  if (!fs.existsSync(filePath)) {
+    return `File ${filePath} does not exist`;
+  }
+  
+  const content = fs.readFileSync(filePath, "utf8");
+  const regex = new RegExp(`${section}[:\\s]*([^\\n]+)`, "i");
+  const match = content.match(regex);
+  
+  if (!match || !match[1]) {
+    return `Section "${section}" not found or has no content`;
+  }
+  
+  const value = match[1].trim();
+  const placeholders = ["...", "[TBD]", "[TODO]", "TBD", "TODO", "[assumption]"];
+  
+  if (value.length === 0) {
+    return `Section "${section}" is empty`;
+  }
+  
+  for (const placeholder of placeholders) {
+    if (value === placeholder || value.startsWith(placeholder)) {
+      return `Section "${section}" contains placeholder value: ${placeholder}`;
+    }
+  }
+  
+  return null; // Valid content
+}
+
+// ---------------------------------------------------------------------------
 // Stage definitions
 // ---------------------------------------------------------------------------
 
@@ -59,7 +98,7 @@ const stages = [
       if (f1) {
         failures.push(f1);
       } else {
-        // Verify required sections are present
+        // Verify required sections are present AND have substantive content
         for (const section of [
           "Goal",
           "Non-goals",
@@ -70,7 +109,15 @@ const stages = [
           "Work-breakdown strategy",
         ]) {
           const f = requireFileContains(artifact, section, "project-intake.md");
-          if (f) failures.push(f);
+          if (f) {
+            failures.push(f);
+          } else {
+            // Check that section has substantive content, not just placeholders
+            const contentError = hasSubstantiveContent(artifact, section);
+            if (contentError) {
+              failures.push(contentError);
+            }
+          }
         }
       }
       return failures.length ? gateFail("intake", failures) : gatePass("intake");
