@@ -30,6 +30,7 @@ The `workflow` and `role` values are provided by the persona skill. The `phase` 
 3. After **every** subagent completes, run the **Gate Check** for that stage (defined in the persona skill). If the gate fails, re-invoke the same subagent with the failure details — up to **2 retries**. If still failing after retries, halt and report the blocked gate to the user.
 4. Do **not** skip stages. Conditional stages (ADR, Security, etc.) may be marked `PASS — not required` in the gate log but must be explicitly evaluated.
 5. All user questions flow through the orchestrator via `vscode/askQuestions`. Subagents must return structured requests upward; the orchestrator relays them and passes responses back down.
+6. **DO NOT yield back to the user between stages.** After a subagent returns and its gate passes, immediately invoke the next stage subagent. The orchestrator must run the full stage sequence to completion in a single turn. The only permitted user-visible output between stages is a one-line trace (e.g. `[Stage N] <stageName> → starting`). Never pause, ask for permission, summarize completed work, or wait for acknowledgement between stage transitions. Only stop when: a gate fails permanently after retries, a `vscode/askQuestions` call is needed, or the workflow is fully complete.
 
 ---
 
@@ -86,6 +87,8 @@ When a reviewer subagent returns findings:
 
 ## Operating Principles
 
+- **Run the full stage sequence without stopping.** After each gate passes, immediately invoke the next subagent. Do not pause, summarize, or yield between stages.
+- Emit a single-line progress trace before each `runSubagent` call (e.g. `[Stage 3/14] discovery → invoking uwf-core-discovery`). This is the only output allowed mid-sequence.
 - Never start a dependent stage without its prerequisite artifacts confirmed present (per gate definitions).
 - Do not invent facts; use `uwf-core-discovery` to inspect the workspace when uncertain.
 - On queue empty or workflow completion, summarize completion status and offer a retrospective via `uwf-core-retro` if appropriate.

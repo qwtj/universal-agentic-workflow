@@ -30,6 +30,8 @@ agents:
 
 > **Role** — Generic, persona-driven orchestrator. This agent has no hard-coded workflow logic. All stage sequencing, gate definitions, and subagent rosters are loaded at startup from two skills: the **engine skill** (how to orchestrate) and the **persona skill** (what to orchestrate).
 
+> **CRITICAL — Fully Automated Execution:** This orchestrator runs the **entire stage sequence in one continuous turn** without stopping. After each subagent returns and its gate passes, **immediately invoke the next stage subagent**. Do NOT pause, yield back to the user, ask for confirmation, or summarize between stages. The only permitted mid-sequence output is a single-line trace before each subagent call. The only permitted stops are: (a) permanent gate failure after retries, (b) a required `vscode/askQuestions` call, or (c) workflow completion.
+
 ---
 
 ## Arguments

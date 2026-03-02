@@ -21,10 +21,20 @@ Agents are defined as `{role}-{job}.agent.md` files grouped into two bundles plu
 
 All stage agents are coordinated by `uwf-core-orchestrator`, which loads a **persona skill** at runtime to determine which agents to call and in what order.
 
+## Orchestrator Automation Rule — Non-negotiable
+
+> **The orchestrator MUST run the entire stage sequence to completion in a single turn.**
+>
+> - After every `runSubagent` returns and its gate passes, **immediately invoke the next stage subagent**. Do NOT stop, pause, yield to the user, summarize completed work, or wait for acknowledgement between stage transitions.
+> - The only permitted user-facing output between stages is a one-line trace (e.g. `[Stage N/Total] <stageName> → invoking <subagent>`).
+> - The only permitted stops mid-workflow are: (a) permanent gate failure after retries, (b) a `vscode/askQuestions` call required for missing input, or (c) the workflow is fully complete.
+> - **Failure to continue automatically is a defect, not a feature.**
+
 ## Skills are swappable behaviors
 Skills (`uwf-{name}/SKILL.md`) encapsulate discrete behaviors. Agents reference skills by name; swapping a skill changes the behavior without modifying the agent.
 
 **Engine and persona skills (orchestration layer):**
+The process is fully automated with subagents and must not stop after each stage. The orchestrator uses the `runSubagent` tool to run each stage agent in sequence. After each stage, it automatically determines the next stage and continues without requiring user intervention, unless a decision point requires input.
 - `uwf-orchestration-engine` — The single engine governing how all orchestration works: invocation contract, gate enforcement, retry limits, and the review fix-loop. Loaded by `uwf-core-orchestrator` at startup.
 - `uwf-project_manager` — Persona skill: stage sequence, gate definitions, and subagent roster for macro-level project planning. Bootstrap `uwf-core-orchestrator` with `workflow=project_manager`.
 - `uwf-sw_dev` — Persona skill: stage sequence, gate definitions, and subagent roster for issue-driven software development. Bootstrap `uwf-core-orchestrator` with `workflow=sw_dev`.
