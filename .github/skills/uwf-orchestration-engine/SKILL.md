@@ -7,7 +7,39 @@ Load this skill at orchestrator startup. It governs **how** any persona-driven o
 
 ## Invocation Contract
 
-Every `runSubagent` call **must** include the following context object so subagents know their operating environment.
+Every `runSubagent` call **must** embed the following context block inside the `prompt` string so subagents know their operating environment.
+
+> **CRITICAL — tool call structure:** The `runSubagent` tool takes three separate parameters:
+> - `agentName` (string) — the subagent to invoke, e.g. `"uwf-sw_dev-intake"`
+> - `description` (string) — a short 3-5 word task label, e.g. `"Run sw_dev intake stage"`
+> - `prompt` (string) — **always a plain string**; the JSON context block below must be embedded *inside* this string
+>
+> ❌ **Wrong** — passing raw JSON as the entire prompt:
+> ```
+> prompt: '{"role":"project"}'
+> ```
+> This gives the subagent no instructions; it will fall back to listing stages instead of executing them.
+>
+> ✅ **Correct** — embedding the context block inside a descriptive prompt string:
+> ```
+> agentName: "uwf-sw_dev-intake"
+> description: "Run sw_dev intake stage"
+> prompt: |
+>   Run the intake stage for the sw_dev workflow.
+>
+>   Context:
+>   {
+>     "workflow":   "sw_dev",
+>     "role":       "issues",
+>     "phase":      "intake",
+>     "outputPath": "./tmp/workflow-artifacts",
+>     "statePath":  "./tmp/uwf-state.json"
+>   }
+>
+>   <goal / issue description goes here>
+> ```
+
+The context fields the prompt string must always include:
 
 ```jsonc
 {

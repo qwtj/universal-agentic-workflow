@@ -49,7 +49,12 @@ agents:
 
 ### REQUIRED — the only acceptable execution loop is:
 1. Emit: `[Stage N/Total] <stageName> → invoking <subagentName>`
-2. Call `runSubagent` with the correct agent name and context payload
+2. Call `runSubagent` using **three separate parameters**:
+   - `agentName`: the subagent name string (e.g. `"uwf-sw_dev-intake"`)
+   - `description`: a 3-5 word label (e.g. `"Run sw_dev intake stage"`)
+   - `prompt`: a **plain string** that contains human-readable instructions AND embeds the JSON context block inline.
+     ❌ Do NOT pass `{"role":"project"}` as the entire prompt — that produces no instructions and causes the subagent to list stages instead of executing them.
+     ✅ The prompt must look like: `"Run the <stageName> stage.\n\nContext:\n{ \"workflow\": \"<workflow>\", \"role\": \"<role>\", ... }\n\n<goal>"`
 3. Receive the result
 4. Run the gate check (`node .github/skills/uwf-<workflow>/run.mjs --check-gate <stageName>`)
 5. If gate passes → go to step 1 for the next stage
