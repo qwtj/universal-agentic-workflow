@@ -4,153 +4,135 @@ description: "Canonical issue-management procedures for UWF state transitions, e
 ---
 # UWF Local Tracking Skill
 
-## Optional Inputs:
--  Existing issues in backlog with milestone and sprint can be found in `./tmp/workflow-artifacts/issues-backlog.md` if present.
--  Existing project roadmap for deliverables and milestones can be found in `./tmp/workflow-artifacts/project-roadmap.md` if present.
+All issue-management operations are implemented as zero-dependency Node.js scripts co-located in this skill folder. Run them from the repo root with `node .github/skills/uwf-local-tracking/<script>.mjs`. Each script outputs JSON to stdout.
+
+## Optional inputs
+- `./tmp/workflow-artifacts/issues-backlog.md` — existing backlog with milestone/sprint placement
+- `./tmp/workflow-artifacts/project-roadmap.md` — project roadmap for deliverables and milestones
 
 ## When to use
-Invoke this skill whenever an agent needs to perform or reason about issue-management behavior, including:
-- Choosing the next eligible issue from `./tmp/state/*/*/open/*.md`
-- Activating work (`open/` → `active/`)
-- Closing or skipping work (`active/` or `open/` → `closed/`)
-- Resetting per-issue workflow artifacts
-- Backlog triage and ungroomed issue creation during intake
+Invoke this skill whenever an agent needs to perform issue-management behavior:
+- Determining operating mode (Project vs Issue)
+- Finding the next eligible issue
+- Activating, closing, or skipping issues
+- Creating new issues or scaffolding the state directory tree
+- Checking overall queue status
 
-This skill is the canonical procedural source for issue-management behavior used by custom agents.
+## Scripts reference
 
-## Canonical state model
-Issue files are tracked under:
+| Operation | Script | Usage |
+|---|---|---|
+| Determine operating mode | `mode.mjs` | `node .github/skills/uwf-local-tracking/mode.mjs` |
+| Find next eligible issue(s) | `next.mjs` | `node .github/skills/uwf-local-tracking/next.mjs` |
+| Activate issue (open → active, reset artifacts) | `activate.mjs` | `node .github/skills/uwf-local-tracking/activate.mjs <issue-path> [--mode <prefix>]` |
+| Close issue after acceptance (active → closed) | `close.mjs` | `node .github/skills/uwf-local-tracking/close.mjs <issue-path>` |
+| Skip issue without activating (open → closed) | `skip.mjs` | `node .github/skills/uwf-local-tracking/skip.mjs <issue-path> [--reason "..."]` |
+| Create a new issue file | `new-issue.mjs` | `node .github/skills/uwf-local-tracking/new-issue.mjs --milestone <M> --sprint <S> --title "..."` |
+| Scaffold open/active/closed directory triplet | `scaffold.mjs` | `node .github/skills/uwf-local-tracking/scaffold.mjs --milestone <M> --sprint <S>` |
+| Report full queue status | `status.mjs` | `node .github/skills/uwf-local-tracking/status.mjs` |
 
-```
-state/
-	<milestone-id>/
-		<sprint-id>/
-			open/
-			active/
-			closed/
-```
+### Key flags
 
-Additional ungroomed backlog intake can use:
+**`activate.mjs`**
+- `--mode <prefix>` — artifact filename prefix (default: `issue`); produces `{prefix}-intake.md`, `{prefix}-discovery.md`, `{prefix}-plan.md`, `{prefix}-acceptance.md`
 
-```
-state/ungroomed/open/
-```
+**`new-issue.mjs`**
+- `--milestone <M>`, `--sprint <S>`, `--title <T>` — required (or use `--ungroomed`)
+- `--id <I>` — explicit id; auto-incremented if omitted
+- `--depends-on "I-001,I-002"` — comma-separated dependency ids
+- `--parallel true|false` — default `false`
+- `--security-sensitive true|false` — default `false`
+- `--acceptance-criteria "<text>"` — one-line stub
+- `--notes "<text>"` — appended to issue body
+- `--ungroomed` — write to `tmp/state/ungroomed/open/` instead
 
-## Procedures
+**`scaffold.mjs`**
+- `--milestone <M>`, `--sprint <S>` — required unless `--ungroomed`
+- `--ungroomed` — create `tmp/state/ungroomed/open/` only
 
-### 1) Determine operating mode
-1. Check whether any path matching `./tmp/state/*/*` exists.
-2. If no such path exists, return **Project Mode**.
-3. If a path exists, return **Issue Mode**.
+**`skip.mjs`**
+- `--reason "<text>"` — rationale prepended as `## Skip reason` in the closed file
 
-### 2) Find next eligible issue (Issue Mode)
-1. Scan all `./tmp/state/*/*/open/*.md` files.
-2. For each candidate, read `depends-on` from frontmatter.
-3. An issue is eligible only if every dependency id exists in any `*/closed/` directory.
-4. Pick the first eligible issue by deterministic order: milestone directory, sprint directory, then filename.
-5. If multiple issues are eligible and independent, return them as parallelizable candidates.
-
-### 3) Activate issue and prepare artifacts
-When an issue is selected:
-1. Move `./tmp/state/<M>/<S>/open/<id>.md` to `./tmp/state/<M>/<S>/active/<id>.md`.
-2. Reset per-issue workflow docs in `tmp/workflow-artifacts/`:
-	 - `{mode}-intake.md`
-	 - `{mode}-discovery.md`
-	 - `{mode}-plan.md`
-	 - `{mode}-acceptance.md`
-3. Return the active issue path and a short activation summary.
-
-### 4) Intake triage and backlog grooming support
-Before or during issue intake:
-1. Scan `./tmp/state/*/*/open/*.md` and `./tmp/state/*/*/active/*.md` for potential duplicates of the incoming request.
-2. If no matching backlog item exists, create a backlog stub in `./tmp/state/ungroomed/open/`.
-3. Check sprint placement fit and recommend move-to-active behavior when immediate execution is intended.
-4. Recommend ordering updates (`order:` field, filename ordering, or `depends-on` edits) when priorities shift.
-5. Return all generated recommendations so intake can record them in `tmp/workflow-artifacts/{mode}-intake.md`.
-
-### 5) Close and skip transitions
-- **Close after acceptance:** move `./tmp/state/<M>/<S>/active/<id>.md` to `./tmp/state/<M>/<S>/closed/<id>.md`.
-- **Skip before start:** move `./tmp/state/<M>/<S>/open/<id>.md` to `./tmp/state/<M>/<S>/closed/<id>.md` and prepend a `## Skip reason` section.
-
-### 6) End-of-queue behavior
-If no eligible `open/` issues remain:
-- Report queue exhaustion and indicate that issue execution is complete for current backlog state.
-- Recommend project completion summary and retrospective.
+### Output shapes (all JSON)
+- `mode.mjs` → `{ "mode": "project" | "issue" }`
+- `next.mjs` → `{ "exhausted": bool, "eligible": [paths], "blocked": [{ path, waiting_on }] }`
+- `activate.mjs` → `{ "activated": path, "mode": str, "issue": {...}, "artifacts_reset": [paths] }`
+- `close.mjs` → `{ "closed": path, "id": str, "title": str }`
+- `skip.mjs` → `{ "skipped": path, "id": str, "title": str, "reason": str }`
+- `new-issue.mjs` → `{ "created": path, "id": str, "title": str }`
+- `scaffold.mjs` → `{ "dirs": [paths] }`
+- `status.mjs` → `{ "mode", "queue_exhausted", "active_issues", "sprints", "totals" }`
 
 ## Required output from skill invocations
-Whenever invoked, return a concise issue-management report with:
+Return a concise issue-management report with:
 - Detected mode
-- Files scanned
-- Transitions performed (if any)
+- Files scanned / transitions performed
 - Recommendations generated (if any)
-- Next action for caller agent
+- Next action for the caller agent
 
-## Orgnanization and lifecycle
-### 1. `./tmp/workflow-artifacts/issues-backlog.md`, — Timeline Roadmap
-Structure by the levels chosen during intake:
-```
-## Milestones / Epics
-- M1-<slug>: <name> — <goal> — <target date or sprint range>
-  - Sprint S1-<slug>: <goal>
-    - Issue I-001: <user story>
-      - Task T-001a: <specific work item>
-```
-Only include levels that apply (not every project needs all four).
-For each milestone/epic include: goal, deliverable, success signal.
+## End-of-queue behavior
+When `next.mjs` returns `{ "exhausted": true }`: report queue exhaustion, recommend project completion summary and retrospective.
 
-### 2. `./tmp/state/` — Issue File-System State
-Create one directory triplet **per sprint**:
-```
-state/<milestone-id>/<sprint-id>/open/
-state/<milestone-id>/<sprint-id>/active/
-state/<milestone-id>/<sprint-id>/closed/
-```
-- `<milestone-id>` matches the `M1-<slug>` ids used in `./tmp/workflow-artifacts/{mode}-plan.md`.
-- `<sprint-id>` matches the `S1-<slug>` ids.
-- For projects with no formal sprints, use a single sprint id of `S1`.
+## Canonical state model
 
-Create one **issue file** per issue/task inside the appropriate `open/` directory:
 ```
-state/<milestone-id>/<sprint-id>/open/<issue-id>.md
+tmp/state/
+  <milestone-id>/
+    <sprint-id>/
+      open/
+      active/
+      closed/
+  ungroomed/
+    open/
 ```
 
-**Issue file format** (frontmatter + body):
-```markdown
+- `<milestone-id>` — matches `M1-<slug>` ids from `./tmp/workflow-artifacts/{mode}-plan.md`
+- `<sprint-id>` — matches `S1-<slug>` ids; use `S1` for projects with no formal sprints
+
+## Issue file format
+
+```
 ---
 id: I-001
 milestone: <milestone-id>
 sprint: <sprint-id>
 title: <short title>
-depends-on: []           # list of issue ids that must be closed first; empty if none
+depends-on: []
 security-sensitive: false
-parallel: false           # true when this issue can run alongside its sibling
-acceptance-criteria: <one-line stub — expanded during Issue Intake>
+parallel: false
+acceptance-criteria: <one-line stub>
+submitter: <agent or script name>
+reason: created
 ---
 
 # <id>: <title>
 
-<Optional additional context, user story, or notes for the intake agent.>
+<Optional context, user story, or notes for the intake agent.>
 ```
 
-- Use sequential ids: `I-001`, `I-002`, … for issues; `T-001a`, `T-001b`, … for sub-tasks.
-- All files start in `open/`. Runtime transitions and queue handling are performed via `uwf-issue-management`.
-- `depends-on` lists ids (not paths); dependency resolution is performed via `uwf-issue-management`.
+- Sequential ids: `I-001`, `I-002`, … for issues; `T-001a`, `T-001b`, … for sub-tasks
+- `depends-on` lists ids (not paths); resolution handled by `next.mjs`
+- `submitter` — agent or script that created/last modified the file
+- `reason` — rationale for current state (created, activated, closed, skipped)
 
-## After producing both artifacts
-1. Verify that every intake goal maps to at least one issue file.
-2. Verify that no circular `depends-on` chains exist.
+## Backlog timeline roadmap (`issues-backlog.md`)
 
-## Unplanned work discovered
-If unplanned work is discovered during any stage, create a spike issue at `./tmp/state/ungroomed/open/<id>.md`. Do not implement unplanned work.
+```
+## Milestones / Epics
+- M1-<slug>: <name> — <goal> — <target date or sprint range>
+  - Sprint S1-<slug>: <goal>
+    - Issue I-001: <user story>
+```
 
-## Logging and Tracing
-At the top of each issue file, include frontmatter with a `submitter` field that is the name of the agent or subagent that contributed to the issue creation or modification. This provides a traceable history of which agents contributed to which work items.
-Alos, include a `reason` field in the frontmatter for opening the issue, which can be updated with the rationale for any subsequent state transitions (e.g. activation, closure, skipping). This allows for traceability of decision-making over the issue lifecycle.
+Include only applicable hierarchy levels. Each milestone must have: goal, deliverable, success signal.
 
-## Intake Stage for Issues
-Any issue that has the following minimum information should be considered ready for implementation:
+## Intake readiness gate
+An issue is ready for implementation when it contains:
 - **Issue goal** — what this specific item delivers
-- **Acceptance criteria** — explicit, testable conditions (copy + expand from backlog stub)
+- **Acceptance criteria** — explicit, testable conditions
 - **Constraints** — what must NOT change, tech limits, time box
 - **Out-of-scope items** — what this issue deliberately defers
-- **Dependencies** — other issues that must be closed first (read `depends-on` from the issue)
+- **Dependencies** — other issues that must be closed first (`depends-on` in frontmatter)
+
+## Unplanned work
+Create a spike at `./tmp/state/ungroomed/open/<id>.md` via `new-issue.mjs --ungroomed`. Do not implement unplanned work inline.
