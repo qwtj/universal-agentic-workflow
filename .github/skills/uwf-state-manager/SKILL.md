@@ -16,6 +16,60 @@ Invoke this skill whenever an agent needs to:
 
 This skill is the single authoritative source for all reads and writes to `./tmp/uwf-state.json`.
 
+**All state operations MUST be performed by running the deterministic script:**
+```
+node .github/skills/uwf-state-manager/state.mjs <command> [options]
+```
+Agents must never write or mutate `./tmp/uwf-state.json` directly or by reasoning. Call the script via terminal and parse the JSON output it prints to stdout.
+
+---
+
+## Script reference
+
+| Command | Purpose |
+|---|---|
+| `read` | Read + validate current state |
+| `init [--mode <mode>]` | Initialize a fresh state file |
+| `advance --to <phase> --agent <id> [--note <text>] [--force]` | Advance to next phase |
+| `rollback --to <phase> --agent <id> [--note <text>]` | Roll back to earlier phase |
+| `set-agent --agent <id> [--force]` | Claim the agent token |
+| `release-agent` | Release the agent token |
+| `check-ready` | Verify prereqs and mark `ready_for_implementation` |
+| `set-status --status <s> --agent <id>` | Set status (`idle`\|`active`\|`blocked`) |
+| `sync` | Derive fields from `./tmp/state/` tree |
+| `note --agent <id> --note <text>` | Append a history entry |
+
+Global options: `--state-path <path>` (default `./tmp/uwf-state.json`), `--output-path <path>` (default `./tmp/workflow-artifacts`).
+
+All output is JSON. Exit code `0` = success, `1` = operational error, `2` = usage error.
+
+### Example invocations
+```sh
+# Read current state
+node .github/skills/uwf-state-manager/state.mjs read
+
+# Initialize a new workflow
+node .github/skills/uwf-state-manager/state.mjs init --mode sw_dev
+
+# Advance from intake → discovery
+node .github/skills/uwf-state-manager/state.mjs advance --to discovery --agent uwf-core-discovery --note "Intake complete"
+
+# Claim the token
+node .github/skills/uwf-state-manager/state.mjs set-agent --agent uwf-sw_dev-work-planner
+
+# Release the token
+node .github/skills/uwf-state-manager/state.mjs release-agent
+
+# Mark ready for implementation
+node .github/skills/uwf-state-manager/state.mjs check-ready
+
+# Sync derived fields after issue transitions
+node .github/skills/uwf-state-manager/state.mjs sync
+
+# Append a note
+node .github/skills/uwf-state-manager/state.mjs note --agent uwf-core-orchestrator --note "Pausing for user review"
+```
+
 ---
 
 ## Schema reference — `./.github/skills/uwf-state-manager/uwf-state.json`
@@ -55,76 +109,59 @@ idea → intake → discovery → planning → execution → acceptance → clos
 
 ---
 
-## Procedures
+## Procedures → script commands
+
+All procedures below map directly to script commands. Do not implement them manually — run the script.
 
 ### 1) Read state
-1. Read `./tmp/uwf-state.json`.
-2. Validate all required top-level keys are present: `phase`, `status`, `current_agent`, `artifact_path`, `ready_for_implementation`, `history`.
-3. If the file is missing or malformed, initialize it with the default schema (phase `idea`, status `idle`, `current_agent` null, `artifact_path` `./tmp/workflow-artifacts`, `ready_for_implementation` false, `history` []).
-4. Return the parsed object.
+```sh
+node .github/skills/uwf-state-manager/state.mjs read
+```
+Returns validated state JSON. If the file is missing or malformed, the script auto-initializes/repairs it.
 
 ### 2) Advance phase
-1. Read current state (Procedure 1).
-2. Verify the requested `to_phase` is the legal next step in the lifecycle (or a forced override flagged explicitly by the caller).
-3. Append a history entry:
-   ```json
-   {
-     "ts": "<current ISO-8601 timestamp>",
-     "from_phase": "<current phase>",
-     "to_phase": "<requested phase>",
-     "agent": "<calling agent id>",
-     "note": "<reason or empty string>"
-   }
-   ```
-4. Update `phase` to `to_phase`.
-5. Update `status` to `active`.
-6. Write the updated object back to `./tmp/uwf-state.json` (pretty-printed, 2-space indent).
-7. Return a transition summary.
+```sh
+node .github/skills/uwf-state-manager/state.mjs advance --to <phase> --agent <id> [--note <text>] [--force]
+```
+Validates lifecycle order, appends a history entry, updates `phase` to the new value and `status` to `active`.
 
 ### 3) Roll back phase
-1. Read current state.
-2. Confirm the requested `to_phase` is earlier in the lifecycle than the current phase.
-3. Append a history entry with `note` beginning `ROLLBACK:`.
-4. Update `phase` and set `status` to `active`.
-5. Write back to disk.
-6. Return rollback summary and list any artifact files that may need to be re-generated.
+```sh
+node .github/skills/uwf-state-manager/state.mjs rollback --to <phase> --agent <id> [--note <text>]
+```
+Validates target is earlier than current phase, prefixes history note with `ROLLBACK:`, and returns a list of artifacts that may need regenerating.
 
-### 4) Set current agent
-1. Read current state.
-2. Set `current_agent` to the given agent id (string) or `null` for release.
-3. If claiming (non-null) and `current_agent` is already non-null and different, **refuse** and return a conflict error — do not overwrite a held token without an explicit `force: true` flag.
-4. Write back to disk.
-5. Return updated `current_agent` value.
+### 4) Set / release current agent
+```sh
+# Claim
+node .github/skills/uwf-state-manager/state.mjs set-agent --agent <id> [--force]
+# Release
+node .github/skills/uwf-state-manager/state.mjs release-agent
+```
+`set-agent` refuses to overwrite an existing non-null token without `--force`.
 
 ### 5) Mark ready for implementation
-1. Verify both files exist:
-   - `./tmp/workflow-artifacts/issues-intake.md` (non-empty)
-   - `./tmp/workflow-artifacts/issues-plan.md` (non-empty)
-2. Verify `phase` is `planning` or later.
-3. If conditions met: set `ready_for_implementation` to `true` and write back.
-4. If conditions not met: return a list of missing prerequisites; do **not** write.
+```sh
+node .github/skills/uwf-state-manager/state.mjs check-ready [--output-path <path>]
+```
+Verifies `issues-intake.md` and `issues-plan.md` are non-empty and `phase` ≥ `planning`. Sets `ready_for_implementation: true` only if all conditions pass.
 
-### 6) Record idle / blocked status
-1. Read current state.
-2. Set `status` to `idle` (queue empty, waiting) or `blocked` (dependency unmet, external blocker).
-3. Append a history entry if the previous status was different.
-4. Write back to disk.
+### 6) Set status
+```sh
+node .github/skills/uwf-state-manager/state.mjs set-status --status <idle|active|blocked> --agent <id>
+```
+Appends a history entry only if the status actually changes.
 
 ### 7) Sync with file-system state tree
-After any issue-level state transition (open → active, active → closed, open → closed/skipped):
-1. Read `./tmp/uwf-state.json`.
-2. Count files across all `./tmp/state/*/*/open/*.md`, `./tmp/state/*/*/active/*.md`, `./tmp/state/*/*/closed/*.md`.
-3. Derive and update the following derived fields if they differ from current values:
-   - If any `active/` file exists → `status: active`.
-   - If `open/` is empty and `active/` is empty → `status: idle`; if phase is `execution`, advance phase to `acceptance`.
-   - `ready_for_implementation` rechecked against Procedure 5.
-4. Write back only if changes were derived.
-5. Return a sync summary (counts before/after).
+```sh
+node .github/skills/uwf-state-manager/state.mjs sync
+```
+Walks `./tmp/state/` open/active/closed directories to derive `status`, auto-advances `execution → acceptance` when all issues are done, and re-checks `ready_for_implementation`.
 
-### 8) Append arbitrary history note
-1. Read current state.
-2. Append a history entry with `ts`, `agent`, and caller-supplied `note`; leave `from_phase` and `to_phase` equal to current phase.
-3. Write back to disk.
+### 8) Append history note
+```sh
+node .github/skills/uwf-state-manager/state.mjs note --agent <id> --note "<text>"
+```
 
 ---
 
@@ -152,10 +189,9 @@ After any issue-level state transition (open → active, active → closed, open
 ---
 
 ## Required output from skill invocations
-After any procedure, return a state-manager report containing:
-- **Procedure executed** — name and parameters
-- **State before** — phase, status, current_agent, ready_for_implementation
-- **State after** — same fields
-- **History entry appended** — full JSON of the new entry (if applicable)
-- **Errors or warnings** — any validation failures encountered
-- **Recommended next action** — which agent or stage should act next
+The script prints structured JSON to stdout for every command. Agents must capture and relay the key fields to the orchestrator:
+- `ok` — `true` for success, `false` for error
+- `procedure` — command that ran
+- `state.phase`, `state.status`, `state.current_agent`, `state.ready_for_implementation` — state snapshot after the operation
+- `history_entry` — the new history entry appended (where applicable)
+- `error` — error message (only present when `ok: false`)
