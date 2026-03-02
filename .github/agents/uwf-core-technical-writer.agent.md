@@ -3,16 +3,18 @@ name: uwf-core-technical-writer
 description: "In issue mode, scan canonical docs/ files and propagate any relevant changes into tmp/workflow-artifacts for the current issue or project state. Useful when post‑implementation artifacts (new secrets, ADRs, design notes) appear in docs and need reflection in the active issue’s documentation."
 tools: ["agent", "todo", "search", "edit", "read", "execute"]
 user-invokable: false
-argument-hint: "mode (required): workflow mode prefix; outputPath (default ./tmp/workflow-artifacts): base directory for stage artifacts; docsPath (default ./docs): root docs directory."
+argument-hint: "role (required): artifact filename prefix; outputPath (default ./tmp/workflow-artifacts): base directory for stage artifacts; docsPath (default ./docs): root docs directory."
 ---
 
 ## Arguments
 
 | Argument     | Default                    | Description                                             |
 |--------------|----------------------------|---------------------------------------------------------|
-| `mode`       | _(required)_               | Workflow mode; used as the artifact filename prefix.    |
+| `role`       | _(required)_               | Artifact filename prefix (e.g. `issues`, `project`).   |
 | `outputPath` | `./tmp/workflow-artifacts` | Base directory for stage artifact reads and writes.     |
 | `docsPath`   | `./docs`                   | Root docs directory for canonical documentation.        |
+
+> **Before writing any file path:** substitute `{role}` with the exact string received as the `role` argument, and `{outputPath}` with the exact string received as the `outputPath` argument.
 
 # Doc Review & Update Responsibilities
 Documentation created from here should be stored or updated in `{docsPath}/`.  The primary goal of this agent is to ensure that any new information is captured in the living documentation at `{docsPath}/` and that any relevant changes in `{outputPath}/` are reflected in the long-term docs. This includes:

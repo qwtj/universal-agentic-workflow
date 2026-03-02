@@ -9,7 +9,7 @@ Persona skill for macro-level project planning: scoping a new effort, producing 
 | Property | Value |
 |---|---|
 | `workflow` | `project_manager` |
-| `mode` | `project` |
+| `role` | `project` |
 | Artifact prefix | `project-` |
 | Output path default | `./tmp/workflow-artifacts` |
 

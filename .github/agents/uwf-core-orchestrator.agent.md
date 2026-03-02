@@ -50,7 +50,7 @@ agents:
    This governs all orchestration behavior: the invocation contract, non-negotiable principles, gate enforcement, retry limits, and the review fix-loop protocol.
 
 2. Read and internalize `.github/skills/uwf-{workflow}/SKILL.md` (where `{workflow}` is the argument provided by the caller).
-   This provides your `mode` value, ordered stage sequence, gate definitions, subagent roster, and persona-specific operating rules.
+   This provides your `role` value, ordered stage sequence, gate definitions, subagent roster, and persona-specific operating rules.
 
 3. Follow the **Startup Procedure** defined in the engine skill to initialize state and begin stage execution.
 

@@ -9,7 +9,7 @@ Persona skill for driving individual work items (issues) from intake through imp
 | Property | Value |
 |---|---|
 | `workflow` | `sw_dev` |
-| `mode` | `issues` |
+| `role` | `issues` |
 | Artifact prefix | `issues-` |
 | Output path default | `./tmp/workflow-artifacts` |
 

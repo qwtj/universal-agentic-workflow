@@ -9,7 +9,7 @@ Invoke this skill whenever an agent needs to:
 - Read the current workflow phase or status from `./tmp/uwf-state.json`
 - Advance or roll back a phase (`idea → intake → discovery → planning → execution → acceptance → closed`)
 - Record a hand-off between agents (`current_agent` field)
-- Mark `ready_for_implementation` after both `{mode}-intake.md` and `{mode}-plan.md` are confirmed present
+- Mark `ready_for_implementation` after both `{role}-intake.md` and `{role}-plan.md` are confirmed present
 - Append an entry to the `history` array
 - Validate that `./tmp/uwf-state.json` is well-formed before acting on it
 - Sync JSON state with the file-system `./tmp/state/` directory tree after issue transitions
@@ -100,11 +100,11 @@ idea → intake → discovery → planning → execution → acceptance → clos
 ```
 
 - **idea** — initial state; project goal not yet captured.
-- **intake** — `./tmp/workflow-artifacts/{mode}-intake.md` being produced.
-- **discovery** — `./tmp/workflow-artifacts/{mode}-discovery.md` being produced.
-- **planning** — `./tmp/workflow-artifacts/{mode}-plan.md` and `./tmp/state/` issue tree being produced.
+- **intake** — `./tmp/workflow-artifacts/{role}-intake.md` being produced.
+- **discovery** — `./tmp/workflow-artifacts/{role}-discovery.md` being produced.
+- **planning** — `./tmp/workflow-artifacts/{role}-plan.md` and `./tmp/state/` issue tree being produced.
 - **execution** — orchestrator is driving per-issue cycles; `./tmp/state/` tree is active.
-- **acceptance** — final checks; `./tmp/workflow-artifacts/{mode}-acceptance.md` being produced.
+- **acceptance** — final checks; `./tmp/workflow-artifacts/{role}-acceptance.md` being produced.
 - **closed** — all issues closed; project complete.
 
 ---

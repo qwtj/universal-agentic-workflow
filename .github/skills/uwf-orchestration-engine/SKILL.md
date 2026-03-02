@@ -12,14 +12,14 @@ Every `runSubagent` call **must** include the following context object so subage
 ```jsonc
 {
   "workflow":   "<persona_name>",      // e.g. "project_manager", "sw_dev", "book_writer"
-  "mode":       "<mode>",              // from the persona skill, e.g. "project" or "issues"
+  "role":       "<role>",              // from the persona skill, e.g. "project" or "issues"
   "phase":      "<current_phase>",     // from uwf-state.json
   "outputPath": "./tmp/workflow-artifacts",
   "statePath":  "./tmp/uwf-state.json"
 }
 ```
 
-The `workflow` and `mode` values are provided by the persona skill. The `phase` value is read from `uwf-state.json` via `uwf-core-project-tracking` before every stage transition.
+The `workflow` and `role` values are provided by the persona skill. The `phase` value is read from `uwf-state.json` via `uwf-core-project-tracking` before every stage transition.
 
 ---
 
@@ -151,7 +151,7 @@ This generates skeleton `run.mjs` and `SKILL.md` files with TODO stubs. Then:
 
 | Artifact | Content |
 |---|---|
-| `SKILL.md` | `mode`, Stage Sequence table, Subagent Roster, Artifact Prefix, Persona-Specific Rules |
+| `SKILL.md` | `role`, Stage Sequence table, Subagent Roster, Artifact Prefix, Persona-Specific Rules |
 | `run.mjs` | `stages[]` array with `name`, `agent`, `maxRetries`, `onGateFailure`, `gate()` for every stage |
 
 ### Required sections in a persona SKILL.md
