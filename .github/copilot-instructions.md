@@ -51,7 +51,8 @@ The process is fully automated with subagents and must not stop after each stage
 - Explicitly document authn/authz decisions in `tmp/workflow-artifacts/master-security-plan.md`.
 
 ## Must always
-After completing a phase or stage (subagents only), end with:
+
+**Subagents only** (never the orchestrator): After completing a stage, end your response with:
 ```
 Current Stage/Phase: <stage/phase name>
 Recommended Next Stage/Phase: <next stage/phase name>
@@ -61,3 +62,5 @@ If the response is workflow-related but not a formal stage:
 Last Stage/Phase: <stage/phase name>
 Recommended Next Stage/Phase: <next stage/phase name>
 ```
+
+**Orchestrator only**: When a subagent's response contains a `Current Stage/Phase` / `Recommended Next Stage/Phase` block, treat it as an internal hand-off signal. **Do NOT echo it to the user. Do NOT stop. Immediately proceed to the next stage.** The orchestrator never emits these blocks — it emits only single-line progress traces between stages.

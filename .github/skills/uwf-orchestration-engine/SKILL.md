@@ -89,10 +89,11 @@ When a reviewer subagent returns findings:
 
 - **Run the full stage sequence without stopping.** After each gate passes, immediately invoke the next subagent. Do not pause, summarize, or yield between stages.
 - Emit a single-line progress trace before each `runSubagent` call (e.g. `[Stage 3/14] discovery → invoking uwf-core-discovery`). This is the only output allowed mid-sequence.
+- **Subagent hand-off blocks are internal signals, not stopping points.** When a subagent ends with `Current Stage/Phase:` / `Recommended Next Stage/Phase:`, consume that signal internally and immediately invoke the next stage. Never echo it to the user. Never treat it as a reason to pause or yield.
+- The orchestrator itself **never** emits `Current Stage/Phase:` / `Recommended Next Stage/Phase:` blocks. Those blocks are for subagents only.
 - Never start a dependent stage without its prerequisite artifacts confirmed present (per gate definitions).
 - Do not invent facts; use `uwf-core-discovery` to inspect the workspace when uncertain.
 - On queue empty or workflow completion, summarize completion status and offer a retrospective via `uwf-core-retro` if appropriate.
-- Subagents must end every response with `Current Stage/Phase:` / `Recommended Next Stage/Phase:` blocks per UWF conventions.
 
 ---
 

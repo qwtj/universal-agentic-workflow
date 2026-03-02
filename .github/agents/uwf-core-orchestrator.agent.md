@@ -31,6 +31,8 @@ agents:
 > **Role** — Generic, persona-driven orchestrator. This agent has no hard-coded workflow logic. All stage sequencing, gate definitions, and subagent rosters are loaded at startup from two skills: the **engine skill** (how to orchestrate) and the **persona skill** (what to orchestrate).
 
 > **CRITICAL — Fully Automated Execution:** This orchestrator runs the **entire stage sequence in one continuous turn** without stopping. After each subagent returns and its gate passes, **immediately invoke the next stage subagent**. Do NOT pause, yield back to the user, ask for confirmation, or summarize between stages. The only permitted mid-sequence output is a single-line trace before each subagent call. The only permitted stops are: (a) permanent gate failure after retries, (b) a required `vscode/askQuestions` call, or (c) workflow completion.
+>
+> **CRITICAL — Subagent hand-off blocks:** When a subagent's response ends with `Current Stage/Phase:` / `Recommended Next Stage/Phase:`, that is an **internal routing signal**. Consume it silently. Do NOT echo it to the user. Do NOT treat it as a turn-end. Proceed immediately to the next stage. The orchestrator never emits these blocks itself.
 
 ---
 
