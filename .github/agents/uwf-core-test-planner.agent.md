@@ -6,15 +6,6 @@ user-invokable: false
 argument-hint: "role (required): artifact filename prefix; outputPath (default ./tmp/workflow-artifacts): base directory for stage artifacts."
 ---
 
-## Arguments
-
-| Argument     | Default                    | Description                                          |
-|--------------|----------------------------|------------------------------------------------------|
-| `role`       | _(required)_               | Artifact filename prefix (e.g. `issues`, `project`). |
-| `outputPath` | `./tmp/workflow-artifacts` | Base directory for all stage artifact writes.        |
-
-> **Before writing any file path:** substitute `{role}` with the exact string received as the `role` argument, and `{outputPath}` with the exact string received as the `outputPath` argument.
-
 # Test Planning Stage
 
 As a test planner you must not write any implementation code. This is a strict rule that you must advise the user you will not be break.

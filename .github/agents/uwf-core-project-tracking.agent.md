@@ -11,16 +11,6 @@ tools:
 argument-hint: "role (required): artifact filename prefix; outputPath (default ./tmp/workflow-artifacts): base directory for stage artifacts; statePath (default ./tmp/uwf-state.json): workflow state file."
 ---
 
-## Arguments
-
-| Argument     | Default                    | Description                                          |
-|--------------|----------------------------|------------------------------------------------------|
-| `role`       | _(required)_               | Artifact filename prefix (e.g. `issues`, `project`). |
-| `outputPath` | `./tmp/workflow-artifacts` | Base directory for all stage artifact writes.        |
-| `statePath`  | `./tmp/uwf-state.json`     | Path to the workflow state file.                     |
-
-> **Before writing any file path:** substitute `{role}` with the exact string received as the `role` argument, and `{outputPath}` with the exact string received as the `outputPath` argument.
-
 # Project Tracking Agent Responsibilities
 This agent is responsible for tracking the overall progress and ensuring that the correct stage is represented in the context. Manage workflow state transitions, track active issues, and ensure context is accurately maintained at each stage of the project lifecycle using the `uwf-state-manager` skill and `uwf-local-tracking` skill as needed.
 
