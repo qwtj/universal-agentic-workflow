@@ -1,0 +1,91 @@
+{
+  "name": "uwf-companion",
+  "displayName": "UWF Companion",
+  "description": "Live data from UWF SQLite skill databases inside VS Code",
+  "version": "0.1.0",
+  "publisher": "uwf",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "workspaceContains:.github/skills"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "uwf.openWorkflowState",
+        "title": "UWF: Open Workflow State"
+      },
+      {
+        "command": "uwf.openStages",
+        "title": "UWF: Open Stages"
+      },
+      {
+        "command": "uwf.openRequirements",
+        "title": "UWF: Open Requirements"
+      },
+      {
+        "command": "uwf.openReview",
+        "title": "UWF: Open Review Findings"
+      },
+      {
+        "command": "uwf.openAdrs",
+        "title": "UWF: Open ADRs"
+      },
+      {
+        "command": "uwf.openDiscoveries",
+        "title": "UWF: Open Discoveries"
+      },
+      {
+        "command": "uwf.openIssues",
+        "title": "UWF: Open Issues"
+      },
+      {
+        "command": "uwf.exportReport",
+        "title": "UWF: Export Report (CSV/JSON)"
+      },
+      {
+        "command": "uwf.refreshAll",
+        "title": "UWF: Refresh All"
+      }
+    ],
+    "views": {
+      "uwf-sidebar": [
+        {
+          "id": "uwf.workflowTree",
+          "name": "Workflow"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "uwf-sidebar",
+          "title": "UWF Companion",
+          "icon": "$(database)"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "node esbuild.mjs --production",
+    "build": "node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "package": "vsce package",
+    "test": "node --test test/**/*.test.mjs"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^22.5.0",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^2.24.0",
+    "better-sqlite3": "^9.4.3",
+    "esbuild": "^0.20.0",
+    "typescript": "^5.3.0"
+  },
+  "dependencies": {}
+}

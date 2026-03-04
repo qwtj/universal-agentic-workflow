@@ -144,7 +144,8 @@ try {
 function cmdListStages(db) {
   requireFlag("workflow", "list-stages");
   const { stages } = loadStagesYaml(workflow);
-  const list = stages.map(({ name, agent, max_retries, on_gate_failure, gated, conditional, run_as_subagent, inputs, outputs }) => ({
+  const Q_MJS = ".github/skills/uwf-question-protocol/questions.mjs";
+  const list = stages.map(({ name, agent, max_retries, on_gate_failure, gated, conditional, run_as_subagent, inputs, outputs, advances_phase_to }) => ({
     name, agent,
     maxRetries: max_retries ?? 2,
     onGateFailure: on_gate_failure ?? "retry",
@@ -153,6 +154,8 @@ function cmdListStages(db) {
     runAsSubagent: run_as_subagent !== false,
     inputs: inputs ?? [],
     outputs: outputs ?? [],
+    advancesTo: advances_phase_to ?? null,
+    questionsCheckCmd: `node ${Q_MJS} check --stage ${name}`,
   }));
   process.stdout.write(JSON.stringify(list, null, 2) + "\n");
   process.exit(0);
@@ -227,7 +230,42 @@ function cmdStageUpdate(db, toStatus) {
     .run(...keys.map((k) => updates[k]), workflow, stageName);
 
   appendHistory(db, workflow, stageName, row.status, toStatus, note);
-  succeed({ procedure: command, workflow, stage: stageName, status: toStatus, state: readState(db) });
+
+  // Build next-action hints for the orchestrator
+  const { stages } = loadStagesYaml(workflow);
+  const stageDef   = stages.find((s) => s.name === stageName);
+  const agentId    = stageDef?.agent ?? "uwf-core-orchestrator";
+  const STATE_MJS  = ".github/skills/uwf-state-manager/state.mjs";
+  const Q_MJS      = ".github/skills/uwf-question-protocol/questions.mjs";
+
+  let pre_flight_check = null;
+  let state_actions    = [];
+
+  if (toStatus === "active") {
+    pre_flight_check = `node ${Q_MJS} check --stage ${stageName}`;
+    state_actions    = [
+      `node ${STATE_MJS} set-agent --agent ${agentId} --force`,
+    ];
+  }
+
+  if (toStatus === "passed" || toStatus === "skipped") {
+    state_actions = [
+      `node ${STATE_MJS} release-agent`,
+      ...(stageDef?.advances_phase_to
+        ? [`node ${STATE_MJS} advance --to ${stageDef.advances_phase_to} --agent ${agentId} --force`]
+        : []),
+    ];
+  }
+
+  succeed({
+    procedure: command,
+    workflow,
+    stage:   stageName,
+    status:  toStatus,
+    ...(pre_flight_check && { pre_flight_check }),
+    ...(state_actions.length && { state_actions }),
+    state: readState(db),
+  });
 }
 
 function cmdStageFail(db) {
@@ -244,8 +282,16 @@ function cmdStageFail(db) {
   ).run(new Date().toISOString(), note, workflow, stageName);
 
   appendHistory(db, workflow, stageName, row.status, "failed", note);
-  const updated = db.prepare(`SELECT * FROM stage_runs WHERE workflow = ? AND stage = ?`).get(workflow, stageName);
-  succeed({ procedure: "stage-fail", workflow, stage: stageName, retry_count: updated.retry_count, state: readState(db) });
+  const updated   = db.prepare(`SELECT * FROM stage_runs WHERE workflow = ? AND stage = ?`).get(workflow, stageName);
+  const STATE_MJS = ".github/skills/uwf-state-manager/state.mjs";
+  succeed({
+    procedure:    "stage-fail",
+    workflow,
+    stage:        stageName,
+    retry_count:  updated.retry_count,
+    state_actions: [`node ${STATE_MJS} release-agent`],
+    state:        readState(db),
+  });
 }
 
 // ---------------------------------------------------------------------------
