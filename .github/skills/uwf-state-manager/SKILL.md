@@ -1,35 +1,53 @@
 ---
 name: uwf-state-manager
-description: "Read, validate, and mutate sate docs/uwf-state.json and the file-system state tree. Provides canonical procedures for phase transitions, agent hand-offs, artifact path resolution, and history recording."
+description: "Read, validate, and mutate state in a SQLite database and the file-system state tree. Provides canonical procedures for phase transitions, agent hand-offs, artifact path resolution, history recording, and issue management."
 ---
 # UWF State Manager Skill
 
+## Overview
+
+All workflow state and issue data are stored in a SQLite database:
+
+```
+.github/skills/uwf-state-manager/uwf-issues.db
+```
+
+The database schema is defined by two YAML files in the same directory:
+
+| File | Purpose |
+|---|---|
+| `workflow-schema.yaml` | Defines `workflow_state` and `workflow_history` tables |
+| `issues-schema.yaml` | Defines the `issues` table (shape is configurable) |
+
+On first run (or after `init`), the script reads both YAML files and creates all tables via `CREATE TABLE IF NOT EXISTS`. To change the issues table shape, edit `issues-schema.yaml` and run `init`.
+
+> **Note:** `uwf-issues.db` is in `.gitignore` and should not be committed.
+
 ## When to use
 Invoke this skill whenever an agent needs to:
-- Read the current workflow phase or status from `./tmp/uwf-state.json`
+- Read the current workflow phase or status
 - Advance or roll back a phase (`idea → intake → discovery → planning → execution → acceptance → closed`)
 - Record a hand-off between agents (`current_agent` field)
 - Mark `ready_for_implementation` after both `{role}-intake.md` and `{role}-plan.md` are confirmed present
-- Append an entry to the `history` array
-- Validate that `./tmp/uwf-state.json` is well-formed before acting on it
-- Sync JSON state with the file-system `./tmp/state/` directory tree after issue transitions
-
-This skill is the single authoritative source for all reads and writes to `./tmp/uwf-state.json`.
+- Append an entry to the history log
+- Create, update, list, or close issues
 
 **All state operations MUST be performed by running the deterministic script:**
 ```
 node .github/skills/uwf-state-manager/state.mjs <command> [options]
 ```
-Agents must never write or mutate `./tmp/uwf-state.json` directly or by reasoning. Call the script via terminal and parse the JSON output it prints to stdout.
+Agents must never write to the database directly. Call the script via terminal and parse the JSON output it prints to stdout.
 
 ---
 
 ## Script reference
 
+### Workflow commands
+
 | Command | Purpose |
 |---|---|
-| `read` | Read + validate current state |
-| `init [--mode <mode>]` | Initialize a fresh state file |
+| `read` | Read current state |
+| `init [--mode <mode>]` | Initialize fresh DB — clears all data and resets to `idea` |
 | `advance --to <phase> --agent <id> [--note <text>] [--force]` | Advance to next phase |
 | `rollback --to <phase> --agent <id> [--note <text>]` | Roll back to earlier phase |
 | `set-agent --agent <id> [--force]` | Claim the agent token |
@@ -39,7 +57,18 @@ Agents must never write or mutate `./tmp/uwf-state.json` directly or by reasonin
 | `sync` | Derive fields from `./tmp/state/` tree |
 | `note --agent <id> --note <text>` | Append a history entry |
 
-Global options: `--state-path <path>` (default `./tmp/uwf-state.json`), `--output-path <path>` (default `./tmp/workflow-artifacts`).
+### Issue commands
+
+| Command | Purpose |
+|---|---|
+| `issue-create --id <id> --title <text> [fields…]` | Create a new issue |
+| `issue-update --id <id> [fields…]` | Update fields on an existing issue |
+| `issue-list [--status <s>] [--milestone <m>] [--sprint <s>]` | List issues with optional filters |
+| `issue-close --id <id>` | Set issue status to `closed` |
+
+**Issue field flags:** `--status`, `--phase`, `--milestone`, `--sprint`, `--description`, `--assigned-agent`, `--risk`, `--unknowns`, `--comments`
+
+Global option: `--output-path <path>` (default `./tmp/workflow-artifacts`).
 
 All output is JSON. Exit code `0` = success, `1` = operational error, `2` = usage error.
 
@@ -54,10 +83,8 @@ node .github/skills/uwf-state-manager/state.mjs init --mode sw_dev
 # Advance from intake → discovery
 node .github/skills/uwf-state-manager/state.mjs advance --to discovery --agent uwf-core-discovery --note "Intake complete"
 
-# Claim the token
+# Claim / release the agent token
 node .github/skills/uwf-state-manager/state.mjs set-agent --agent uwf-sw_dev-work-planner
-
-# Release the token
 node .github/skills/uwf-state-manager/state.mjs release-agent
 
 # Mark ready for implementation
@@ -68,30 +95,62 @@ node .github/skills/uwf-state-manager/state.mjs sync
 
 # Append a note
 node .github/skills/uwf-state-manager/state.mjs note --agent uwf-core-orchestrator --note "Pausing for user review"
+
+# Issue management
+node .github/skills/uwf-state-manager/state.mjs issue-create --id ISS-001 --title "Auth module" --milestone "v1.0" --risk "High" --unknowns "OAuth provider TBD"
+node .github/skills/uwf-state-manager/state.mjs issue-update --id ISS-001 --sprint "S1" --assigned-agent uwf-sw_dev-implementer
+node .github/skills/uwf-state-manager/state.mjs issue-list --status open --milestone v1.0
+node .github/skills/uwf-state-manager/state.mjs issue-close --id ISS-001
 ```
 
 ---
 
-## Schema reference — `./.github/skills/uwf-state-manager/uwf-state.json`
+## Schema reference
 
-```jsonc
-{
-  "phase": "<phase-name>",            // see Phase lifecycle below
-  "status": "<idle|active|blocked>",  // current execution status
-  "current_agent": "<agent-id|null>", // agent presently holding the token
-  "artifact_path": "./tmp/workflow-artifacts", // base path for per-stage docs
-  "ready_for_implementation": false,  // true only when gate conditions are met
-  "history": [                        // append-only audit log
-    {
-      "ts": "ISO-8601",
-      "from_phase": "<phase>",
-      "to_phase": "<phase>",
-      "agent": "<agent-id>",
-      "note": "<free text>"
-    }
-  ]
-}
-```
+### workflow_state (single row, id=1)
+
+Defined by `workflow-schema.yaml`.
+
+| Column | Type | Description |
+|---|---|---|
+| `phase` | TEXT | Current workflow phase |
+| `mode` | TEXT | Workflow mode (e.g. `sw_dev`) |
+| `status` | TEXT | `idle` \| `active` \| `blocked` |
+| `current_agent` | TEXT | Agent presently holding the token |
+| `artifact_path` | TEXT | Base path for per-stage docs |
+| `ready_for_implementation` | INTEGER | `1` when gate conditions are met |
+
+### workflow_history (append-only)
+
+Defined by `workflow-schema.yaml`.
+
+| Column | Type | Description |
+|---|---|---|
+| `ts` | TEXT | ISO-8601 timestamp |
+| `from_phase` | TEXT | Phase before the transition |
+| `to_phase` | TEXT | Phase after the transition |
+| `agent` | TEXT | Agent that triggered the entry |
+| `note` | TEXT | Free-text annotation |
+
+### issues
+
+Defined by `issues-schema.yaml`. Default columns:
+
+| Column | Type |
+|---|---|
+| `id` | TEXT (PK) |
+| `title` | TEXT |
+| `status` | TEXT (`open` \| `active` \| `closed`) |
+| `phase` | TEXT |
+| `milestone` | TEXT |
+| `sprint` | TEXT |
+| `description` | TEXT |
+| `assigned_agent` | TEXT |
+| `risk` | TEXT |
+| `unknowns` | TEXT |
+| `comments` | TEXT |
+| `created_at` | TEXT |
+| `updated_at` | TEXT |
 
 ### Phase lifecycle
 
@@ -99,79 +158,14 @@ node .github/skills/uwf-state-manager/state.mjs note --agent uwf-core-orchestrat
 idea → intake → discovery → planning → execution → acceptance → closed
 ```
 
-- **idea** — initial state; project goal not yet captured.
-- **intake** — `./tmp/workflow-artifacts/{role}-intake.md` being produced.
-- **discovery** — `./tmp/workflow-artifacts/{role}-discovery.md` being produced.
-- **planning** — `./tmp/workflow-artifacts/{role}-plan.md` and `./tmp/state/` issue tree being produced.
-- **execution** — orchestrator is driving per-issue cycles; `./tmp/state/` tree is active.
-- **acceptance** — final checks; `./tmp/workflow-artifacts/{role}-acceptance.md` being produced.
-- **closed** — all issues closed; project complete.
-
----
-
-## Procedures → script commands
-
-All procedures below map directly to script commands. Do not implement them manually — run the script.
-
-### 1) Read state
-```sh
-node .github/skills/uwf-state-manager/state.mjs read
-```
-Returns validated state JSON. If the file is missing or malformed, the script auto-initializes/repairs it.
-
-### 2) Advance phase
-```sh
-node .github/skills/uwf-state-manager/state.mjs advance --to <phase> --agent <id> [--note <text>] [--force]
-```
-Validates lifecycle order, appends a history entry, updates `phase` to the new value and `status` to `active`.
-
-### 3) Roll back phase
-```sh
-node .github/skills/uwf-state-manager/state.mjs rollback --to <phase> --agent <id> [--note <text>]
-```
-Validates target is earlier than current phase, prefixes history note with `ROLLBACK:`, and returns a list of artifacts that may need regenerating.
-
-### 4) Set / release current agent
-```sh
-# Claim
-node .github/skills/uwf-state-manager/state.mjs set-agent --agent <id> [--force]
-# Release
-node .github/skills/uwf-state-manager/state.mjs release-agent
-```
-`set-agent` refuses to overwrite an existing non-null token without `--force`.
-
-### 5) Mark ready for implementation
-```sh
-node .github/skills/uwf-state-manager/state.mjs check-ready [--output-path <path>]
-```
-Verifies `issues-intake.md` and `issues-plan.md` are non-empty and `phase` ≥ `planning`. Sets `ready_for_implementation: true` only if all conditions pass.
-
-### 6) Set status
-```sh
-node .github/skills/uwf-state-manager/state.mjs set-status --status <idle|active|blocked> --agent <id>
-```
-Appends a history entry only if the status actually changes.
-
-### 7) Sync with file-system state tree
-```sh
-node .github/skills/uwf-state-manager/state.mjs sync
-```
-Walks `./tmp/state/` open/active/closed directories to derive `status`, auto-advances `execution → acceptance` when all issues are done, and re-checks `ready_for_implementation`.
-
-### 8) Append history note
-```sh
-node .github/skills/uwf-state-manager/state.mjs note --agent <id> --note "<text>"
-```
-
 ---
 
 ## Validation rules
 - `phase` must be one of: `idea`, `intake`, `discovery`, `planning`, `execution`, `acceptance`, `closed`.
 - `status` must be one of: `idle`, `active`, `blocked`.
-- `history` is append-only — never remove or mutate existing entries.
-- `artifact_path` must be a relative path string starting with `./`.
-- Phase advances must follow the defined lifecycle order unless a `force: true` override is explicitly supplied by the caller.
-- Never write partial / intermediate state. Always construct the full updated object before writing.
+- `workflow_history` is append-only — never remove or mutate existing rows.
+- Phase advances must follow lifecycle order unless `--force` is supplied.
+- All writes are wrapped in SQLite transactions — no partial state.
 
 ---
 
@@ -179,12 +173,13 @@ node .github/skills/uwf-state-manager/state.mjs note --agent <id> --note "<text>
 
 | Condition | Response |
 |---|---|
-| File missing | Initialize with defaults; log as first history entry |
+| DB missing | Auto-created on first run via schema YAML files |
 | Unknown phase value | Reject with validation error; do not write |
 | Token conflict (agent claim) | Return conflict error; do not overwrite |
 | Illegal phase skip | Return lifecycle-order error; do not write |
 | Artifact prereqs unmet for `ready_for_implementation` | Return missing-file list; do not set flag |
-| History mutation attempted | Return immutability error |
+| Issue ID already exists | Return conflict error on `issue-create` |
+| Issue ID not found | Return not-found error on `issue-update` / `issue-close` |
 
 ---
 
@@ -194,4 +189,5 @@ The script prints structured JSON to stdout for every command. Agents must captu
 - `procedure` — command that ran
 - `state.phase`, `state.status`, `state.current_agent`, `state.ready_for_implementation` — state snapshot after the operation
 - `history_entry` — the new history entry appended (where applicable)
+- `issue` / `issues` — issue data (issue commands only)
 - `error` — error message (only present when `ok: false`)

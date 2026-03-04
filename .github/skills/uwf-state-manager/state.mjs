@@ -1,30 +1,39 @@
 /**
- * UWF State Manager — deterministic CLI for all uwf-state.json operations.
+ * UWF State Manager — SQLite-backed CLI for all workflow state and issue operations.
  *
- * This script replaces LLM-based state manipulation with reliable, atomic
- * reads and writes. Every agent that needs to touch workflow state must call
- * this script via terminal instead of reasoning about the JSON file itself.
+ * Schema is defined by two YAML files in this directory:
+ *   workflow-schema.yaml  — workflow_state + workflow_history tables
+ *   issues-schema.yaml    — issues table (shape is configurable)
+ *
+ * Database: .github/skills/uwf-state-manager/uwf-issues.db
  *
  * Usage:
  *   node .github/skills/uwf-state-manager/state.mjs <command> [options]
  *
- * Commands:
- *   read                                   Read + validate state; print JSON
- *   init [--mode <mode>]                   Initialize a fresh state file
+ * Workflow commands:
+ *   read                                   Read state; print JSON
+ *   init [--mode <mode>]                   Initialize fresh DB (clears all data)
  *   advance  --to <phase> --agent <id>     Advance to the next phase
  *            [--note <text>] [--force]
  *   rollback --to <phase> --agent <id>     Roll back to an earlier phase
  *            [--note <text>]
- *   set-agent --agent <id>  [--force]      Claim the agent token
- *   release-agent                          Release the agent token (set null)
- *   check-ready                            Mark ready_for_implementation when
- *                                          gate conditions are met
+ *   set-agent --agent <id> [--force]       Claim the agent token
+ *   release-agent                          Release the agent token
+ *   check-ready                            Mark ready_for_implementation
  *   set-status --status <s> --agent <id>   Set status (idle|active|blocked)
  *   sync                                   Derive fields from ./tmp/state/ tree
  *   note --agent <id> --note <text>        Append a history entry
  *
+ * Issue commands:
+ *   issue-create --id <id> --title <text>  Create a new issue
+ *               [--status <s>] [--phase <p>] [--milestone <m>] [--sprint <s>]
+ *               [--description <text>] [--assigned-agent <id>]
+ *               [--risk <text>] [--unknowns <text>] [--comments <text>]
+ *   issue-update --id <id> [field flags…]  Update fields on an existing issue
+ *   issue-list   [--status <s>] [--milestone <m>] [--sprint <s>]
+ *   issue-close  --id <id>                 Set issue status to "closed"
+ *
  * Global options:
- *   --state-path  <path>   Default: ./tmp/uwf-state.json
  *   --output-path <path>   Default: ./tmp/workflow-artifacts
  *
  * Exit codes:
@@ -35,18 +44,25 @@
  * All output is JSON to stdout.
  */
 
-import fs from "node:fs";
-import path from "node:path";
+import Database from "better-sqlite3";
+import { readFileSync, existsSync, statSync, readdirSync } from "node:fs";
+import { resolve, join, dirname, relative, sep } from "node:path";
+import { fileURLToPath } from "node:url";
+import yaml from "js-yaml";
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DB_PATH = join(__dirname, "uwf-issues.db");
+const WORKFLOW_SCHEMA_PATH = join(__dirname, "workflow-schema.yaml");
+const ISSUES_SCHEMA_PATH = join(__dirname, "issues-schema.yaml");
+
 const VALID_PHASES = ["idea", "intake", "discovery", "planning", "execution", "acceptance", "closed"];
 const VALID_STATUSES = ["idle", "active", "blocked"];
 const PHASE_ORDER = Object.fromEntries(VALID_PHASES.map((p, i) => [p, i]));
 
-const DEFAULT_STATE_PATH = "./tmp/uwf-state.json";
 const DEFAULT_OUTPUT_PATH = "./tmp/workflow-artifacts";
 
 // ---------------------------------------------------------------------------
@@ -57,11 +73,95 @@ const rawArgs = process.argv.slice(2);
 const [command, ...restArgs] = rawArgs;
 
 const flags = parseFlags(restArgs);
-const statePath = flags["state-path"] ?? DEFAULT_STATE_PATH;
 const outputPath = flags["output-path"] ?? DEFAULT_OUTPUT_PATH;
 
 if (!command) {
-  usageError("No command provided. Run with --help for usage.");
+  usageError("No command provided.");
+}
+
+// ---------------------------------------------------------------------------
+// Database setup
+// ---------------------------------------------------------------------------
+
+function openDb() {
+  const db = new Database(DB_PATH);
+  db.pragma("journal_mode = WAL");
+  initTables(db);
+  return db;
+}
+
+/**
+ * Read both YAML schema files and CREATE TABLE IF NOT EXISTS for each table.
+ * Seeds the single workflow_state row (id=1) if absent.
+ */
+function initTables(db) {
+  const workflowSchema = yaml.load(readFileSync(WORKFLOW_SCHEMA_PATH, "utf8"));
+  const issuesSchema = yaml.load(readFileSync(ISSUES_SCHEMA_PATH, "utf8"));
+
+  db.transaction(() => {
+    for (const [tableName, tableDef] of Object.entries(workflowSchema.tables)) {
+      db.exec(buildCreateTable(tableName, tableDef.columns));
+    }
+    db.exec(buildCreateTable(issuesSchema.table, issuesSchema.columns));
+
+    const row = db.prepare("SELECT id FROM workflow_state WHERE id = 1").get();
+    if (!row) {
+      db.prepare(
+        `INSERT INTO workflow_state
+           (id, phase, mode, status, current_agent, artifact_path, ready_for_implementation)
+         VALUES (1, 'idea', NULL, 'idle', NULL, './tmp/workflow-artifacts', 0)`
+      ).run();
+    }
+  })();
+}
+
+function buildCreateTable(tableName, columns) {
+  const colDefs = columns.map((col) => {
+    let def = `"${col.name}" ${col.type}`;
+    if (col.primary_key && col.autoincrement) def += " PRIMARY KEY AUTOINCREMENT";
+    else if (col.primary_key) def += " PRIMARY KEY";
+    if (col.not_null) def += " NOT NULL";
+    if (col.default !== undefined) {
+      const val = typeof col.default === "string" ? `'${col.default}'` : col.default;
+      def += ` DEFAULT ${val}`;
+    }
+    return def;
+  });
+  return `CREATE TABLE IF NOT EXISTS "${tableName}" (${colDefs.join(", ")})`;
+}
+
+// ---------------------------------------------------------------------------
+// State helpers
+// ---------------------------------------------------------------------------
+
+function readState(db) {
+  const row = db.prepare("SELECT * FROM workflow_state WHERE id = 1").get();
+  const history = db
+    .prepare("SELECT ts, from_phase, to_phase, agent, note FROM workflow_history ORDER BY id ASC")
+    .all();
+  return {
+    phase: row.phase,
+    mode: row.mode,
+    status: row.status,
+    current_agent: row.current_agent,
+    artifact_path: row.artifact_path,
+    ready_for_implementation: !!row.ready_for_implementation,
+    history,
+  };
+}
+
+function updateState(db, fields) {
+  const keys = Object.keys(fields);
+  const setClauses = keys.map((k) => `"${k}" = ?`).join(", ");
+  db.prepare(`UPDATE workflow_state SET ${setClauses} WHERE id = 1`).run(...keys.map((k) => fields[k]));
+}
+
+function appendHistory(db, fromPhase, toPhase, agent, note) {
+  const ts = new Date().toISOString();
+  db.prepare(
+    `INSERT INTO workflow_history (ts, from_phase, to_phase, agent, note) VALUES (?, ?, ?, ?, ?)`
+  ).run(ts, fromPhase, toPhase, agent, note ?? "");
+  return { ts, from_phase: fromPhase, to_phase: toPhase, agent, note: note ?? "" };
 }
 
 // ---------------------------------------------------------------------------
@@ -69,17 +169,22 @@ if (!command) {
 // ---------------------------------------------------------------------------
 
 try {
+  const db = openDb();
   switch (command) {
-    case "read":        cmdRead(); break;
-    case "init":        cmdInit(); break;
-    case "advance":     cmdAdvance(); break;
-    case "rollback":    cmdRollback(); break;
-    case "set-agent":   cmdSetAgent(); break;
-    case "release-agent": cmdReleaseAgent(); break;
-    case "check-ready": cmdCheckReady(); break;
-    case "set-status":  cmdSetStatus(); break;
-    case "sync":        cmdSync(); break;
-    case "note":        cmdNote(); break;
+    case "read":          cmdRead(db); break;
+    case "init":          cmdInit(db); break;
+    case "advance":       cmdAdvance(db); break;
+    case "rollback":      cmdRollback(db); break;
+    case "set-agent":     cmdSetAgent(db); break;
+    case "release-agent": cmdReleaseAgent(db); break;
+    case "check-ready":   cmdCheckReady(db); break;
+    case "set-status":    cmdSetStatus(db); break;
+    case "sync":          cmdSync(db); break;
+    case "note":          cmdNote(db); break;
+    case "issue-create":  cmdIssueCreate(db); break;
+    case "issue-update":  cmdIssueUpdate(db); break;
+    case "issue-list":    cmdIssueList(db); break;
+    case "issue-close":   cmdIssueClose(db); break;
     default:
       usageError(`Unknown command: "${command}"`);
   }
@@ -88,33 +193,30 @@ try {
 }
 
 // ---------------------------------------------------------------------------
-// Commands
+// Commands — workflow state
 // ---------------------------------------------------------------------------
 
-/** Procedure 1: Read + validate state. */
-function cmdRead() {
-  const { state, initialized } = loadState();
-  succeed({
-    procedure: "read",
-    initialized,
-    state,
-  });
+function cmdRead(db) {
+  const state = readState(db);
+  succeed({ procedure: "read", state });
 }
 
-/** Initialize a fresh state file (overwrites if present). */
-function cmdInit() {
+function cmdInit(db) {
   const mode = flags["mode"] ?? null;
-  const fresh = defaultState(mode);
-  writeState(fresh);
-  succeed({
-    procedure: "init",
-    mode,
-    state: fresh,
-  });
+  db.transaction(() => {
+    db.prepare("DELETE FROM workflow_history").run();
+    db.prepare("DELETE FROM issues").run();
+    db.prepare(
+      `UPDATE workflow_state
+       SET phase = 'idea', mode = ?, status = 'idle', current_agent = NULL,
+           artifact_path = ?, ready_for_implementation = 0
+       WHERE id = 1`
+    ).run(mode, outputPath);
+  })();
+  succeed({ procedure: "init", mode, state: readState(db) });
 }
 
-/** Procedure 2: Advance phase. */
-function cmdAdvance() {
+function cmdAdvance(db) {
   requireFlag("to", "advance");
   requireFlag("agent", "advance");
 
@@ -125,7 +227,7 @@ function cmdAdvance() {
 
   validatePhase(toPhase);
 
-  const { state } = loadState();
+  const state = readState(db);
   const fromPhase = state.phase ?? "idea";
 
   if (!force) {
@@ -134,30 +236,20 @@ function cmdAdvance() {
     if (toIdx !== fromIdx + 1) {
       fail(
         `Illegal phase advance: "${fromPhase}" → "${toPhase}". ` +
-        `Expected next phase: "${VALID_PHASES[fromIdx + 1] ?? "(none)"}". ` +
-        `Use --force to override.`
+        `Expected: "${VALID_PHASES[fromIdx + 1] ?? "(none)"}". Use --force to override.`
       );
     }
   }
 
-  const entry = historyEntry(fromPhase, toPhase, agent, note);
-  state.phase = toPhase;
-  state.status = "active";
-  state.history = [...(state.history ?? []), entry];
+  const entry = db.transaction(() => {
+    updateState(db, { phase: toPhase, status: "active" });
+    return appendHistory(db, fromPhase, toPhase, agent, note);
+  })();
 
-  writeState(state);
-  succeed({
-    procedure: "advance",
-    from_phase: fromPhase,
-    to_phase: toPhase,
-    agent,
-    history_entry: entry,
-    state,
-  });
+  succeed({ procedure: "advance", from_phase: fromPhase, to_phase: toPhase, agent, history_entry: entry, state: readState(db) });
 }
 
-/** Procedure 3: Roll back phase. */
-function cmdRollback() {
+function cmdRollback(db) {
   requireFlag("to", "rollback");
   requireFlag("agent", "rollback");
 
@@ -167,25 +259,19 @@ function cmdRollback() {
 
   validatePhase(toPhase);
 
-  const { state } = loadState();
+  const state = readState(db);
   const fromPhase = state.phase ?? "idea";
 
-  const fromIdx = PHASE_ORDER[fromPhase] ?? 0;
-  const toIdx = PHASE_ORDER[toPhase];
-
-  if (toIdx >= fromIdx) {
-    fail(
-      `Rollback target "${toPhase}" is not earlier than current phase "${fromPhase}".`
-    );
+  if (PHASE_ORDER[toPhase] >= PHASE_ORDER[fromPhase]) {
+    fail(`Rollback target "${toPhase}" is not earlier than current phase "${fromPhase}".`);
   }
 
   const note = `ROLLBACK: ${rawNote}`.trimEnd();
-  const entry = historyEntry(fromPhase, toPhase, agent, note);
-  state.phase = toPhase;
-  state.status = "active";
-  state.history = [...(state.history ?? []), entry];
+  const entry = db.transaction(() => {
+    updateState(db, { phase: toPhase, status: "active" });
+    return appendHistory(db, fromPhase, toPhase, agent, note);
+  })();
 
-  writeState(state);
   succeed({
     procedure: "rollback",
     from_phase: fromPhase,
@@ -193,70 +279,54 @@ function cmdRollback() {
     agent,
     history_entry: entry,
     artifacts_to_regenerate: artifactsForPhase(toPhase, outputPath),
-    state,
+    state: readState(db),
   });
 }
 
-/** Procedure 4: Set (claim) current agent. */
-function cmdSetAgent() {
+function cmdSetAgent(db) {
   requireFlag("agent", "set-agent");
   const agent = flags["agent"];
   const force = "force" in flags;
 
-  const { state } = loadState();
+  const state = readState(db);
   const prev = state.current_agent;
 
   if (prev && prev !== agent && !force) {
-    fail(
-      `Token conflict: "${prev}" currently holds the agent token. ` +
-      `Use --force to override.`
-    );
+    fail(`Token conflict: "${prev}" currently holds the agent token. Use --force to override.`);
   }
 
-  state.current_agent = agent;
-  writeState(state);
-  succeed({ procedure: "set-agent", previous: prev, current_agent: agent, state });
+  updateState(db, { current_agent: agent });
+  succeed({ procedure: "set-agent", previous: prev, current_agent: agent, state: readState(db) });
 }
 
-/** Procedure 4 (release): Set current_agent to null. */
-function cmdReleaseAgent() {
-  const { state } = loadState();
+function cmdReleaseAgent(db) {
+  const state = readState(db);
   const prev = state.current_agent;
-  state.current_agent = null;
-  writeState(state);
-  succeed({ procedure: "release-agent", previous: prev, current_agent: null, state });
+  updateState(db, { current_agent: null });
+  succeed({ procedure: "release-agent", previous: prev, current_agent: null, state: readState(db) });
 }
 
-/** Procedure 5: Mark ready for implementation. */
-function cmdCheckReady() {
-  const { state } = loadState();
-
+function cmdCheckReady(db) {
+  const state = readState(db);
   const phaseIdx = PHASE_ORDER[state.phase ?? "idea"] ?? 0;
-  const planningIdx = PHASE_ORDER["planning"];
-
   const missing = [];
 
-  const intakePath = path.join(outputPath, "issues-intake.md");
-  const planPath = path.join(outputPath, "issues-plan.md");
+  const intakePath = join(outputPath, "issues-intake.md");
+  const planPath = join(outputPath, "issues-plan.md");
 
   if (!fileNonEmpty(intakePath)) missing.push(intakePath);
   if (!fileNonEmpty(planPath)) missing.push(planPath);
-
-  if (phaseIdx < planningIdx) {
+  if (phaseIdx < PHASE_ORDER["planning"]) {
     missing.push(`phase must be "planning" or later (current: "${state.phase}")`);
   }
 
-  if (missing.length > 0) {
-    fail(`ready_for_implementation prerequisites not met`, { missing });
-  }
+  if (missing.length > 0) fail("ready_for_implementation prerequisites not met", { missing });
 
-  state.ready_for_implementation = true;
-  writeState(state);
-  succeed({ procedure: "check-ready", ready_for_implementation: true, state });
+  updateState(db, { ready_for_implementation: 1 });
+  succeed({ procedure: "check-ready", ready_for_implementation: true, state: readState(db) });
 }
 
-/** Procedure 6: Set status (idle | active | blocked). */
-function cmdSetStatus() {
+function cmdSetStatus(db) {
   requireFlag("status", "set-status");
   requireFlag("agent", "set-status");
 
@@ -267,154 +337,155 @@ function cmdSetStatus() {
     fail(`Invalid status "${newStatus}". Must be one of: ${VALID_STATUSES.join(", ")}.`);
   }
 
-  const { state } = loadState();
+  const state = readState(db);
   const prevStatus = state.status;
 
-  if (prevStatus !== newStatus) {
-    const entry = historyEntry(state.phase, state.phase, agent, `status → ${newStatus}`);
-    state.history = [...(state.history ?? []), entry];
-  }
+  db.transaction(() => {
+    if (prevStatus !== newStatus) appendHistory(db, state.phase, state.phase, agent, `status → ${newStatus}`);
+    updateState(db, { status: newStatus });
+  })();
 
-  state.status = newStatus;
-  writeState(state);
-  succeed({ procedure: "set-status", previous_status: prevStatus, status: newStatus, state });
+  succeed({ procedure: "set-status", previous_status: prevStatus, status: newStatus, state: readState(db) });
 }
 
-/** Procedure 7: Sync derived fields from file-system state tree. */
-function cmdSync() {
-  const { state } = loadState();
-  const stateRoot = "./tmp/state";
-
-  const counts = countIssues(stateRoot);
-  const before = {
-    status: state.status,
-    phase: state.phase,
-    ready_for_implementation: state.ready_for_implementation,
-  };
-
+function cmdSync(db) {
+  const state = readState(db);
+  const counts = countIssues("./tmp/state");
+  const before = { status: state.status, phase: state.phase, ready_for_implementation: state.ready_for_implementation };
   let changed = false;
 
-  // Derive status
-  if (counts.active > 0) {
-    if (state.status !== "active") { state.status = "active"; changed = true; }
-  } else if (counts.open === 0 && counts.active === 0) {
-    if (state.status !== "idle") { state.status = "idle"; changed = true; }
-    // Auto-advance execution → acceptance when all issues are done
-    if (state.phase === "execution") {
-      state.phase = "acceptance";
-      const entry = historyEntry("execution", "acceptance", "sync", "All issues closed; auto-advancing to acceptance.");
-      state.history = [...(state.history ?? []), entry];
+  db.transaction(() => {
+    if (counts.active > 0) {
+      if (state.status !== "active") { updateState(db, { status: "active" }); changed = true; }
+    } else if (counts.open === 0 && counts.active === 0) {
+      if (state.status !== "idle") { updateState(db, { status: "idle" }); changed = true; }
+      if (state.phase === "execution") {
+        updateState(db, { phase: "acceptance" });
+        appendHistory(db, "execution", "acceptance", "sync", "All issues closed; auto-advancing to acceptance.");
+        changed = true;
+      }
+    }
+
+    const intakePath = join(outputPath, "issues-intake.md");
+    const planPath = join(outputPath, "issues-plan.md");
+    const phaseIdx = PHASE_ORDER[state.phase ?? "idea"] ?? 0;
+    const newReady = fileNonEmpty(intakePath) && fileNonEmpty(planPath) && phaseIdx >= PHASE_ORDER["planning"];
+
+    if (newReady !== state.ready_for_implementation) {
+      updateState(db, { ready_for_implementation: newReady ? 1 : 0 });
       changed = true;
     }
-  }
+  })();
 
-  // Re-check ready_for_implementation
-  const intakePath = path.join(outputPath, "issues-intake.md");
-  const planPath = path.join(outputPath, "issues-plan.md");
-  const phaseIdx = PHASE_ORDER[state.phase ?? "idea"] ?? 0;
-  const planningIdx = PHASE_ORDER["planning"];
-  const newReady = fileNonEmpty(intakePath) && fileNonEmpty(planPath) && phaseIdx >= planningIdx;
-
-  if (newReady !== state.ready_for_implementation) {
-    state.ready_for_implementation = newReady;
-    changed = true;
-  }
-
-  if (changed) writeState(state);
-
+  const after = readState(db);
   succeed({
     procedure: "sync",
     changed,
     issue_counts: counts,
     before,
-    after: {
-      status: state.status,
-      phase: state.phase,
-      ready_for_implementation: state.ready_for_implementation,
-    },
-    state,
+    after: { status: after.status, phase: after.phase, ready_for_implementation: after.ready_for_implementation },
+    state: after,
   });
 }
 
-/** Procedure 8: Append arbitrary history note. */
-function cmdNote() {
+function cmdNote(db) {
   requireFlag("agent", "note");
   requireFlag("note", "note");
-
-  const agent = flags["agent"];
-  const noteText = flags["note"];
-
-  const { state } = loadState();
-  const entry = historyEntry(state.phase, state.phase, agent, noteText);
-  state.history = [...(state.history ?? []), entry];
-
-  writeState(state);
-  succeed({ procedure: "note", history_entry: entry, state });
+  const state = readState(db);
+  const entry = appendHistory(db, state.phase, state.phase, flags["agent"], flags["note"]);
+  succeed({ procedure: "note", history_entry: entry, state: readState(db) });
 }
 
 // ---------------------------------------------------------------------------
-// State I/O
+// Commands — issue management
 // ---------------------------------------------------------------------------
 
-function loadState() {
-  const abs = path.resolve(statePath);
+function cmdIssueCreate(db) {
+  requireFlag("id", "issue-create");
+  requireFlag("title", "issue-create");
 
-  if (!fs.existsSync(abs)) {
-    const fresh = defaultState(null);
-    writeState(fresh);
-    return { state: fresh, initialized: true };
+  const id = flags["id"];
+  if (db.prepare("SELECT id FROM issues WHERE id = ?").get(id)) {
+    fail(`Issue "${id}" already exists.`);
   }
 
-  let raw;
-  try {
-    raw = fs.readFileSync(abs, "utf8");
-  } catch (err) {
-    fail(`Cannot read state file: ${err.message}`);
-  }
+  const now = new Date().toISOString();
+  db.prepare(
+    `INSERT INTO issues
+       (id, title, status, phase, milestone, sprint, description, assigned_agent, risk, unknowns, comments, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  ).run(
+    id,
+    flags["title"],
+    flags["status"] ?? "open",
+    flags["phase"] ?? null,
+    flags["milestone"] ?? null,
+    flags["sprint"] ?? null,
+    flags["description"] ?? null,
+    flags["assigned-agent"] ?? null,
+    flags["risk"] ?? null,
+    flags["unknowns"] ?? null,
+    flags["comments"] ?? null,
+    now, now
+  );
 
-  let parsed;
-  try {
-    parsed = JSON.parse(raw);
-  } catch {
-    fail(`State file is not valid JSON: ${abs}`);
-  }
-
-  // Validate required keys
-  const REQUIRED = ["phase", "status", "current_agent", "artifact_path", "ready_for_implementation", "history"];
-  const missingKeys = REQUIRED.filter((k) => !(k in parsed));
-  if (missingKeys.length > 0) {
-    // Repair rather than reject
-    const repaired = { ...defaultState(null), ...parsed };
-    writeState(repaired);
-    return { state: repaired, initialized: false, repaired: true, repaired_keys: missingKeys };
-  }
-
-  if (parsed.phase !== null && !VALID_PHASES.includes(parsed.phase)) {
-    fail(`Invalid phase value in state file: "${parsed.phase}"`);
-  }
-  if (!VALID_STATUSES.includes(parsed.status)) {
-    fail(`Invalid status value in state file: "${parsed.status}"`);
-  }
-
-  return { state: parsed, initialized: false };
+  succeed({ procedure: "issue-create", issue: db.prepare("SELECT * FROM issues WHERE id = ?").get(id) });
 }
 
-function writeState(state) {
-  const abs = path.resolve(statePath);
-  fs.mkdirSync(path.dirname(abs), { recursive: true });
-  fs.writeFileSync(abs, JSON.stringify(state, null, 2) + "\n", "utf8");
-}
+function cmdIssueUpdate(db) {
+  requireFlag("id", "issue-update");
+  const id = flags["id"];
 
-function defaultState(mode) {
-  return {
-    phase: "idea",
-    mode: mode ?? null,
-    status: "idle",
-    current_agent: null,
-    artifact_path: outputPath,
-    ready_for_implementation: false,
-    history: [],
+  if (!db.prepare("SELECT id FROM issues WHERE id = ?").get(id)) {
+    fail(`Issue "${id}" not found.`);
+  }
+
+  // Map flag names (kebab-case) to column names (snake_case)
+  const fieldMap = {
+    title: "title", status: "status", phase: "phase",
+    milestone: "milestone", sprint: "sprint", description: "description",
+    "assigned-agent": "assigned_agent", risk: "risk",
+    unknowns: "unknowns", comments: "comments",
   };
+
+  const updates = {};
+  for (const [flag, col] of Object.entries(fieldMap)) {
+    if (flag in flags) updates[col] = flags[flag];
+  }
+
+  if (Object.keys(updates).length === 0) fail("No fields to update. Provide at least one flag.");
+
+  updates.updated_at = new Date().toISOString();
+  const keys = Object.keys(updates);
+  const setClauses = keys.map((k) => `"${k}" = ?`).join(", ");
+  db.prepare(`UPDATE issues SET ${setClauses} WHERE id = ?`).run(...keys.map((k) => updates[k]), id);
+
+  succeed({ procedure: "issue-update", issue: db.prepare("SELECT * FROM issues WHERE id = ?").get(id) });
+}
+
+function cmdIssueList(db) {
+  let query = "SELECT * FROM issues WHERE 1=1";
+  const params = [];
+
+  if (flags["status"])    { query += " AND status = ?";    params.push(flags["status"]); }
+  if (flags["milestone"]) { query += " AND milestone = ?"; params.push(flags["milestone"]); }
+  if (flags["sprint"])    { query += " AND sprint = ?";    params.push(flags["sprint"]); }
+
+  query += " ORDER BY created_at ASC";
+  const issues = db.prepare(query).all(...params);
+  succeed({ procedure: "issue-list", count: issues.length, issues });
+}
+
+function cmdIssueClose(db) {
+  requireFlag("id", "issue-close");
+  const id = flags["id"];
+
+  if (!db.prepare("SELECT id FROM issues WHERE id = ?").get(id)) {
+    fail(`Issue "${id}" not found.`);
+  }
+
+  db.prepare(`UPDATE issues SET status = 'closed', updated_at = ? WHERE id = ?`).run(new Date().toISOString(), id);
+  succeed({ procedure: "issue-close", issue: db.prepare("SELECT * FROM issues WHERE id = ?").get(id) });
 }
 
 // ---------------------------------------------------------------------------
@@ -422,8 +493,8 @@ function defaultState(mode) {
 // ---------------------------------------------------------------------------
 
 function fileNonEmpty(filePath) {
-  const abs = path.resolve(filePath);
-  return fs.existsSync(abs) && fs.statSync(abs).size > 0;
+  const abs = resolve(filePath);
+  return existsSync(abs) && statSync(abs).size > 0;
 }
 
 /**
@@ -431,14 +502,13 @@ function fileNonEmpty(filePath) {
  * Expects: tmp/state/<milestone>/<sprint>/open|active|closed/<id>.md
  */
 function countIssues(stateRoot) {
-  const abs = path.resolve(stateRoot);
+  const abs = resolve(stateRoot);
   const counts = { open: 0, active: 0, closed: 0 };
-  if (!fs.existsSync(abs)) return counts;
+  if (!existsSync(abs)) return counts;
 
   for (const entry of walkDir(abs)) {
-    const rel = path.relative(abs, entry);
-    const parts = rel.split(path.sep);
-    const stateDir = parts[parts.length - 2]; // parent dir of the file
+    const parts = relative(abs, entry).split(sep);
+    const stateDir = parts[parts.length - 2];
     if (stateDir === "open") counts.open++;
     else if (stateDir === "active") counts.active++;
     else if (stateDir === "closed") counts.closed++;
@@ -448,20 +518,16 @@ function countIssues(stateRoot) {
 
 function walkDir(dir) {
   const results = [];
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    const full = path.join(dir, entry.name);
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name);
     if (entry.isDirectory()) results.push(...walkDir(full));
     else results.push(full);
   }
   return results;
 }
 
-/**
- * Return a list of artifact file paths that should be regenerated after
- * rolling back to a given phase.
- */
 function artifactsForPhase(toPhase, artPath) {
-  const phaseArtifacts = {
+  const map = {
     idea: [],
     intake: [`${artPath}/{mode}-intake.md`],
     discovery: [`${artPath}/{mode}-intake.md`, `${artPath}/{mode}-discovery.md`],
@@ -470,21 +536,7 @@ function artifactsForPhase(toPhase, artPath) {
     acceptance: [`${artPath}/{mode}-acceptance.md`],
     closed: [],
   };
-  return phaseArtifacts[toPhase] ?? [];
-}
-
-// ---------------------------------------------------------------------------
-// History helpers
-// ---------------------------------------------------------------------------
-
-function historyEntry(fromPhase, toPhase, agent, note) {
-  return {
-    ts: new Date().toISOString(),
-    from_phase: fromPhase,
-    to_phase: toPhase,
-    agent,
-    note: note ?? "",
-  };
+  return map[toPhase] ?? [];
 }
 
 // ---------------------------------------------------------------------------
@@ -493,7 +545,7 @@ function historyEntry(fromPhase, toPhase, agent, note) {
 
 function validatePhase(phase) {
   if (!VALID_PHASES.includes(phase)) {
-    usageError(`Unknown phase: "${phase}". Valid phases: ${VALID_PHASES.join(", ")}.`);
+    usageError(`Unknown phase: "${phase}". Valid: ${VALID_PHASES.join(", ")}.`);
   }
 }
 
