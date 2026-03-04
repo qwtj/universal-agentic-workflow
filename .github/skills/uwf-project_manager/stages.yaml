@@ -1,0 +1,202 @@
+# stages.yaml — uwf-project_manager persona stage definitions
+# Loaded by stage-tracker.mjs to drive gate enforcement and execution tracking.
+# Gate conditions are evaluated declaratively by the central stage-tracker script.
+#
+# Template variables available in paths:
+#   {{output_path}}  — resolved output-path (default: ./tmp/workflow-artifacts)
+#   {{state_path}}   — resolved state-path  (default: ./tmp/uwf-state.json)
+#   {{cwd}}          — process.cwd()
+
+workflow: project_manager
+artifact_prefix: project
+output_path: ./tmp/workflow-artifacts
+
+stages:
+
+  - name: state-init
+    agent: uwf-core-project-tracking
+    max_retries: 2
+    on_gate_failure: retry
+    gated: true
+    gate:
+      checks:
+        - type: require_non_empty
+          path: "{{state_path}}"
+          label: "uwf-state.json"
+
+  - name: intake
+    agent: uwf-project_manager-intake
+    max_retries: 2
+    on_gate_failure: retry
+    gated: true
+    gate:
+      checks:
+        - type: require_non_empty
+          path: "{{output_path}}/project-intake.md"
+          label: "project-intake.md"
+        - type: require_contains
+          path: "{{output_path}}/project-intake.md"
+          text: "Goal"
+          label: "project-intake.md"
+        - type: require_contains
+          path: "{{output_path}}/project-intake.md"
+          text: "Non-goals"
+          label: "project-intake.md"
+        - type: require_contains
+          path: "{{output_path}}/project-intake.md"
+          text: "Constraints"
+          label: "project-intake.md"
+        - type: require_contains
+          path: "{{output_path}}/project-intake.md"
+          text: "Success metrics"
+          label: "project-intake.md"
+        - type: require_contains
+          path: "{{output_path}}/project-intake.md"
+          text: "Stakeholders"
+          label: "project-intake.md"
+        - type: require_contains
+          path: "{{output_path}}/project-intake.md"
+          text: "Risk tolerance"
+          label: "project-intake.md"
+        - type: require_contains
+          path: "{{output_path}}/project-intake.md"
+          text: "Work-breakdown strategy"
+          label: "project-intake.md"
+
+  - name: discovery
+    agent: uwf-core-discovery
+    max_retries: 2
+    on_gate_failure: retry
+    gated: true
+    gate:
+      checks:
+        - type: require_non_empty
+          path: "{{output_path}}/project-discovery.md"
+          label: "project-discovery.md"
+
+  - name: requirements
+    agent: uwf-core-requirements
+    max_retries: 2
+    on_gate_failure: retry
+    gated: true
+    gate:
+      checks:
+        - type: require_non_empty
+          path: "{{output_path}}/project-requirements.md"
+          label: "project-requirements.md"
+
+  - name: adr
+    agent: uwf-core-adr
+    max_retries: 2
+    on_gate_failure: retry
+    gated: true
+    conditional: true
+    condition:
+      type: file_contains
+      path: "{{output_path}}/project-requirements.md"
+      text: "ADR:"
+    gate:
+      checks:
+        - type: require_files_with_prefix
+          dir: "{{cwd}}/docs/adr"
+          prefix: "ADR-"
+          label: "ADR-*.md"
+
+  - name: security-plan
+    agent: uwf-core-security-plan
+    max_retries: 2
+    on_gate_failure: retry
+    gated: true
+    conditional: true
+    condition:
+      type: file_contains_any
+      path: "{{output_path}}/project-requirements.md"
+      texts:
+        - "security-sensitive: true"
+        - "SECURITY:"
+        - "security: true"
+    gate:
+      checks:
+        - type: require_non_empty
+          path: "{{output_path}}/project-security-plan.md"
+          label: "project-security-plan.md"
+
+  - name: test-plan
+    agent: uwf-core-test-planner
+    max_retries: 2
+    on_gate_failure: retry
+    gated: true
+    gate:
+      checks:
+        - type: require_non_empty
+          path: "{{output_path}}/project-test-plan.md"
+          label: "project-test-plan.md"
+
+  - name: timeline-planning
+    agent: uwf-project_manager-timeline-planner
+    max_retries: 2
+    on_gate_failure: retry
+    gated: true
+    gate:
+      checks:
+        - type: require_non_empty
+          path: "{{output_path}}/issues-backlog.md"
+          label: "issues-backlog.md"
+        - type: require_non_empty
+          path: "{{output_path}}/project-roadmap.md"
+          label: "project-roadmap.md"
+
+  - name: review
+    agent: uwf-project_manager-reviewer
+    max_retries: 3
+    on_gate_failure: retry
+    gated: true
+    gate:
+      checks:
+        - type: require_non_empty
+          path: "{{output_path}}/project-review.md"
+          label: "project-review.md"
+        - type: require_contains
+          path: "{{output_path}}/project-review.md"
+          text: "APPROVED"
+          label: "project-review.md"
+
+  - name: issue-state-population
+    agent: uwf-core-project-tracking
+    max_retries: 2
+    on_gate_failure: retry
+    gated: true
+    gate:
+      checks:
+        - type: require_file_matching_pattern
+          dir: "{{cwd}}/tmp/state"
+          pattern: "/open/.*\\.md$"
+          label: "open issue files"
+
+  - name: acceptance
+    agent: uwf-core-acceptance
+    max_retries: 2
+    on_gate_failure: retry
+    gated: true
+    gate:
+      checks:
+        - type: require_non_empty
+          path: "{{output_path}}/project-acceptance.md"
+          label: "project-acceptance.md"
+
+  - name: close
+    agent: uwf-core-project-tracking
+    max_retries: 1
+    on_gate_failure: abort
+    gated: true
+    gate:
+      checks:
+        - type: require_non_empty
+          path: "{{state_path}}"
+          label: "uwf-state.json"
+
+  - name: retro
+    agent: uwf-core-retro
+    max_retries: 1
+    on_gate_failure: skip
+    gated: false

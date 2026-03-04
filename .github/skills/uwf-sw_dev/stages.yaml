@@ -1,0 +1,176 @@
+# stages.yaml — uwf-sw_dev persona stage definitions
+# Loaded by stage-tracker.mjs to drive gate enforcement and execution tracking.
+# Gate conditions are evaluated declaratively by the central stage-tracker script.
+#
+# Template variables available in paths:
+#   {{output_path}}  — resolved output-path (default: ./tmp/workflow-artifacts)
+#   {{state_path}}   — resolved state-path  (default: ./tmp/uwf-state.json)
+#   {{cwd}}          — process.cwd()
+
+workflow: sw_dev
+artifact_prefix: issues
+output_path: ./tmp/workflow-artifacts
+
+stages:
+
+  - name: queue-prep
+    agent: uwf-core-project-tracking
+    max_retries: 2
+    on_gate_failure: retry
+    gated: true
+    gate:
+      checks:
+        - type: require_non_empty
+          path: "{{state_path}}"
+          label: "uwf-state.json"
+
+  - name: intake
+    agent: uwf-sw_dev-intake
+    max_retries: 2
+    on_gate_failure: retry
+    gated: true
+    gate:
+      checks:
+        - type: require_non_empty
+          path: "{{output_path}}/issues-intake.md"
+          label: "issues-intake.md"
+
+  - name: discovery
+    agent: uwf-core-discovery
+    max_retries: 2
+    on_gate_failure: retry
+    gated: true
+    gate:
+      checks:
+        - type: require_non_empty
+          path: "{{output_path}}/issues-discovery.md"
+          label: "issues-discovery.md"
+
+  - name: requirements
+    agent: uwf-core-requirements
+    max_retries: 2
+    on_gate_failure: retry
+    gated: true
+    gate:
+      checks:
+        - type: require_non_empty
+          path: "{{output_path}}/issues-requirements.md"
+          label: "issues-requirements.md"
+
+  - name: adr
+    agent: uwf-core-adr
+    max_retries: 2
+    on_gate_failure: retry
+    gated: true
+    conditional: true
+    condition:
+      type: file_contains
+      path: "{{output_path}}/issues-requirements.md"
+      text: "ADR:"
+    gate:
+      checks:
+        - type: require_files_with_prefix
+          dir: "{{cwd}}/docs/adr"
+          prefix: "ADR-"
+          label: "ADR-*.md"
+
+  - name: security-plan
+    agent: uwf-core-security-plan
+    max_retries: 2
+    on_gate_failure: retry
+    gated: true
+    conditional: true
+    condition:
+      type: file_contains_any
+      path: "{{output_path}}/issues-requirements.md"
+      texts:
+        - "security-sensitive: true"
+        - "SECURITY:"
+        - "security: true"
+    gate:
+      checks:
+        - type: require_non_empty
+          path: "{{output_path}}/issues-security-plan.md"
+          label: "issues-security-plan.md"
+
+  - name: test-plan
+    agent: uwf-core-test-planner
+    max_retries: 2
+    on_gate_failure: retry
+    gated: true
+    gate:
+      checks:
+        - type: require_non_empty
+          path: "{{output_path}}/issues-test-plan.md"
+          label: "issues-test-plan.md"
+
+  - name: work-plan
+    agent: uwf-sw_dev-work-planner
+    max_retries: 2
+    on_gate_failure: retry
+    gated: true
+    gate:
+      checks:
+        - type: require_non_empty
+          path: "{{output_path}}/issues-plan.md"
+          label: "issues-plan.md"
+
+  - name: implementation
+    agent: uwf-issue-implementer
+    max_retries: 1
+    on_gate_failure: retry
+    gated: true
+    gate:
+      checks:
+        - type: require_non_empty
+          path: "{{output_path}}/issues-plan.md"
+          label: "issues-plan.md"
+
+  - name: review
+    agent: uwf-sw_dev-reviewer
+    max_retries: 3
+    on_gate_failure: retry
+    gated: true
+    gate:
+      checks:
+        - type: require_non_empty
+          path: "{{output_path}}/issues-review.md"
+          label: "issues-review.md"
+        - type: require_contains
+          path: "{{output_path}}/issues-review.md"
+          text: "APPROVED"
+          label: "issues-review.md"
+
+  - name: technical-writing
+    agent: uwf-core-technical-writer
+    max_retries: 1
+    on_gate_failure: abort
+    gated: false
+
+  - name: acceptance
+    agent: uwf-core-acceptance
+    max_retries: 2
+    on_gate_failure: retry
+    gated: true
+    gate:
+      checks:
+        - type: require_non_empty
+          path: "{{output_path}}/issues-acceptance.md"
+          label: "issues-acceptance.md"
+
+  - name: close
+    agent: uwf-core-project-tracking
+    max_retries: 1
+    on_gate_failure: abort
+    gated: true
+    gate:
+      checks:
+        - type: require_non_empty
+          path: "{{state_path}}"
+          label: "uwf-state.json"
+
+  - name: retro
+    agent: uwf-core-retro
+    max_retries: 1
+    on_gate_failure: skip
+    gated: false

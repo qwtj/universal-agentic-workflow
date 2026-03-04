@@ -157,7 +157,19 @@ When a reviewer subagent returns findings:
 
 ## Script-Driven Gate Enforcement
 
-Gate enforcement for each persona is implemented in a deterministic script, not in the orchestrator's reasoning loop. Every persona skill directory contains a `run.mjs` file alongside its `SKILL.md`.
+Gate enforcement is implemented in a central, deterministic script — not in the orchestrator's reasoning loop and not duplicated per persona.
+
+### Architecture
+
+| File | Purpose |
+|---|---|
+| `.github/skills/uwf-orchestration-engine/stage-tracker.mjs` | **Central** stage tracking and gate evaluation CLI |
+| `.github/skills/uwf-orchestration-engine/stage-schema.yaml` | SQLite table definitions for `stage_runs` and `stage_history` |
+| `.github/skills/uwf-orchestration-engine/uwf-stages.db` | Shared SQLite DB (all workflows, one file; in `.gitignore`) |
+| `.github/skills/uwf-{workflow}/stages.yaml` | **Per-persona** stage definitions (name, agent, gate conditions, retries) |
+| `.github/skills/uwf-{workflow}/run.mjs` | Thin shim — translates legacy `--list-stages` / `--check-gate` flags to `stage-tracker.mjs` |
+
+The orchestrator's call convention (`run.mjs --list-stages`, `run.mjs --check-gate <stage>`) is **unchanged**. The shims forward those calls transparently to `stage-tracker.mjs`.
 
 ### Orchestrator gate-check protocol
 
@@ -182,45 +194,108 @@ On exit code `1`, apply the Gate Failure Protocol (re-invoke responsible subagen
 node .github/skills/uwf-<workflow>/run.mjs --list-stages
 ```
 
-### Shared utilities
+### Stage execution tracking (optional but recommended)
 
-All `run.mjs` files import from `.github/skills/uwf-orchestration-engine/skill-runner.mjs`, which provides:
-- `requireNonEmptyFile(path, label)` — checks file exists and is non-empty
-- `requireFileContains(path, needle, label)` — checks file contains expected text
-- `requireFilesWithPrefix(dir, prefix, label)` — checks at least one matching file exists
-- `requireFileMatchingPattern(baseDir, regex, label)` — recursive pattern match
-- `gatePass(stageName)` / `gateFail(stageName, failures[])` — result constructors
-- `runCLI(stages)` — CLI dispatcher; call as the entry point of every `run.mjs`
+The orchestrator may optionally record stage lifecycle events for observability:
+
+```sh
+# Mark stage active when subagent is invoked
+node .github/skills/uwf-orchestration-engine/stage-tracker.mjs stage-start \
+  --workflow <name> --stage <stageName>
+
+# Mark stage passed after gate clears
+node .github/skills/uwf-orchestration-engine/stage-tracker.mjs stage-complete \
+  --workflow <name> --stage <stageName>
+
+# Record a gate failure + increment retry count
+node .github/skills/uwf-orchestration-engine/stage-tracker.mjs stage-fail \
+  --workflow <name> --stage <stageName> [--note "<reason>"]
+
+# Mark stage skipped
+node .github/skills/uwf-orchestration-engine/stage-tracker.mjs stage-skip \
+  --workflow <name> --stage <stageName>
+
+# Read full execution state for a workflow
+node .github/skills/uwf-orchestration-engine/stage-tracker.mjs read \
+  --workflow <name>
+
+# Reset tracking for a fresh run
+node .github/skills/uwf-orchestration-engine/stage-tracker.mjs init \
+  --workflow <name>
+```
+
+### Shared utilities (skill-runner.mjs)
+
+`skill-runner.mjs` remains available for any JS that still needs direct helper functions:
+- `requireNonEmptyFile(path, label)`
+- `requireFileContains(path, needle, label)`
+- `requireFilesWithPrefix(dir, prefix, label)`
+- `requireFileMatchingPattern(baseDir, regex, label)`
+- `gatePass(stageName)` / `gateFail(stageName, failures[])`
+- `runCLI(stages)` — legacy CLI dispatcher (still valid for custom JS gates)
 
 ---
 
 ## Adding a New Workflow (for workflow authors)
 
-To create a new persona, use the scaffolder:
+Creating a new persona requires **only two files** in the new skill directory — no JS gate code needed:
 
-```sh
-node scripts/scaffold-skill.mjs --name <skill-name> --stages "stage1,stage2,stage3"
+1. **`stages.yaml`** — declares every stage with gate conditions (see format below).
+2. **`run.mjs`** — a thin shim (copy from `uwf-sw_dev/run.mjs`, change the workflow name).
+3. Create stage agent files: `.github/agents/uwf-{name}-{stage}.agent.md`.
+4. Add all new stage agents to the `agents:` list in `uwf-core-orchestrator.agent.md`.
+5. Bootstrap the orchestrator with `workflow={name}`.
+
+### stages.yaml format
+
+```yaml
+workflow: <name>
+artifact_prefix: <prefix>          # e.g. "issues" or "project"
+output_path: ./tmp/workflow-artifacts
+
+stages:
+  - name: <stage-name>
+    agent: <subagent-id>
+    max_retries: 2                 # retries before gate failure escalates
+    on_gate_failure: retry         # retry | abort | skip
+    gated: true                    # false = always passes (best-effort stages)
+    conditional: true              # optional; gate auto-passes if condition is false
+    condition:                     # evaluated only when conditional: true
+      type: file_contains          # file_contains | file_contains_any
+      path: "{{output_path}}/..."
+      text: "MARKER"
+    gate:
+      checks:                      # all checks must pass for gate to clear
+        - type: require_non_empty
+          path: "{{output_path}}/artifact.md"
+          label: "artifact.md"
+        - type: require_contains
+          path: "{{output_path}}/artifact.md"
+          text: "APPROVED"
+          label: "artifact.md"
+        - type: require_files_with_prefix
+          dir: "{{cwd}}/docs/adr"
+          prefix: "ADR-"
+          label: "ADR-*.md"
+        - type: require_file_matching_pattern
+          dir: "{{cwd}}/tmp/state"
+          pattern: "/open/.*\\.md$"
+          label: "open issue files"
 ```
 
-This generates skeleton `run.mjs` and `SKILL.md` files with TODO stubs. Then:
+**Template variables** available in any `path` or `dir` value:
 
-1. Fill in the `gate()` function stubs in `.github/skills/uwf-{name}/run.mjs`.
-2. Create stage agent files: `.github/agents/uwf-{name}-{stage}.agent.md`.
-3. Add all new stage agents to the `agents:` list in `uwf-core-orchestrator.agent.md`.
-4. Bootstrap the orchestrator with `workflow={name}`.
-
-### Required artifacts per persona
-
-| Artifact | Content |
+| Variable | Resolves to |
 |---|---|
-| `SKILL.md` | `role`, Stage Sequence table, Subagent Roster, Artifact Prefix, Persona-Specific Rules |
-| `run.mjs` | `stages[]` array with `name`, `agent`, `maxRetries`, `onGateFailure`, `gate()` for every stage |
+| `{{output_path}}` | `--output-path` flag value (default `./tmp/workflow-artifacts`) |
+| `{{state_path}}` | `--state-path` flag value (default `./tmp/uwf-state.json`) |
+| `{{cwd}}` | `process.cwd()` at runtime |
 
 ### Required sections in a persona SKILL.md
 
 | Section | Content |
 |---|---|
-| `mode` | The string passed as `mode` in the invocation contract (e.g. `project`, `issues`, `design`, `writing`) |
-| `Stage Sequence` | Ordered table: `# \| Stage \| Subagent \| Purpose` — gate logic lives in `run.mjs`, not here |
+| `mode` | The string passed as `mode` in the invocation contract |
+| `Stage Sequence` | Ordered table: `# \| Stage \| Subagent \| Purpose` — gate logic lives in `stages.yaml` |
 | `Subagent Roster` | List of all subagent names this persona uses |
-| `Artifact Prefix` | The filename prefix for all generated artifacts (e.g. `project-`, `issues-`) |
+| `Artifact Prefix` | The filename prefix for all generated artifacts |
