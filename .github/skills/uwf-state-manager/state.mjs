@@ -1,16 +1,15 @@
 /**
- * UWF State Manager — SQLite-backed CLI for all workflow state and issue operations.
+ * UWF State Manager — SQLite-backed CLI for workflow state operations.
  *
- * Schema is defined by two YAML files in this directory:
- *   workflow-schema.yaml  — workflow_state + workflow_history tables
- *   issues-schema.yaml    — issues table (shape is configurable)
+ * Schema is defined by workflow-schema.yaml in this directory.
+ * Issue management lives in uwf-local-tracking/issues.mjs.
  *
- * Database: .github/skills/uwf-state-manager/uwf-issues.db
+ * Database: .github/skills/uwf-state-manager/uwf-state.db
  *
  * Usage:
  *   node .github/skills/uwf-state-manager/state.mjs <command> [options]
  *
- * Workflow commands:
+ * Commands:
  *   read                                   Read state; print JSON
  *   init [--mode <mode>]                   Initialize fresh DB (clears all data)
  *   advance  --to <phase> --agent <id>     Advance to the next phase
@@ -23,15 +22,6 @@
  *   set-status --status <s> --agent <id>   Set status (idle|active|blocked)
  *   sync                                   Derive fields from ./tmp/state/ tree
  *   note --agent <id> --note <text>        Append a history entry
- *
- * Issue commands:
- *   issue-create --id <id> --title <text>  Create a new issue
- *               [--status <s>] [--phase <p>] [--milestone <m>] [--sprint <s>]
- *               [--description <text>] [--assigned-agent <id>]
- *               [--risk <text>] [--unknowns <text>] [--comments <text>]
- *   issue-update --id <id> [field flags…]  Update fields on an existing issue
- *   issue-list   [--status <s>] [--milestone <m>] [--sprint <s>]
- *   issue-close  --id <id>                 Set issue status to "closed"
  *
  * Global options:
  *   --output-path <path>   Default: ./tmp/workflow-artifacts
@@ -55,9 +45,8 @@ import yaml from "js-yaml";
 // ---------------------------------------------------------------------------
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const DB_PATH = join(__dirname, "uwf-issues.db");
+const DB_PATH = join(__dirname, "uwf-state.db");
 const WORKFLOW_SCHEMA_PATH = join(__dirname, "workflow-schema.yaml");
-const ISSUES_SCHEMA_PATH = join(__dirname, "issues-schema.yaml");
 
 const VALID_PHASES = ["idea", "intake", "discovery", "planning", "execution", "acceptance", "closed"];
 const VALID_STATUSES = ["idle", "active", "blocked"];
@@ -91,18 +80,16 @@ function openDb() {
 }
 
 /**
- * Read both YAML schema files and CREATE TABLE IF NOT EXISTS for each table.
+ * Read workflow-schema.yaml and CREATE TABLE IF NOT EXISTS for each table.
  * Seeds the single workflow_state row (id=1) if absent.
  */
 function initTables(db) {
   const workflowSchema = yaml.load(readFileSync(WORKFLOW_SCHEMA_PATH, "utf8"));
-  const issuesSchema = yaml.load(readFileSync(ISSUES_SCHEMA_PATH, "utf8"));
 
   db.transaction(() => {
     for (const [tableName, tableDef] of Object.entries(workflowSchema.tables)) {
       db.exec(buildCreateTable(tableName, tableDef.columns));
     }
-    db.exec(buildCreateTable(issuesSchema.table, issuesSchema.columns));
 
     const row = db.prepare("SELECT id FROM workflow_state WHERE id = 1").get();
     if (!row) {
@@ -181,10 +168,6 @@ try {
     case "set-status":    cmdSetStatus(db); break;
     case "sync":          cmdSync(db); break;
     case "note":          cmdNote(db); break;
-    case "issue-create":  cmdIssueCreate(db); break;
-    case "issue-update":  cmdIssueUpdate(db); break;
-    case "issue-list":    cmdIssueList(db); break;
-    case "issue-close":   cmdIssueClose(db); break;
     default:
       usageError(`Unknown command: "${command}"`);
   }
@@ -205,7 +188,6 @@ function cmdInit(db) {
   const mode = flags["mode"] ?? null;
   db.transaction(() => {
     db.prepare("DELETE FROM workflow_history").run();
-    db.prepare("DELETE FROM issues").run();
     db.prepare(
       `UPDATE workflow_state
        SET phase = 'idea', mode = ?, status = 'idle', current_agent = NULL,
@@ -394,98 +376,6 @@ function cmdNote(db) {
   const state = readState(db);
   const entry = appendHistory(db, state.phase, state.phase, flags["agent"], flags["note"]);
   succeed({ procedure: "note", history_entry: entry, state: readState(db) });
-}
-
-// ---------------------------------------------------------------------------
-// Commands — issue management
-// ---------------------------------------------------------------------------
-
-function cmdIssueCreate(db) {
-  requireFlag("id", "issue-create");
-  requireFlag("title", "issue-create");
-
-  const id = flags["id"];
-  if (db.prepare("SELECT id FROM issues WHERE id = ?").get(id)) {
-    fail(`Issue "${id}" already exists.`);
-  }
-
-  const now = new Date().toISOString();
-  db.prepare(
-    `INSERT INTO issues
-       (id, title, status, phase, milestone, sprint, description, assigned_agent, risk, unknowns, comments, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-  ).run(
-    id,
-    flags["title"],
-    flags["status"] ?? "open",
-    flags["phase"] ?? null,
-    flags["milestone"] ?? null,
-    flags["sprint"] ?? null,
-    flags["description"] ?? null,
-    flags["assigned-agent"] ?? null,
-    flags["risk"] ?? null,
-    flags["unknowns"] ?? null,
-    flags["comments"] ?? null,
-    now, now
-  );
-
-  succeed({ procedure: "issue-create", issue: db.prepare("SELECT * FROM issues WHERE id = ?").get(id) });
-}
-
-function cmdIssueUpdate(db) {
-  requireFlag("id", "issue-update");
-  const id = flags["id"];
-
-  if (!db.prepare("SELECT id FROM issues WHERE id = ?").get(id)) {
-    fail(`Issue "${id}" not found.`);
-  }
-
-  // Map flag names (kebab-case) to column names (snake_case)
-  const fieldMap = {
-    title: "title", status: "status", phase: "phase",
-    milestone: "milestone", sprint: "sprint", description: "description",
-    "assigned-agent": "assigned_agent", risk: "risk",
-    unknowns: "unknowns", comments: "comments",
-  };
-
-  const updates = {};
-  for (const [flag, col] of Object.entries(fieldMap)) {
-    if (flag in flags) updates[col] = flags[flag];
-  }
-
-  if (Object.keys(updates).length === 0) fail("No fields to update. Provide at least one flag.");
-
-  updates.updated_at = new Date().toISOString();
-  const keys = Object.keys(updates);
-  const setClauses = keys.map((k) => `"${k}" = ?`).join(", ");
-  db.prepare(`UPDATE issues SET ${setClauses} WHERE id = ?`).run(...keys.map((k) => updates[k]), id);
-
-  succeed({ procedure: "issue-update", issue: db.prepare("SELECT * FROM issues WHERE id = ?").get(id) });
-}
-
-function cmdIssueList(db) {
-  let query = "SELECT * FROM issues WHERE 1=1";
-  const params = [];
-
-  if (flags["status"])    { query += " AND status = ?";    params.push(flags["status"]); }
-  if (flags["milestone"]) { query += " AND milestone = ?"; params.push(flags["milestone"]); }
-  if (flags["sprint"])    { query += " AND sprint = ?";    params.push(flags["sprint"]); }
-
-  query += " ORDER BY created_at ASC";
-  const issues = db.prepare(query).all(...params);
-  succeed({ procedure: "issue-list", count: issues.length, issues });
-}
-
-function cmdIssueClose(db) {
-  requireFlag("id", "issue-close");
-  const id = flags["id"];
-
-  if (!db.prepare("SELECT id FROM issues WHERE id = ?").get(id)) {
-    fail(`Issue "${id}" not found.`);
-  }
-
-  db.prepare(`UPDATE issues SET status = 'closed', updated_at = ? WHERE id = ?`).run(new Date().toISOString(), id);
-  succeed({ procedure: "issue-close", issue: db.prepare("SELECT * FROM issues WHERE id = ?").get(id) });
 }
 
 // ---------------------------------------------------------------------------

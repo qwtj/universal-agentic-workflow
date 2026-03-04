@@ -30,6 +30,7 @@ Invoke this skill whenever an agent needs to perform issue-management behavior:
 | Create a new issue file | `new-issue.mjs` | `node .github/skills/uwf-local-tracking/new-issue.mjs --milestone <M> --sprint <S> --title "..."` |
 | Scaffold open/active/closed directory triplet | `scaffold.mjs` | `node .github/skills/uwf-local-tracking/scaffold.mjs --milestone <M> --sprint <S>` |
 | Report full queue status | `status.mjs` | `node .github/skills/uwf-local-tracking/status.mjs` |
+| **SQLite issue CRUD** | `issues.mjs` | `node .github/skills/uwf-local-tracking/issues.mjs <cmd> [flags]` |
 
 ### Key flags
 
@@ -52,6 +53,26 @@ Invoke this skill whenever an agent needs to perform issue-management behavior:
 
 **`skip.mjs`**
 - `--reason "<text>"` — rationale prepended as `## Skip reason` in the closed file
+
+### `issues.mjs` — SQLite issue CRUD
+
+Schema is defined by `issues-schema.yaml` in this directory. Database: `.github/skills/uwf-local-tracking/uwf-issues.db` (gitignored). Table shape is configurable — edit `issues-schema.yaml` and run `init` (or delete the DB) to apply changes.
+
+| Command | Purpose |
+|---|---|
+| `create --id <id> --title <text> [fields…]` | Create a new issue |
+| `update --id <id> [fields…]` | Update fields on an existing issue |
+| `list [--status <s>] [--milestone <m>] [--sprint <s>]` | List issues with optional filters |
+| `close  --id <id>` | Set issue status to `closed` |
+
+**Field flags:** `--status`, `--phase`, `--milestone`, `--sprint`, `--description`, `--assigned-agent`, `--risk`, `--unknowns`, `--comments`
+
+```sh
+node .github/skills/uwf-local-tracking/issues.mjs create --id ISS-001 --title "Auth module" --milestone "v1.0" --risk "High" --unknowns "OAuth provider TBD"
+node .github/skills/uwf-local-tracking/issues.mjs update --id ISS-001 --sprint "S1" --assigned-agent uwf-sw_dev-implementer
+node .github/skills/uwf-local-tracking/issues.mjs list --status open --milestone v1.0
+node .github/skills/uwf-local-tracking/issues.mjs close --id ISS-001
+```
 
 ### Output shapes (all JSON)
 - `mode.mjs` → `{ "mode": "project" | "issue" }`

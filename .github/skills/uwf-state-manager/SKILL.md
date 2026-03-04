@@ -1,27 +1,28 @@
 ---
 name: uwf-state-manager
-description: "Read, validate, and mutate state in a SQLite database and the file-system state tree. Provides canonical procedures for phase transitions, agent hand-offs, artifact path resolution, history recording, and issue management."
+description: "Read, validate, and mutate workflow state in a SQLite database and the file-system state tree. Provides canonical procedures for phase transitions, agent hand-offs, artifact path resolution, and history recording."
 ---
 # UWF State Manager Skill
 
 ## Overview
 
-All workflow state and issue data are stored in a SQLite database:
+Workflow state is stored in a SQLite database:
 
 ```
-.github/skills/uwf-state-manager/uwf-issues.db
+.github/skills/uwf-state-manager/uwf-state.db
 ```
 
-The database schema is defined by two YAML files in the same directory:
+The database schema is defined by a YAML file in the same directory:
 
 | File | Purpose |
 |---|---|
 | `workflow-schema.yaml` | Defines `workflow_state` and `workflow_history` tables |
-| `issues-schema.yaml` | Defines the `issues` table (shape is configurable) |
 
-On first run (or after `init`), the script reads both YAML files and creates all tables via `CREATE TABLE IF NOT EXISTS`. To change the issues table shape, edit `issues-schema.yaml` and run `init`.
+On first run (or after `init`), the script reads the YAML file and creates all tables via `CREATE TABLE IF NOT EXISTS`.
 
-> **Note:** `uwf-issues.db` is in `.gitignore` and should not be committed.
+> **Note:** `uwf-state.db` is in `.gitignore` and should not be committed.
+
+> **Issue management** lives in `uwf-local-tracking` — see `issues.mjs` there.
 
 ## When to use
 Invoke this skill whenever an agent needs to:
@@ -30,7 +31,6 @@ Invoke this skill whenever an agent needs to:
 - Record a hand-off between agents (`current_agent` field)
 - Mark `ready_for_implementation` after both `{role}-intake.md` and `{role}-plan.md` are confirmed present
 - Append an entry to the history log
-- Create, update, list, or close issues
 
 **All state operations MUST be performed by running the deterministic script:**
 ```
@@ -57,17 +57,6 @@ Agents must never write to the database directly. Call the script via terminal a
 | `sync` | Derive fields from `./tmp/state/` tree |
 | `note --agent <id> --note <text>` | Append a history entry |
 
-### Issue commands
-
-| Command | Purpose |
-|---|---|
-| `issue-create --id <id> --title <text> [fields…]` | Create a new issue |
-| `issue-update --id <id> [fields…]` | Update fields on an existing issue |
-| `issue-list [--status <s>] [--milestone <m>] [--sprint <s>]` | List issues with optional filters |
-| `issue-close --id <id>` | Set issue status to `closed` |
-
-**Issue field flags:** `--status`, `--phase`, `--milestone`, `--sprint`, `--description`, `--assigned-agent`, `--risk`, `--unknowns`, `--comments`
-
 Global option: `--output-path <path>` (default `./tmp/workflow-artifacts`).
 
 All output is JSON. Exit code `0` = success, `1` = operational error, `2` = usage error.
@@ -90,17 +79,11 @@ node .github/skills/uwf-state-manager/state.mjs release-agent
 # Mark ready for implementation
 node .github/skills/uwf-state-manager/state.mjs check-ready
 
-# Sync derived fields after issue transitions
+# Sync derived fields after state transitions
 node .github/skills/uwf-state-manager/state.mjs sync
 
 # Append a note
 node .github/skills/uwf-state-manager/state.mjs note --agent uwf-core-orchestrator --note "Pausing for user review"
-
-# Issue management
-node .github/skills/uwf-state-manager/state.mjs issue-create --id ISS-001 --title "Auth module" --milestone "v1.0" --risk "High" --unknowns "OAuth provider TBD"
-node .github/skills/uwf-state-manager/state.mjs issue-update --id ISS-001 --sprint "S1" --assigned-agent uwf-sw_dev-implementer
-node .github/skills/uwf-state-manager/state.mjs issue-list --status open --milestone v1.0
-node .github/skills/uwf-state-manager/state.mjs issue-close --id ISS-001
 ```
 
 ---
@@ -132,26 +115,6 @@ Defined by `workflow-schema.yaml`.
 | `agent` | TEXT | Agent that triggered the entry |
 | `note` | TEXT | Free-text annotation |
 
-### issues
-
-Defined by `issues-schema.yaml`. Default columns:
-
-| Column | Type |
-|---|---|
-| `id` | TEXT (PK) |
-| `title` | TEXT |
-| `status` | TEXT (`open` \| `active` \| `closed`) |
-| `phase` | TEXT |
-| `milestone` | TEXT |
-| `sprint` | TEXT |
-| `description` | TEXT |
-| `assigned_agent` | TEXT |
-| `risk` | TEXT |
-| `unknowns` | TEXT |
-| `comments` | TEXT |
-| `created_at` | TEXT |
-| `updated_at` | TEXT |
-
 ### Phase lifecycle
 
 ```
@@ -173,13 +136,11 @@ idea → intake → discovery → planning → execution → acceptance → clos
 
 | Condition | Response |
 |---|---|
-| DB missing | Auto-created on first run via schema YAML files |
+| DB missing | Auto-created on first run via `workflow-schema.yaml` |
 | Unknown phase value | Reject with validation error; do not write |
 | Token conflict (agent claim) | Return conflict error; do not overwrite |
 | Illegal phase skip | Return lifecycle-order error; do not write |
 | Artifact prereqs unmet for `ready_for_implementation` | Return missing-file list; do not set flag |
-| Issue ID already exists | Return conflict error on `issue-create` |
-| Issue ID not found | Return not-found error on `issue-update` / `issue-close` |
 
 ---
 
@@ -189,5 +150,4 @@ The script prints structured JSON to stdout for every command. Agents must captu
 - `procedure` — command that ran
 - `state.phase`, `state.status`, `state.current_agent`, `state.ready_for_implementation` — state snapshot after the operation
 - `history_entry` — the new history entry appended (where applicable)
-- `issue` / `issues` — issue data (issue commands only)
 - `error` — error message (only present when `ok: false`)
