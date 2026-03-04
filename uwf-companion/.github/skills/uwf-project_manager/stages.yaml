@@ -20,6 +20,7 @@ stages:
     max_retries: 2
     on_gate_failure: retry
     run_as_subagent: true
+    advances_phase_to: intake
     inputs: []
     outputs:
       - "{{output_path}}/project-intake.md"
@@ -63,6 +64,7 @@ stages:
     max_retries: 2
     on_gate_failure: retry
     run_as_subagent: true
+    advances_phase_to: discovery
     inputs:
       - "{{output_path}}/project-intake.md"
     outputs:
@@ -159,6 +161,7 @@ stages:
     max_retries: 2
     on_gate_failure: retry
     run_as_subagent: true
+    advances_phase_to: planning
     inputs:
       - "{{output_path}}/project-intake.md"
       - "{{output_path}}/project-discovery.md"
@@ -216,6 +219,7 @@ stages:
     max_retries: 2
     on_gate_failure: retry
     run_as_subagent: true
+    advances_phase_to: acceptance
     inputs:
       - "{{output_path}}/project-review.md"
     outputs:
@@ -236,6 +240,7 @@ stages:
     max_retries: 1
     on_gate_failure: skip
     run_as_subagent: true
+    advances_phase_to: closed
     inputs: []
     outputs:
       - "{{output_path}}/project-retro.md"

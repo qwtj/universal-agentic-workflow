@@ -9,10 +9,10 @@ export class DbWatcher {
   private timer: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
-    // Watch all DB files and their WAL companions under .github/skills
+    // Watch all DB files and their WAL companions under the workspace-root .github/skills
     for (const pattern of [
-      "**/.github/skills/**/*.db",
-      "**/.github/skills/**/*.db-wal",
+      ".github/skills/**/*.db",
+      ".github/skills/**/*.db-wal",
     ]) {
       const w = vscode.workspace.createFileSystemWatcher(pattern);
       const handler = () => this.scheduleRefresh();

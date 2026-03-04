@@ -38,7 +38,7 @@ export class StagesPanel {
       body = `<p class="empty">No stages database found.</p>`;
     } else {
       try {
-        const cols = reader.columns("stages");
+        const cols = reader.columns("stage_runs");
         const rows = reader.listAll();
         body = renderDynamicTable(cols, rows, {
           status: (v) => badge(String(v ?? ""), STATUS_COLORS[String(v)] ?? "grey"),

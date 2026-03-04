@@ -19,10 +19,10 @@ export class StageReader extends BaseReader {
   }
 
   listAll(): Stage[] {
-    return this.all<Stage>("SELECT * FROM stages ORDER BY id");
+    return this.all<Stage>("SELECT * FROM stage_runs ORDER BY id");
   }
 
   listByWorkflow(workflow: string): Stage[] {
-    return this.all<Stage>("SELECT * FROM stages WHERE workflow = ? ORDER BY id", workflow);
+    return this.all<Stage>("SELECT * FROM stage_runs WHERE workflow = ? ORDER BY id", workflow);
   }
 }
