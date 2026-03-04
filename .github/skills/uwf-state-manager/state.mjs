@@ -395,7 +395,6 @@ function fileNonEmpty(filePath) {
   const abs = resolve(filePath);
   return existsSync(abs) && statSync(abs).size > 0;
 }
-}
 
 function artifactsForPhase(toPhase, artPath) {
   const map = {
