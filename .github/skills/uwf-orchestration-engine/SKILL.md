@@ -107,6 +107,79 @@ When the orchestrator is invoked:
 
 ---
 
+## Per-Stage Execution Loop
+
+This is the canonical loop the orchestrator runs for **every stage**. Read it once; apply it to all stages.
+
+```
+FOR EACH stage in the stage sequence:
+
+  ┌─── PRE-FLIGHT ─────────────────────────────────────────────────────────┐
+  │ 1. Resolve stage metadata                                               │
+  │    node .github/skills/uwf-{workflow}/run.mjs --list-stages             │
+  │    → record inputs[], outputs[], runAsSubagent for this stage           │
+  │                                                                         │
+  │ 2. Check for outstanding question dependencies                          │
+  │    node .github/skills/uwf-question-protocol/questions.mjs \            │
+  │         check --stage <stageName>                                       │
+  │    → exit 1 (pending required questions)?                               │
+  │      YES → ask user via vscode/askQuestions                             │
+  │            answer each: questions.mjs answer --id <n> --answer "..."   │
+  │            REPEAT from step 2 until gate passes (exit 0)               │
+  │      NO  → continue                                                     │
+  └─────────────────────────────────────────────────────────────────────────┘
+
+  ┌─── INVOKE ─────────────────────────────────────────────────────────────┐
+  │ IF runAsSubagent = true:                                                │
+  │   3. Claim agent token                                                  │
+  │      node .github/skills/uwf-state-manager/state.mjs \                 │
+  │           set-agent --agent uwf-core-orchestrator                      │
+  │      node .github/skills/uwf-orchestration-engine/stage-tracker.mjs \  │
+  │           stage-start --workflow <w> --stage <stageName>               │
+  │                                                                         │
+  │   4. Emit progress trace (one line only):                               │
+  │      [Stage N/Total] <stageName> → invoking <agentName>                │
+  │                                                                         │
+  │   5. Call runSubagent with resolved inputs/outputs in prompt:           │
+  │      agentName: <agentName>                                             │
+  │      prompt: "Run the <stageName> stage.\n\nContext:\n{ ... }\n\n      │
+  │               inputs: [...]\noutputs: [...]"                            │
+  │                                                                         │
+  │ ELSE (runAsSubagent = false):                                           │
+  │   4. Execute inline — do not use runSubagent                            │
+  └─────────────────────────────────────────────────────────────────────────┘
+
+  ┌─── POST-INVOKE ────────────────────────────────────────────────────────┐
+  │ 6. Release agent token                                                  │
+  │    node .github/skills/uwf-state-manager/state.mjs release-agent       │
+  │                                                                         │
+  │ 7. Did the subagent response contain QUESTIONS_NEEDED?                  │
+  │    YES → log each question to SQLite and get IDs back:                  │
+  │           questions.mjs log --stage <stageName> --group "..." \         │
+  │                              --question "..." --required true/false     │
+  │           → capture question_id for each                                │
+  │           → ask user via vscode/askQuestions                            │
+  │           → answer each: questions.mjs answer --id <n> --answer "..."  │
+  │           → GOTO step 2 (re-check, then re-invoke with answered ctx)   │
+  │    NO  → continue                                                       │
+  └─────────────────────────────────────────────────────────────────────────┘
+
+  ┌─── GATE ───────────────────────────────────────────────────────────────┐
+  │ 8. Run gate check                                                       │
+  │    node .github/skills/uwf-{workflow}/run.mjs --check-gate <stageName> │
+  │    exit 0 → record stage-complete; advance to next stage               │
+  │             stage-tracker.mjs stage-complete --workflow <w>            │
+  │                               --stage <stageName>                      │
+  │    exit 1 → apply Gate Failure Protocol (max 2 retries)               │
+  │             stage-tracker.mjs stage-fail --workflow <w>               │
+  │                               --stage <stageName>                      │
+  └─────────────────────────────────────────────────────────────────────────┘
+```
+
+**The GOTO at step 7** means questions unblock the loop from the inside — the orchestrator never advances past a stage until both questions and the gate are fully satisfied. No half-answers, no partial outputs.
+
+---
+
 ## Gate Enforcement
 
 For every stage, after the designated subagent returns, run the persona's gate script (see **Script-Driven Gate Enforcement** below):
