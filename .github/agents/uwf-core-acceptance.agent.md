@@ -6,11 +6,8 @@ user-invokable: false
 argument-hint: "role (required): artifact filename prefix; outputPath (default ./tmp/workflow-artifacts): base directory for stage artifacts."
 ---
 
-# Acceptance stage
+# Acceptance Stage
 
-## Outputs:
-Write `{outputPath}/{role}-acceptance.md` with the following sections:
-- Acceptance checklist results
-- Verification commands + outcomes
-- Known issues / follow-ups
-- Final summary
+Read `.github/skills/uwf-review/SKILL.md`. Use `reviews.mjs start --role {role} --stage acceptance` to open the run. All procedures, script commands, fix-loop protocol, and gate check are defined there.
+
+Unlike the review stage, acceptance MAY use `execute` tools to run verification commands (tests, linters, build checks). Log the outcome of each check as a finding — failures as `critical`, warnings as `minor`.
