@@ -25,6 +25,7 @@ agents:
   - uwf-sw_dev-work-planner
   - uwf-sw_dev-reviewer
   - uwf-issue-implementer
+  - uwf-core-project-tracking
 ---
 
 # UWF Core Orchestrator

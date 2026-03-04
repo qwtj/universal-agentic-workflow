@@ -95,6 +95,11 @@ The reviewer agent is **read-only**. It MUST NOT use `edit` or `execute` tools. 
    - `approved` — no open `critical` or `major` findings → recommend Acceptance stage
    - `changes_requested` — one or more `critical`/`major` findings → return to implementer with finding IDs only (no fix instructions)
    - `rejected` — fundamental scope/approach problem → escalate to orchestrator
+6. **Write the output file** (e.g. `{outputPath}/{prefix}-review.md`) with a summary rendered from the DB. The file MUST contain the line:
+   ```
+   verdict: approved
+   ```
+   (or `verdict: changes_requested` / `verdict: rejected` as applicable). This is the stage gate artifact.
 
 ### Severity guide
 
@@ -112,12 +117,7 @@ When verdict is `changes_requested`:
 4. Gate check: `list-findings --review-id <n> --status open` — exits `0` only when no open `critical`/`major` findings remain.
 
 ### Gate check
-The orchestrator uses `list-findings` as the stage gate:
-```sh
-node .github/skills/uwf-review/reviews.mjs list-findings --review-id <n> --status open
-```
-- Exit `0` → gate passes, proceed to Acceptance
-- Exit `1` → gate fails, apply retry/fix-loop protocol
+The stage gate checks for `verdict: approved` in the output markdown file (e.g. `{prefix}-review.md`). The reviewer MUST write this line. The orchestrator does NOT call `list-findings` as the primary gate — the file check is authoritative.
 
 ---
 

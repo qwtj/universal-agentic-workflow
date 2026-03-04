@@ -60,14 +60,14 @@ The context fields the prompt string must always include:
 }
 ```
 
-The `workflow` and `role` values are provided by the persona skill. The `phase` value is read from `uwf-state.json` via `uwf-core-project-tracking` before every stage transition.
+The `workflow` and `role` values are provided by the persona skill. The `phase` value is read from `uwf-state.json` via `node .github/skills/uwf-state-manager/state.mjs read` before every stage transition.
 
 ---
 
 ## Non-negotiable Principles
 
 1. The orchestrator does **not** produce, edit, or delete any artifact file. Every artifact is produced by a subagent.
-2. Before **every** stage transition, invoke `uwf-core-project-tracking` to advance the phase and record the hand-off in `uwf-state.json`.
+2. After **every** stage transition, call `node .github/skills/uwf-orchestration-engine/stage-tracker.mjs stage-start --workflow <w> --stage <stageName>` to advance the phase and record the hand-off in the stage DB.
 3. After **every** subagent completes, run the **Gate Check** for that stage (defined in the persona skill). If the gate fails, re-invoke the same subagent with the failure details — up to **2 retries**. If still failing after retries, halt and report the blocked gate to the user.
 4. Do **not** skip stages. Conditional stages (ADR, Security, etc.) may be marked `PASS — not required` in the gate log but must be explicitly evaluated.
 5. All user questions flow through the orchestrator via `vscode/askQuestions`. Subagents must return structured requests upward; the orchestrator relays them and passes responses back down.
@@ -102,7 +102,7 @@ When the orchestrator is invoked:
    node .github/skills/uwf-{workflow}/run.mjs --list-stages
    ```
    Parse the JSON output and record every stage name in order. **This script output is your sole authoritative stage list.** The SKILL.md Stage Sequence table is human-readable documentation only — it may be incomplete or stale. You MUST execute every stage returned by the script in order. Skipping, reordering, or substituting stages based on memory, summarization, or reading the table is a **hard violation**. Conditional stages (ADR, security, test-plan, etc.) are **never skipped** — their gate script auto-passes when not applicable, but you must still invoke the subagent for every stage the script returns.
-4. Invoke `uwf-core-project-tracking` to initialize or read `uwf-state.json` and obtain the current phase.
+4. Initialize state: `node .github/skills/uwf-state-manager/state.mjs init --workflow <workflow>`. Read the current phase to determine the resume point.
 5. Begin executing every stage from the script-supplied list in order, starting from the current phase.
 
 ---

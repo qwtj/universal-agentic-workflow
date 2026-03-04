@@ -16,21 +16,6 @@ output_path: ./tmp/workflow-artifacts
 
 stages:
 
-  - name: queue-prep
-    agent: uwf-core-project-tracking
-    max_retries: 2
-    on_gate_failure: retry
-    run_as_subagent: true
-    inputs: []
-    outputs:
-      - "{{state_path}}"
-    gated: true
-    gate:
-      checks:
-        - type: require_non_empty
-          path: "{{state_path}}"
-          label: "uwf-state.json"
-
   - name: intake
     agent: uwf-sw_dev-intake
     max_retries: 2
@@ -134,7 +119,6 @@ stages:
       - "{{output_path}}/issues-intake.md"
       - "{{output_path}}/issues-discovery.md"
       - "{{output_path}}/issues-requirements.md"
-      - "{{output_path}}/issues-security-plan.md"
     outputs:
       - "{{output_path}}/issues-test-plan.md"
     gated: true
@@ -153,7 +137,6 @@ stages:
       - "{{output_path}}/issues-intake.md"
       - "{{output_path}}/issues-discovery.md"
       - "{{output_path}}/issues-requirements.md"
-      - "{{output_path}}/issues-security-plan.md"
       - "{{output_path}}/issues-test-plan.md"
       - "{{cwd}}/docs/adr/ADR-[0-9]*.md"
     outputs:
@@ -198,7 +181,7 @@ stages:
           label: "issues-review.md"
         - type: require_contains
           path: "{{output_path}}/issues-review.md"
-          text: "APPROVED"
+          text: "verdict: approved"
           label: "issues-review.md"
 
   - name: technical-writing
@@ -226,21 +209,10 @@ stages:
         - type: require_non_empty
           path: "{{output_path}}/issues-acceptance.md"
           label: "issues-acceptance.md"
-
-  - name: close
-    agent: uwf-core-project-tracking
-    max_retries: 1
-    on_gate_failure: abort
-    run_as_subagent: true
-    inputs:
-      - "{{output_path}}/issues-acceptance.md"
-    outputs: []
-    gated: true
-    gate:
-      checks:
-        - type: require_non_empty
-          path: "{{state_path}}"
-          label: "uwf-state.json"
+        - type: require_contains
+          path: "{{output_path}}/issues-acceptance.md"
+          text: "verdict: approved"
+          label: "issues-acceptance.md"
 
   - name: retro
     agent: uwf-core-retro

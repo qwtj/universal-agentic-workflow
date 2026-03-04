@@ -16,21 +16,6 @@ output_path: ./tmp/workflow-artifacts
 
 stages:
 
-  - name: state-init
-    agent: uwf-core-project-tracking
-    max_retries: 2
-    on_gate_failure: retry
-    run_as_subagent: true
-    inputs: []
-    outputs:
-      - "{{state_path}}"
-    gated: true
-    gate:
-      checks:
-        - type: require_non_empty
-          path: "{{state_path}}"
-          label: "uwf-state.json"
-
   - name: intake
     agent: uwf-project_manager-intake
     max_retries: 2
@@ -161,7 +146,6 @@ stages:
       - "{{output_path}}/project-intake.md"
       - "{{output_path}}/project-discovery.md"
       - "{{output_path}}/project-requirements.md"
-      - "{{output_path}}/project-security-plan.md"
     outputs:
       - "{{output_path}}/project-test-plan.md"
     gated: true
@@ -210,7 +194,7 @@ stages:
           label: "project-review.md"
         - type: require_contains
           path: "{{output_path}}/project-review.md"
-          text: "APPROVED"
+          text: "verdict: approved"
           label: "project-review.md"
 
   - name: issue-state-population
@@ -245,21 +229,10 @@ stages:
         - type: require_non_empty
           path: "{{output_path}}/project-acceptance.md"
           label: "project-acceptance.md"
-
-  - name: close
-    agent: uwf-core-project-tracking
-    max_retries: 1
-    on_gate_failure: abort
-    run_as_subagent: true
-    inputs:
-      - "{{output_path}}/project-acceptance.md"
-    outputs: []
-    gated: true
-    gate:
-      checks:
-        - type: require_non_empty
-          path: "{{state_path}}"
-          label: "uwf-state.json"
+        - type: require_contains
+          path: "{{output_path}}/project-acceptance.md"
+          text: "verdict: approved"
+          label: "project-acceptance.md"
 
   - name: retro
     agent: uwf-core-retro
