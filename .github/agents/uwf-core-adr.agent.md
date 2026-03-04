@@ -3,10 +3,8 @@ name: uwf-core-adr
 description: "Create ADRs and decision records (use 300-point ADR when warranted)."
 tools: ["agent", "todo", "search", "edit", "read", "execute","web"]
 user-invokable: false
-argument-hint: "role (required): artifact filename prefix; outputPath (default ./tmp/workflow-artifacts): base directory for stage artifacts; adrPath (default ./docs/adr): where ADR files are written."
 ---
 
 # ADR Stage
-- Create `{adrPath}/ADR-####-<slug>.md` for each major decision.
-- For high-impact decisions, invoke or follow the 'uwf-adr' skill checklist.
-- Each ADR must include: context, decision, alternatives, consequences, security/ops notes, verification.
+
+Read `.github/skills/uwf-adr/SKILL.md`. All ADR procedures, script commands, and the 300-point checklist are defined there. Follow them exactly.
