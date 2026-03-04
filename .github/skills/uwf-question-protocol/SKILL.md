@@ -1,12 +1,34 @@
 ---
 name: uwf-question-protocol
-description: "Canonical protocol for subagents to request user input and for orchestrators to handle those requests."
+description: "Canonical protocol for subagents to request user input and for orchestrators to handle those requests. Questions are persisted in SQLite with a numeric ID so they can be stored as stage dependencies."
 ---
 
 # Skill: uwf-question-protocol
 
 ## Purpose
 This skill defines the standard protocol for subagents to request missing information from the user via the orchestrator, and for orchestrators to handle those requests using the `vscode/askQuestions` tool.
+
+Questions are persisted in a SQLite database (`uwf-questions.db`) via `questions.mjs`. Each logged question receives a numeric ID that the orchestrator stores in workflow state as a dependency. A stage gate will not pass until all required questions for that stage are answered.
+
+### Database and schema
+
+```
+.github/skills/uwf-question-protocol/uwf-questions.db   ← gitignored
+.github/skills/uwf-question-protocol/questions-schema.yaml
+```
+
+### `questions.mjs` command reference
+
+| Command | Purpose |
+|---|---|
+| `log --stage <s> --question <text> [--group <g>] [--proposed <text>] [--required true\|false]` | Log a question; returns `question_id` |
+| `answer --id <n> --answer <text>` | Record user's answer; sets `status → answered` |
+| `skip --id <n>` | Mark a question skipped (unblocks gate without an answer) |
+| `list [--stage <s>] [--status <s>]` | List questions with optional filters |
+| `check --stage <s> [--ids <n,n,…>]` | Gate check — exit `0` if all required questions are satisfied, exit `1` if any are pending |
+| `clear --stage <s>` | Delete all questions for a stage (reset for re-runs) |
+
+All output is JSON. Exit `0` = success/gate-pass, `1` = gate-fail/operational error, `2` = usage error.
 
 ---
 
@@ -84,7 +106,29 @@ Extract questions from the structured format:
 - Proposed answer (line starting with `Proposed:`)
 - Required flag (line starting with `Required:`)
 
-### 2. Call `vscode/askQuestions` Tool
+### 2. Log Each Question to the DB
+
+For every parsed question, call `questions.mjs log` and capture the returned `question_id`:
+
+```sh
+node .github/skills/uwf-question-protocol/questions.mjs log \
+  --stage intake \
+  --group "Goal" \
+  --question "What is the primary goal of this project?" \
+  --proposed "Build a blog platform" \
+  --required true
+# → { "ok": true, "question_id": 7, ... }
+```
+
+Collect all returned IDs (e.g. `7,8,9`) and store them in workflow state using `uwf-state-manager`:
+
+```sh
+node .github/skills/uwf-state-manager/state.mjs note \
+  --agent uwf-core-orchestrator \
+  --note "pending_question_ids=7,8,9"
+```
+
+### 3. Call `vscode/askQuestions` Tool
 
 Transform parsed questions into the tool format:
 
@@ -94,7 +138,7 @@ Transform parsed questions into the tool format:
     {
       "header": "Goal",
       "question": "What is the primary goal of this project?",
-      "options": [],  // Empty for free-text input
+      "options": [],
       "allowFreeformInput": true
     },
     {
@@ -116,9 +160,32 @@ Transform parsed questions into the tool format:
 - Use options for constrained choices (but include "Other" automatically)
 - Batch all questions in a single call
 
-### 3. Re-invoke the Subagent
+### 4. Record Answers
 
-After receiving answers, call the same subagent again with enhanced context:
+For each answer received, call `questions.mjs answer`:
+
+```sh
+node .github/skills/uwf-question-protocol/questions.mjs answer --id 7 --answer "Create a monitoring dashboard"
+node .github/skills/uwf-question-protocol/questions.mjs answer --id 8 --answer "React, deploy to Azure"
+```
+
+### 5. Gate Check Before Advancing
+
+Before advancing to the next stage, run the gate check. This will exit `1` if any required questions are still pending:
+
+```sh
+# Check all required questions for a stage
+node .github/skills/uwf-question-protocol/questions.mjs check --stage intake
+
+# Or scope to specific IDs stored in state
+node .github/skills/uwf-question-protocol/questions.mjs check --stage intake --ids 7,8,9
+```
+
+Only proceed to re-invoke the subagent once the gate passes (exit `0`).
+
+### 6. Re-invoke the Subagent
+
+After the gate passes, call the same subagent again with enhanced context:
 
 ```json
 {
@@ -132,10 +199,10 @@ After receiving answers, call the same subagent again with enhanced context:
 }
 ```
 
-### 4. Continue Workflow
+### 7. Continue Workflow
 
 - The subagent should now produce complete output
-- Run the gate check as normal
+- Run the stage gate check as normal
 - If gate fails due to missing content, apply standard retry logic
 - Do NOT advance to the next stage until the current stage's gate passes
 
