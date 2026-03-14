@@ -64,8 +64,8 @@ Execute stages **in this exact order**. Do not advance past a stage until its ga
 | 13 | `planning` → `waiting-acceptance` | `uwf-core-project-tracking` | Track issues in project tracking. |
 | 14 | `waiting-acceptance` → `acceptance` | `uwf-core-acceptance` | Run final acceptance checks against all artifacts. |
 | 15 | `acceptance` → `snapshot` | `uwf-core-snapshot` | Produce `project-drs.json`; close `project-br.json` layer 5; append closure entry to `uwf-changelog.md`. |
-| 16 | `snapshot` → `closed` | `uwf-core-project-tracking` | Advance phase to `closed`; record completion. |
-| 17 | `closed` | `uwf-core-retro` | *(Optional)* Produce retrospective if requested or if issues were encountered. |
+| 16 | `snapshot` → `closed` | `uwf-core-retro` | Produce retrospective and advance phase to `closed`. |
+| 17 | `closed` | `uwf-core-project-tracking` | *(Optional)* Record completion in tracking system. |
 
 ---
 
