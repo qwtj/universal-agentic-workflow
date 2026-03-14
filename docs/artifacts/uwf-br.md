@@ -13,11 +13,15 @@
 
 ## Storage Format
 
-`uwf-br` is stored as **SQLite** with one table per layer. The database is located at:
+`uwf-br` is stored as a **JSON build record**. The blueprint skill appends entries to a role-scoped file:
 
 ```
-.github/skills/uwf-cbs/uwf-br.db
+{output_path}/{role}-br.json
 ```
+
+where `output_path` is the workflow's configured artifact directory (by default `./tmp/workflow-artifacts/`). This file is committed so that subsequent runs and external tooling can replay the build record.
+
+Internally, some skills may use temporary, gitignored SQLite databases under `.github/skills/uwf-cbs/*.db` for caching or indexing, but these are implementation details and are not the canonical `uwf-br` artifact.
 
 At the `snapshot` stage, a full JSON export is produced as `uwf-drs` — the portable, point-in-time snapshot of `uwf-br` at the moment of acceptance. See [JSON Export Schema](#json-export-schema-for-uwf-drs) below.
 
@@ -332,6 +336,8 @@ Records every action that must be (or was) taken during the workflow run: implem
 | `confidence` | `TEXT` | Yes | Confidence tier |
 | `recorded_at` | `TEXT` | Yes | ISO 8601 timestamp |
 
+Note: Any examples in this document that show `layer_3_actions` records are expressed in **exported JSON** form. In the underlying SQLite schema, the `reversible` field is stored as an `INTEGER` with values `0` or `1`, and is converted to a JSON boolean (`false` or `true`) when exported. Other scalar fields preserve their natural types when serialized to JSON.
+
 ### SQLite DDL
 
 ```sql
@@ -568,39 +574,36 @@ At the `snapshot` stage, `uwf-br` is exported as `uwf-drs` — a portable, forwa
 
 ### Top-Level Structure
 
+The canonical `{role}-drs.json` schema is defined by the `uwf-snapshot` skill and documented in:
+
+```
+.github/skills/uwf-snapshot/SKILL.md
+```
+
+At a high level, each snapshot document:
+
+- Uses semantic-versioned schemas.
+- Records when the snapshot was produced.
+- Identifies the workflow persona and role.
+- Encodes a flattened, forward-reference-free view of all build-record layers.
+
+The top-level object looks like:
+
 ```json
 {
-  "schema_version": "1.0",
-  "exported_at":    "<ISO 8601 timestamp>",
+  "schema_version": "1.0.0",
+  "produced_at":    "<ISO 8601 timestamp>",
   "workflow":       "<persona name, e.g. 'sw_dev' or 'project_manager'>",
-  "role":           "<artifact prefix, e.g. 'issues' or 'project'>",
-  "layers": {
-    "0": {
-      "label":   "Context",
-      "entries": [ /* array of Layer 0 entry objects */ ]
-    },
-    "1": {
-      "label":   "Decisions",
-      "entries": [ /* array of Layer 1 entry objects */ ]
-    },
-    "2": {
-      "label":   "Dependencies",
-      "entries": [ /* array of Layer 2 entry objects */ ]
-    },
-    "3": {
-      "label":   "Actions",
-      "entries": [ /* array of Layer 3 entry objects */ ]
-    },
-    "4": {
-      "label":   "Verification",
-      "entries": [ /* array of Layer 4 entry objects */ ]
-    },
-    "5": {
-      "label":   "State",
-      "entries": [ /* array of Layer 5 entry objects */ ]
-    }
-  }
+  "role":           "<artifact prefix, e.g. 'issues' or 'project'>"
+  // ... additional fields defined in uwf-snapshot/SKILL.md ...
 }
+```
+
+The exact field set, including how individual `uwf-br` layers are represented in the snapshot, MUST follow the specification in `uwf-snapshot/SKILL.md`. This document only describes the intent:
+
+- **No forward references:** entries may depend only on data that appears earlier in the document.
+- **Layer coverage:** all six `uwf-br` layers (Context, Decisions, Dependencies, Actions, Verification, State) are represented, but not necessarily via a top-level `"layers"` object.
+- **Replayability:** an agent can reconstruct the workflow’s reasoning and actions using only the snapshot file, without accessing the original SQLite database.
 ```
 
 ### Field Constraints
@@ -654,7 +657,7 @@ The `snapshot` stage is responsible for producing `uwf-drs`. Execute these steps
 | Layer | Label | Entry ID Prefix | Written By Stage(s) | Entry Count Guarantee |
 |---|---|---|---|---|
 | 0 | Context | `CTX-` | `discovery` | ≥ 1 (unless discovery was skipped) |
-| 1 | Decisions | `DEC-` | `requirements`, `adr`, `risk-planner`, `security-planner` | ≥ 1 per owning stage that ran |
+| 1 | Decisions | `DEC-` | `requirements`, `adr`, `risk-planner`, `security-plan` | ≥ 1 per owning stage that ran |
 | 2 | Dependencies | `DEP-` | `risk-planner`, `blueprint` | ≥ 0 (empty if no dependencies identified) |
 | 3 | Actions | `ACT-` | `work-planner`, `refinement` | ≥ 1 (at least one action must exist for a workflow run to produce output) |
 | 4 | Verification | `VER-` | `test-planner`, `acceptance` | ≥ 1 per owning stage that ran |
