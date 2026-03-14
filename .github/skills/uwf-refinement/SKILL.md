@@ -44,15 +44,15 @@ Stories that pass both dimensions are promoted to `refined` status. Stories that
 
 ## Inputs
 
-Read all of the following artifacts before producing any output. If a file does not exist, record the gap in the refinement report and continue with available data.
+Read all of the following artifacts before producing any output. Treat **required** inputs as hard entry criteria: if a required file does not exist, follow the abort behavior defined in Error Handling/Entry Criteria. For **optional** inputs, if a file does not exist, record the gap in the refinement report and continue with available data.
 
-| File | Content |
-|---|---|
-| `{output_path}/{role}-requirements.md` | Source of user stories — all stories in `draft` status are candidates for refinement |
-| `{output_path}/{role}-risk-plan.md` | Risk register — source of `RSK-*` IDs for slippage risk signal population |
-| `{output_path}/{role}-discovery.md` | Brownfield: source of confidence scores (`confirmed`, `inferred-strong`, `inferred-weak`, `gap`) |
-| `docs/adr/ADR-*.md` | Architectural decisions — used for traceability and constraint compliance checks |
-| `{output_path}/{role}-traceability.md` | Traceability matrix — updated by this stage with refinement results |
+| File | Content | Required? |
+|---|---|---|
+| `{output_path}/{role}-requirements.md` | Source of user stories — all stories in `draft` status are candidates for refinement | Yes |
+| `{output_path}/{role}-risk-plan.md` | Risk register — source of `RSK-*` IDs for slippage risk signal population | No |
+| `{output_path}/{role}-discovery.md` | Brownfield: source of confidence scores (`confirmed`, `inferred-strong`, `inferred-weak`, `gap`) | No |
+| `docs/adr/ADR-*.md` | Architectural decisions — used for traceability and constraint compliance checks | No |
+| `{output_path}/{role}-traceability.md` | Traceability matrix — updated by this stage with refinement results | No |
 
 ---
 
@@ -115,7 +115,7 @@ All nine controls are binary: each story either passes or fails each control. A 
 | # | Control | Pass Condition | Fail Condition |
 |---|---|---|---|
 | 1 | **Grounding** | The story maps to at least one explicit requirement in `{role}-requirements.md` (functional or non-functional). The requirement ID is cited in the story or traceability matrix. | No requirement citation exists; story scope cannot be traced to the requirements artifact. |
-| 2 | **Sourcing** | The requirement source is cited: an ADR number, a discovery finding ID, a stakeholder statement in intake, or — for brownfield — an inferred artifact reference. At minimum, the `source` field in the requirements DB record for this story is non-empty. | No source is cited for the underlying requirement. Story scope was invented without a traceable origin. |
+| 2 | **Sourcing** | The requirement source is explicitly cited in committed artifacts: an ADR number, a discovery finding ID, a stakeholder statement in intake, or — for brownfield — an inferred artifact reference. At least one of the following contains a non-empty source reference: the story text (for example, a `Source:` line), the corresponding requirement entry in `{role}-requirements.md`, or the traceability matrix (`uwf-tm`). | No committed artifact (story, `{role}-requirements.md`, or traceability matrix) cites a source for the underlying requirement. Story scope was invented without a traceable origin. |
 | 3 | **Traceability** | The story links to at least one ADR (`ADR-*`) OR at least one requirement entry in `uwf-tm`. The link must be bidirectional: the traceability matrix records the story → ADR or story → requirement relationship. | No ADR and no traceability matrix entry exists for this story. |
 | 4 | **Disambiguation** | No acceptance criterion contains ambiguous language. Prohibited terms: "should", "might", "as needed", "as appropriate", "where possible", "reasonable", "in a timely manner", "user-friendly", "easy to use", "properly". Each criterion is verifiable as an unambiguous binary pass/fail. | One or more acceptance criteria contain at least one prohibited ambiguous term. |
 | 5 | **Decomposition correctness** | The story represents a single, independently deliverable unit of work. It cannot be split into two or more stories that each stand alone. It has exactly one `role`, one `goal`, and one coherent set of acceptance criteria. | The story bundles multiple independent goals, has acceptance criteria that span unrelated capabilities, or its `goal` can be trivially decomposed into two complete stories. |
@@ -168,15 +168,15 @@ Refinement cannot pass on a brownfield project if any of the following are true:
 
 ## Entry Criteria
 
-The following conditions must be true before refinement begins. If any condition is false, abort and record the failure in the refinement report.
+The following conditions must be evaluated before refinement begins. Criteria 1, 4, and 5 are **hard gates**: if any of them fail, abort and record the failure in the refinement report with `verdict: blocked`. Criteria 2 and 3 are **soft gates**: if they fail, follow the behavior defined in this table and in the Error Handling section instead of blocking the stage.
 
 | # | Condition | Check |
 |---|---|---|
-| 1 | Project-tracking stage completed | `{role}-requirements.md` exists and is non-empty |
-| 2 | Stories exist in draft status | At least one story in `{role}-requirements.md` has `status: draft` |
-| 3 | Traceability matrix exists | `{role}-traceability.md` exists (may be a stub; presence is required) |
-| 4 | Risk register available | `{role}-risk-plan.md` exists OR a note is recorded that no risk register was produced (slippage checks will be skipped) |
-| 5 | ADR set available | `docs/adr/` directory exists (may be empty; absence is recorded as a gap but does not block entry) |
+| 1 | Project-tracking stage completed (hard gate) | `{role}-requirements.md` exists and is non-empty |
+| 2 | Draft stories evaluated (soft gate) | Scan `{role}-requirements.md` for stories with `status: draft`. If at least one exists, continue with refinement. If none exist, record “No stories with status: draft” and immediately emit a refinement report with `verdict: pass` (no work items to refine); do not treat this as a failure. |
+| 3 | Traceability matrix available (soft gate) | If `{role}-traceability.md` exists (may be a stub), load it. If it does not exist, create a new `{role}-traceability.md` stub, record that it was synthesized by refinement, and proceed; do not block entry on absence. |
+| 4 | Risk register available (hard gate) | `{role}-risk-plan.md` exists OR a note is recorded that no risk register was produced (slippage checks will be skipped) |
+| 5 | ADR set available (hard gate, presence-only) | `docs/adr/` directory exists (may be empty; absence is recorded as a gap but does not block entry) |
 
 ---
 
@@ -184,7 +184,7 @@ The following conditions must be true before refinement begins. If any condition
 
 Execute these steps in order. Do not skip a step. Do not advance to the next step until the current step is complete.
 
-1. **Verify entry criteria.** Evaluate each entry criterion in the Entry Criteria table. If any required criterion fails, write a refinement report with `verdict: blocked` citing the failed criterion and abort. Do not attempt to refine stories on unmet entry conditions.
+1. **Verify entry criteria.** Evaluate each entry criterion in the Entry Criteria table. If any **hard-gate** criterion (1, 4, or 5) fails, write a refinement report with `verdict: blocked` citing the failed criterion and abort. For **soft-gate** criteria (2 and 3), follow the behavior described in the table and in Error Handling (early `verdict: pass` when there are no draft stories, or synthesis of `{role}-traceability.md` when missing) instead of blocking. Do not attempt to refine stories when an early-pass exit has been triggered.
 
 2. **Read all inputs.** Load each file listed in the Inputs table. For each file that is absent, record a gap in the refinement report under **Missing Inputs** and continue with available data.
 
