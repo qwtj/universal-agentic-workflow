@@ -37,8 +37,8 @@ Every workflow begins here regardless of archetype. The goal is situational awar
 | **Requirements** | `uwf-requirements.agent.md` | Elicit and structure functional + non-functional requirements. Output structured user stories (see Story Schema below). |
 | **ADR** | `uwf-adr.agent.md` | Capture architectural decisions using a standard ADR template. Link each decision to the requirement(s) it resolves. |
 | **Risk Planner** | `uwf-core-risk-planner.agent.md` | Identify and document project-level execution risks: schedule, dependency, technical-debt, and external. Produce a risk register. Appends to uwf-br layer 1; flags blocking dependency risks in layer 2. Feeds slippage risk signals into user stories for the Refinement stage. |
-| **Security Planner** | `uwf-security-planner.agent.md` | Threat model the proposed scope. Identify attack surfaces, data classification, auth/authz requirements. Output security stories or constraints. |
-| **Test Planner** | `uwf-test-planner.agent.md` | Define the test strategy: unit/integration/E2E ratio, coverage targets, critical path tests, test data requirements. |
+| **Security Planner** | `uwf-core-security-plan.agent.md` | Threat model the proposed scope. Identify attack surfaces, data classification, auth/authz requirements. Output security stories or constraints. |
+| **Test Planner** | `uwf-core-test-planner.agent.md` | Define the test strategy: unit/integration/E2E ratio, coverage targets, critical path tests, test data requirements. |
 | **Blueprint** | `uwf-core-blueprint.agent.md` | Synthesize all First-phase outputs into the Canonical Build Spec (uwf-cbs) SQLite database and initialize the Build Record (uwf-br) strata 0–4. Produces the machine-readable handoff artifact from Phase 1 to Phase 2. |
 
 ### Phase 2 — Execution (archetype-specific, pick one)
