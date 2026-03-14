@@ -31,6 +31,7 @@ Persona skill for macro-level project planning: scoping a new effort, producing 
 | `uwf-project_manager-timeline-planner` | Issues backlog and project roadmap |
 | `uwf-project_manager-reviewer` | Quality and security review of all planning artifacts |
 | `uwf-core-acceptance` | Final acceptance gate checks |
+| `uwf-core-refinement` | Groom user stories to production-ready standard before acceptance |
 | `uwf-core-snapshot` | Produce uwf-drs; close uwf-br layer 5; append changelog closure entry |
 | `uwf-core-retro` | Retrospective |
 
@@ -66,6 +67,7 @@ Execute stages **in this exact order**. Do not advance past a stage until its ga
 | 15 | `acceptance` → `snapshot` | `uwf-core-snapshot` | Produce `project-drs.json`; close `project-br.json` layer 5; append closure entry to `uwf-changelog.md`. |
 | 16 | `snapshot` → `closed` | `uwf-core-retro` | Produce retrospective and advance phase to `closed`. |
 | 17 | `closed` | `uwf-core-project-tracking` | *(Optional)* Record completion in tracking system. |
+
 
 ---
 

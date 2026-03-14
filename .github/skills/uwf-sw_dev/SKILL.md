@@ -33,6 +33,7 @@ Persona skill for driving individual work items (issues) from intake through imp
 | `uwf-sw_dev-reviewer` | Review implementation; produce fix list or clean bill |
 | `uwf-core-technical-writer` | Review and update documentation from changed artifacts |
 | `uwf-core-acceptance` | Run acceptance gate checklist |
+| `uwf-core-refinement` | Groom user stories to production-ready standard before acceptance |
 | `uwf-core-snapshot` | Produce uwf-drs; close uwf-br layer 5; append changelog closure entry |
 | `uwf-core-retro` | Retrospective |
 
