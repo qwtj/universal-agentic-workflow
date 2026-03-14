@@ -50,7 +50,7 @@ Generic agents reusable by any orchestrator, regardless of whether you are runni
 | `uwf-core-project-tracking.agent.md` | Manages workflow state transitions using whichever tracking skill is configured. |
 | `uwf-core-requirements.agent.md` | Writes PRDs, Non-Functional Requirements, and testable acceptance criteria. |
 | `uwf-core-retro.agent.md` | Runs end-of-cycle retrospectives and surfaces workflow or implementation improvements. |
-| `uwf-core-risk-planner.agent.md` | Produces a project-level risk register covering schedule, dependency, technical-debt, and external risks via the `uwf-risk-planner` skill. Runs after `adr` and before `security-planner`. |
+| `uwf-core-risk-planner.agent.md` | Produces a project-level risk register covering schedule, dependency, technical-debt, and external risks via the `uwf-risk-planner` skill. Runs after `adr` and before `security-plan`. |
 | `uwf-core-security-plan.agent.md` | Generates threat models and security control plans via the `uwf-threat-model` skill. |
 | `uwf-core-tehcnical-writer.agent.md` | Promotes ephemeral `tmp/` artifacts into permanent `./docs/` documentation and files gaps as backlog items. |
 | `uwf-core-test-planner.agent.md` | Defines test stubs, integration scenarios, and coverage targets before implementation begins. |
