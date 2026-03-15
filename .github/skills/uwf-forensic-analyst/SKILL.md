@@ -8,7 +8,7 @@ Brownfield pre-phase archetype. Runs before the standard First phase on existing
 
 | Property | Value |
 |---|---|
-| `workflow` | `forensic_analyst` |
+| `workflow` | `forensic-analyst` |
 | `role` | `forensic` |
 | Artifact prefix | `forensic-` |
 | Output path default | `./tmp/workflow-artifacts` |

@@ -9,7 +9,7 @@
 # inputs/outputs use the same template variables and support glob patterns.
 # The orchestrator resolves these and passes them to the stage agent at invocation time.
 
-workflow: forensic_analyst
+workflow: forensic-analyst
 artifact_prefix: forensic
 output_path: ./tmp/workflow-artifacts
 
@@ -20,7 +20,7 @@ stages:
     max_retries: 2
     on_gate_failure: retry
     run_as_subagent: true
-    advances_phase_to: forensic-audit
+    advances_phase_to: discovery
     inputs: []
     outputs:
       - "{{output_path}}/forensic-repo-audit.md"
@@ -44,7 +44,7 @@ stages:
     max_retries: 2
     on_gate_failure: retry
     run_as_subagent: true
-    advances_phase_to: forensic-harvest
+    advances_phase_to: discovery
     inputs:
       - "{{output_path}}/forensic-repo-audit.md"
     outputs:
@@ -65,7 +65,7 @@ stages:
     max_retries: 2
     on_gate_failure: retry
     run_as_subagent: true
-    advances_phase_to: forensic-inference
+    advances_phase_to: discovery
     inputs:
       - "{{output_path}}/forensic-repo-audit.md"
       - "{{output_path}}/forensic-artifact-harvest.md"
@@ -114,8 +114,8 @@ stages:
 
   - name: gap-report
     agent: uwf-forensic-analyst-gap-report
-    max_retries: 1
-    on_gate_failure: abort
+    max_retries: 3
+    on_gate_failure: retry
     run_as_subagent: true
     advances_phase_to: forensic-review
     inputs:
@@ -132,7 +132,12 @@ stages:
           path: "{{output_path}}/forensic-gap-report.md"
           text: "Gap Entries"
           label: "forensic-gap-report.md contains Gap Entries section"
-        - type: require_contains
-          path: "{{output_path}}/forensic-br.json"
-          text: "\"gap_report_reviewed\": true"
+        - type: run_script
+          command: >
+            node -e "const fs=require('fs'); const p=process.argv[1];
+            const d=JSON.parse(fs.readFileSync(p,'utf8'));
+            if(d.gap_report_reviewed!==true){
+              console.error('forensic-br.json: gap_report_reviewed must be true');
+              process.exit(1);
+            }" "{{output_path}}/forensic-br.json"
           label: "forensic-br.json gap_report_reviewed is true"

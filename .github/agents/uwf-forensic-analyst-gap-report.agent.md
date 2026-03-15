@@ -1,7 +1,7 @@
 ---
 name: uwf-forensic-analyst-gap-report
 description: "Surface all gap entries from the provisional Build Record, produce the structured human-review document, and block until every gap is resolved or accepted as out-of-scope. Brownfield pre-phase stage 5."
-tools: ["agent", "todo", "search", "edit", "read", "execute", "vscode/askQuestions"]
+tools: ["agent", "todo", "search", "edit", "read", "execute"]
 user-invokable: false
 ---
 
@@ -44,20 +44,29 @@ Execute these steps in order.
 
 3. **Write the initial `forensic-gap-report.md`.** Populate it with all gap entries using the output structure below. Set pre-phase status to `BLOCKED — human review required`. Do not mark any gaps as resolved yet.
 
-4. **Present gaps to the human reviewer.** For each gap entry, use `vscode/askQuestions` to ask:
-   > **Gap {id}: {short description}**
-   >
-   > **What is unknown:** {unknown field}
-   > **What was checked:** {artifact categories checked}
-   > **Observation:** {what artifacts did and did not say}
-   >
-   > Please choose one:
-   > - **A)** Provide an answer: _{resolution question}_
-   > - **B)** Accept as out-of-scope (this gap will not block Phase 1)
-   >
-   > Type your answer or "out-of-scope":
+4. **Emit structured questions for the orchestrator (do not ask the user directly).**
 
-   Present gaps one at a time. Wait for a response before presenting the next gap.
+   This stage MUST NOT call `vscode/askQuestions` or run an interactive Q&A loop. Instead:
+
+   - Build a `QUESTIONS_NEEDED` block as defined in `.github/skills/uwf-question-protocol/SKILL.md`.
+   - For each gap entry in the working list, add a question payload that includes at least:
+     - A stable `question_id` that can be matched back to the corresponding `gap_log` entry.
+     - A human-readable prompt with the following content:
+       - **Gap {id}: {short description}**
+       - **What is unknown:** {unknown field}
+       - **What was checked:** {artifact categories checked}
+       - **Observation:** {what artifacts did and did not say}
+       - A choice description:
+         - **A)** Provide an answer: _{resolution question}_
+         - **B)** Accept as out-of-scope (this gap will not block Phase 1)
+       - Clear instructions that the answer should either be the human's resolution text or the literal keyword `out-of-scope`.
+     - Any additional metadata required by `uwf-question-protocol` so the orchestrator can route answers back to this stage.
+   - Return the `QUESTIONS_NEEDED` block and end the stage execution so that the orchestrator can:
+     - Invoke `vscode/askQuestions` on behalf of this agent.
+     - Persist question/answer pairs according to `uwf-question-protocol`.
+     - Re-enter this stage with the collected answers attached to the context.
+
+   On re-entry, if the context indicates that answers for all outstanding `question_id`s are available, SKIP emitting a new `QUESTIONS_NEEDED` block and continue with step 5 using the provided answers.
 
 5. **Process each response.** For each gap:
    - If the human provides an answer:
