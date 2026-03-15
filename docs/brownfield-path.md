@@ -121,7 +121,7 @@ When the pre-phase completes, `forensic-br.json` contains a provisional Build Re
 |---|---|---|
 | **Intake** | `gap_report_reviewed: true` (pre-condition) | Validates the pre-phase is complete. Reads project-scope (stratum 0) and constraints (stratum 3). |
 | **Discovery** | All strata | Treats `confirmed` + `inferred-strong` as verified prior work. Flags `inferred-weak` for re-examination. Treats `gap` entries as known unknowns to investigate. |
-| **Requirements** | Stratum 1 (requirements) | Promotes `confirmed` + `inferred-strong` to `refined` status. Challenges `inferred-weak`. Blocks `gap` stories. |
+| **Requirements** | Stratum 1 (requirements) | Treats `confirmed` + `inferred-strong` as high-confidence **draft** stories; keeps them in `draft` and hands off to Refinement for promotion. Challenges `inferred-weak`. Blocks `gap` stories. |
 | **ADR** | Stratum 2 (decisions) | Creates formal ADRs from `confirmed` decisions. Creates draft ADRs for `inferred-strong` / `inferred-weak` with `Confidence:` annotation. Skips `gap` decisions — flags as unresolved. |
 | **Risk Planner** | Strata 1–3 | Adds `inferred-weak` + `gap` entries as scope-uncertainty risk inputs. |
 | **Security Planner** | Stratum 3 (constraints) | Validates all inferred security constraints. Confirms or supersedes before security plan closes. |
@@ -153,13 +153,13 @@ Stories that remain `inferred-weak` or `gap` after the Refinement pass are set t
 
 | Artifact | Stage | Path | Purpose |
 |---|---|---|---|
-| `forensic-repo-audit.md` | repo-audit | `tmp/workflow-artifacts/forensic-repo-audit.md` | Repo inventory and tech stack map |
-| `forensic-artifact-harvest.md` | artifact-harvest | `tmp/workflow-artifacts/forensic-artifact-harvest.md` | Evidence catalog |
-| `forensic-intent.md` | intent-inference | `tmp/workflow-artifacts/forensic-intent.md` | Inferred requirements, decisions, constraints |
-| `forensic-br.json` | confidence-score | `tmp/workflow-artifacts/forensic-br.json` | Provisional Build Record with confidence tiers |
-| `forensic-gap-report.md` | gap-report | `tmp/workflow-artifacts/forensic-gap-report.md` | Human-review gap document |
+| `forensic-repo-audit.md` | repo-audit | `./tmp/workflow-artifacts/forensic-repo-audit.md` | Repo inventory and tech stack map |
+| `forensic-artifact-harvest.md` | artifact-harvest | `./tmp/workflow-artifacts/forensic-artifact-harvest.md` | Evidence catalog |
+| `forensic-intent.md` | intent-inference | `./tmp/workflow-artifacts/forensic-intent.md` | Inferred requirements, decisions, constraints |
+| `forensic-br.json` | confidence-score | `./tmp/workflow-artifacts/forensic-br.json` | Provisional Build Record with confidence tiers |
+| `forensic-gap-report.md` | gap-report | `./tmp/workflow-artifacts/forensic-gap-report.md` | Human-review gap document |
 
-All brownfield artifacts use the `forensic-` prefix and are stored in `tmp/workflow-artifacts/`.
+All brownfield artifacts use the `forensic-` prefix and are stored in `./tmp/workflow-artifacts/`.
 
 ---
 
